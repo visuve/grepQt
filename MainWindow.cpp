@@ -28,10 +28,41 @@ MainWindow::MainWindow(QWidget *parent) :
 
 		if (!info.isDir())
 		{
-			palette.setColor(QPalette::Text, Qt::red);
+			palette.setColor(text.isEmpty() ? QPalette::Window : QPalette::Text, Qt::red);
+			_ui->pushButtonSearch->setEnabled(false);
+			_ui->pushButtonReplace->setEnabled(false);
+		}
+		else
+		{
+			bool hasSearchCriteria = !_ui->lineEditSearch->text().isEmpty();
+			_ui->pushButtonSearch->setEnabled(hasSearchCriteria);
+			_ui->pushButtonReplace->setEnabled(hasSearchCriteria);
 		}
 
 		_ui->lineEditLocation->setPalette(palette);
+	});
+
+	connect(_ui->lineEditSearch, &QLineEdit::textChanged, [this](const QString& text)
+	{
+		QPalette palette;
+
+		if (text.isEmpty())
+		{
+			palette.setColor(QPalette::Window, Qt::red);
+			_ui->pushButtonSearch->setEnabled(false);
+			_ui->pushButtonReplace->setEnabled(false);
+		}
+		else
+		{
+			const QString path = _ui->lineEditLocation->text();
+			const QFileInfo info(path);
+
+			bool hasDir = info.isDir();
+			_ui->pushButtonSearch->setEnabled(hasDir);
+			_ui->pushButtonReplace->setEnabled(hasDir);
+		}
+
+		_ui->lineEditSearch->setPalette(palette);
 	});
 
 	connect(_ui->toolButtonBrowse, &QToolButton::clicked, this, &MainWindow::onOpenDirectoryDialog);
