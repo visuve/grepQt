@@ -1,6 +1,7 @@
 #include "MainWindow.hpp"
 #include "./ui_MainWindow.h"
 #include "SearchResultModel.hpp"
+#include "FileSearcher.hpp"
 #include <QFileInfo>
 #include <QFileDialog>
 

@@ -8,6 +8,7 @@ namespace Ui
 }
 
 class SearchResultModel;
+class FileSearcher;
 
 class MainWindow : public QMainWindow
 {
@@ -22,4 +23,5 @@ public:
 private:
 	Ui::MainWindow* _ui;
 	SearchResultModel* _model;
+	FileSearcher* _searcher;
 };
