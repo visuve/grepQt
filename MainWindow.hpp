@@ -17,6 +17,8 @@ public:
 	MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
 
+	void onOpenDirectoryDialog();
+
 private:
 	Ui::MainWindow* _ui;
 	SearchResultModel* _model;
