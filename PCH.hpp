@@ -7,6 +7,7 @@
 #include <QFileDialog>
 #include <QDir>
 #include <QDirIterator>
+#include <QList>
 #include <QMainWindow>
 #include <QObject>
 #include <QRegularExpression>

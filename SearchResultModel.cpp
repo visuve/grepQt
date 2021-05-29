@@ -8,51 +8,63 @@ SearchResultModel::SearchResultModel(QObject *parent) :
 
 QVariant SearchResultModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-	// FIXME: Implement me!
+	if (orientation == Qt::Orientation::Horizontal && role == Qt::DisplayRole)
+	{
+		switch (section)
+		{
+			case 0:
+				return "File Path";
+			case 1:
+				return "Line Number";
+			case 2:
+				return "Line Content";
+		}
+	}
+
 	return QVariant();
 }
 
-int SearchResultModel::rowCount(const QModelIndex &parent) const
+int SearchResultModel::rowCount(const QModelIndex&) const
 {
-	if (parent.isValid())
-		return 0;
-
-	// FIXME: Implement me!
-	return 0;
+	return _matches.size();
 }
 
-int SearchResultModel::columnCount(const QModelIndex &parent) const
+int SearchResultModel::columnCount(const QModelIndex&) const
 {
-	if (parent.isValid())
-		return 0;
-
-	// FIXME: Implement me!
-	return 0;
+	return 3;
 }
 
-QVariant SearchResultModel::data(const QModelIndex &index, int role) const
+QVariant SearchResultModel::data(const QModelIndex& index, int role) const
 {
 	if (!index.isValid())
+	{
 		return QVariant();
+	}
 
-	// FIXME: Implement me!
+	if (role == Qt::DisplayRole)
+	{
+		const int row = index.row();
+		const int col = index.column();
+
+		switch (col)
+		{
+			case 0:
+				return _matches[row].filePath;
+			case 1:
+				return _matches[row].lineNumber;
+			case 2:
+				return _matches[row].lineContent;
+		}
+	}
+
 	return QVariant();
 }
 
-bool SearchResultModel::insertRows(int row, int count, const QModelIndex &parent)
+void SearchResultModel::addMatch(const FileSearcher::Match& match)
 {
-	beginInsertRows(parent, row, row + count - 1);
-	// FIXME: Implement me!
+	qDebug() << match.toString();
+
+	beginInsertRows(QModelIndex(), 0, 0);
+	_matches.emplaceBack(match);
 	endInsertRows();
-
-	return false;
-}
-
-bool SearchResultModel::removeRows(int row, int count, const QModelIndex &parent)
-{
-	beginRemoveRows(parent, row, row + count - 1);
-	// FIXME: Implement me!
-	endRemoveRows();
-
-	return false;
 }

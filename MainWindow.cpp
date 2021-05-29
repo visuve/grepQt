@@ -107,7 +107,7 @@ void MainWindow::onSearch()
 
 	if (_ui->radioButtonRegex->isChecked())
 	{
-		QRegularExpression::PatternOptions options = !caseSensitive ?
+		const QRegularExpression::PatternOptions options = !caseSensitive ?
 			QRegularExpression::DontCaptureOption | QRegularExpression::CaseInsensitiveOption :
 			QRegularExpression::DontCaptureOption;
 
@@ -127,10 +127,7 @@ void MainWindow::onSearch()
 		_ui->statusbar->showMessage(QTime::currentTime().toString() + " Finished searching: " + location);
 	});
 
-	connect(searcher, &FileSearcher::matchFound, [this](const FileSearcher::Match& match)
-	{
-		qDebug() << match.toString();
-	});
+	connect(searcher, &FileSearcher::matchFound, _model, &SearchResultModel::addMatch);
 
 	connect(searcher, &FileSearcher::finished, searcher, &QObject::deleteLater);
 
