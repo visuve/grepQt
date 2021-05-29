@@ -17,8 +17,13 @@ public:
 		}
 	};
 
-	FileSearcher(QObject* parent, const QDir& directory, const QStringList& fileWildCards, const QRegularExpression& regex);
-	FileSearcher(QObject* parent, const QDir& directory, const QStringList& fileWildCards, QStringView searchWord, Qt::CaseSensitivity caseSensitive);
+	FileSearcher(
+		QObject* parent,
+		const QDir& directory,
+		const QStringList& fileWildCards,
+		const std::function<bool(QStringView)> matchFunction,
+		const std::function<bool(QFileInfo)> filterFunction);
+
 	~FileSearcher();
 
 signals:
@@ -32,4 +37,5 @@ private:
 	const QDir _directory;
 	const QStringList _wildcards;
 	std::function<bool(QStringView)> _matchFunction;
+	std::function<bool(QFileInfo)> _filterFunction;
 };

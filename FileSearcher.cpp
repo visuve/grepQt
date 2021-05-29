@@ -3,10 +3,17 @@
 
 constexpr size_t BufferSize = 0x1000; // 4kib
 
-FileSearcher::FileSearcher(QObject* parent, const QDir& directory, const QStringList& fileWildCards, const QRegularExpression& regex) :
+FileSearcher::FileSearcher(
+	QObject* parent,
+	const QDir& directory,
+	const QStringList& fileWildCards,
+	const std::function<bool(QStringView)> matchFunction,
+	const std::function<bool(QFileInfo)> filterFunction) :
 	QThread(parent),
 	_directory(directory),
-	_wildcards(fileWildCards)
+	_wildcards(fileWildCards),
+	_matchFunction(matchFunction),
+	_filterFunction(filterFunction)
 {
 	connect(this, &QThread::terminate, []()
 	{
@@ -17,32 +24,6 @@ FileSearcher::FileSearcher(QObject* parent, const QDir& directory, const QString
 	{
 		qDebug() << "Quit requested";
 	});
-
-	_matchFunction = [=](QStringView haystack)
-	{
-		return regex.match(haystack).hasMatch();
-	};
-}
-
-FileSearcher::FileSearcher(QObject* parent, const QDir& directory, const QStringList& fileWildCards, QStringView searchWord,  Qt::CaseSensitivity caseSensitive) :
-	QThread(parent),
-	_directory(directory),
-	_wildcards(fileWildCards)
-{
-	connect(this, &QThread::terminate, []()
-	{
-		qDebug() << "Terminate requested";
-	});
-
-	connect(this, &QThread::quit, []()
-	{
-		qDebug() << "Quit requested";
-	});
-
-	_matchFunction = [=](QStringView haystack)
-	{
-		return haystack.contains(searchWord, caseSensitive);
-	};
 }
 
 FileSearcher::~FileSearcher()
@@ -63,6 +44,12 @@ void FileSearcher::run()
 	while (iter.hasNext())
 	{
 		const QString path = iter.next();
+
+		if (!_filterFunction(QFileInfo(path)))
+		{
+			continue;
+		}
+
 		std::wifstream stream(path.toStdWString());
 
 		emit processing(path, ++filesProcessed);

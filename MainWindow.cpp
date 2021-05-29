@@ -174,11 +174,23 @@ void MainWindow::onSearch()
 	const QStringList wildcards = _ui->lineEditWildcards->text().split('|');
 	const QString searchExpression = _ui->lineEditSearch->text();
 	const bool caseSensitive = _ui->checkBoxCaseSensitive->isChecked();
+	const int sizeOption = _ui->comboBoxFileSize->currentIndex();
+	const int sizeValue = _ui->spinBoxFileSize->value() * 1024;
+	const int modifiedOption = _ui->comboBoxLastModified->currentIndex();
+	const QDateTime modifiedValue = _ui->dateTimeEditLastModified->dateTime();
+
+
+	std::function<bool(QStringView)> searchFunction;
+	std::function<bool(QFileInfo)> filterFunction;
 
 	if (_ui->radioButtonPlain->isChecked())
 	{
 		const Qt::CaseSensitivity options = caseSensitive ? Qt::CaseInsensitive : Qt::CaseInsensitive;
-		searcher = new FileSearcher(nullptr, location, wildcards, searchExpression, options);
+
+		searchFunction = [=](QStringView haystack)
+		{
+			return haystack.contains(searchExpression, options);
+		};
 	}
 
 	if (_ui->radioButtonRegex->isChecked())
@@ -188,10 +200,39 @@ void MainWindow::onSearch()
 			QRegularExpression::DontCaptureOption;
 
 		const QRegularExpression regex(searchExpression, options);
-		searcher = new FileSearcher(nullptr, location, wildcards, regex);
+
+		searchFunction = [=](QStringView haystack)
+		{
+			return regex.match(haystack).hasMatch();
+		};
 	}
 
-	Q_ASSERT(searcher);
+	filterFunction = [=](const QFileInfo& fileInfo)
+	{
+		switch (sizeOption)
+		{
+			case 1:
+				return fileInfo.size() < sizeValue;
+			case 2:
+				return fileInfo.size() > sizeValue;
+			case 3:
+				return fileInfo.size() == sizeValue;
+		}
+
+		switch (modifiedOption)
+		{
+			case 1:
+				return fileInfo.lastModified() < modifiedValue;
+			case 2:
+				return fileInfo.lastModified() > modifiedValue;
+			case 3:
+				return fileInfo.lastModified() == modifiedValue;
+		}
+
+		return true;
+	};
+
+	searcher = new FileSearcher(nullptr, location, wildcards, searchFunction, filterFunction);
 
 	connect(searcher, &FileSearcher::processing, [this](const QString& filePath, int filesProcessed)
 	{
