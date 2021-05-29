@@ -67,7 +67,7 @@ void FileSearcher::run()
 
 			if (_matchFunction(line))
 			{
-				emit matchFound({ path, lineNumber, line.toString() });
+				emit matchFound({ QDir::toNativeSeparators(path), lineNumber, line.toString() });
 			}
 		}
 	}
