@@ -18,7 +18,7 @@ FileSearcher::FileSearcher(QObject* parent, const QDir& directory, const QString
 		qDebug() << "Quit requested";
 	});
 
-	_matchFunction = [&](QStringView haystack)
+	_matchFunction = [=](QStringView haystack)
 	{
 		return regex.match(haystack).hasMatch();
 	};
@@ -39,7 +39,7 @@ FileSearcher::FileSearcher(QObject* parent, const QDir& directory, const QString
 		qDebug() << "Quit requested";
 	});
 
-	_matchFunction = [&](QStringView haystack)
+	_matchFunction = [=](QStringView haystack)
 	{
 		return haystack.contains(searchWord, caseSensitive);
 	};
