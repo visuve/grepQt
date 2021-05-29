@@ -1,4 +1,4 @@
-name: Ubuntu 20.04 & Clang 11 & Qt 5
+name: Ubuntu 20.04 & Clang 11 & Qt 6
 
 on: [push, pull_request]
 
@@ -11,7 +11,7 @@ jobs:
     - name: Install tools
       run: |
         sudo apt update
-        sudo apt --yes install clang-11 cmake qtbase5-dev
+        sudo apt --yes install clang-11 cmake qtbase6-dev
 
     - name: Build
       run: |
