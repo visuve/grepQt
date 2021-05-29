@@ -9,6 +9,7 @@
 #include <QDirIterator>
 #include <QList>
 #include <QMainWindow>
+#include <QMessageBox>
 #include <QObject>
 #include <QRegularExpression>
 #include <QStringView>

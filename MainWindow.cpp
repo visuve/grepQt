@@ -12,6 +12,21 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	_ui->setupUi(this);
 
+	_ui->actionOpen->setIcon(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon));
+	connect(_ui->actionOpen, &QAction::triggered, this, &MainWindow::onOpenDirectoryDialog);
+
+	_ui->actionExit->setIcon(QApplication::style()->standardIcon(QStyle::SP_DialogCloseButton));
+	connect(_ui->actionExit, &QAction::triggered, qApp, &QApplication::quit);
+
+	_ui->actionAbout->setIcon(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation));
+	connect(_ui->actionAbout, &QAction::triggered, this, &MainWindow::onAbout);
+
+	_ui->actionLicenses->setIcon(QApplication::style()->standardIcon(QStyle::SP_TitleBarMenuButton));
+	connect(_ui->actionLicenses, &QAction::triggered, [this]()
+	{
+		QMessageBox::aboutQt(this, "grepQt");
+	});
+
 	connect(_ui->comboBoxFileSize, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index)
 	{
 		_ui->spinBoxFileSize->setEnabled(index != 0);
@@ -76,6 +91,19 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
 	delete _ui;
+}
+
+void MainWindow::onAbout()
+{
+	QStringList text;
+	text << "grepQt - File Content Finder version 0.1.";
+	text << "";
+	text << "grepQt is yet another grep like file content searched GUI.";
+	text << "";
+	text << "grepQt is open source (GPLv2) and written in Qt (C++) see Licenses for more details.";
+	text << "";
+
+	QMessageBox::about(this, "grepQt", text.join('\n'));
 }
 
 void MainWindow::onOpenDirectoryDialog()

@@ -15,6 +15,7 @@ public:
 	MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
 
+	void onAbout();
 	void onOpenDirectoryDialog();
 	void onSearch();
 
