@@ -169,6 +169,8 @@ void MainWindow::onOpenDirectoryDialog()
 
 void MainWindow::onSearch()
 {
+	_model->clear();
+
 	FileSearcher* searcher = nullptr;
 	const QString location = _ui->lineEditLocation->text();
 	const QStringList wildcards = _ui->lineEditWildcards->text().split('|');

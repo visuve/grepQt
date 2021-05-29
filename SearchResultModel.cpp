@@ -84,3 +84,10 @@ void SearchResultModel::addMatch(const FileSearcher::Match& match)
 	_matches.emplaceBack(match);
 	endInsertRows();
 }
+
+void SearchResultModel::clear()
+{
+	beginResetModel();
+	_matches.clear();
+	endResetModel();
+}

@@ -15,6 +15,7 @@ public:
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 	void addMatch(const FileSearcher::Match& match);
+	void clear();
 
 private:
 	QList<FileSearcher::Match> _matches;
