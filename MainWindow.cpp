@@ -8,7 +8,8 @@
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	_ui(new Ui::MainWindow()),
-	_model(new SearchResultModel(this))
+	_model(new SearchResultModel(this)),
+	_settings(QSettings::IniFormat, QSettings::UserScope, "visuve", "grepQt")
 {
 	_ui->setupUi(this);
 
@@ -94,10 +95,47 @@ MainWindow::MainWindow(QWidget *parent) :
 		const QString& path = args[1];
 		_ui->lineEditLocation->setText(path);
 	}
+	else
+	{
+		_ui->lineEditLocation->setText(_settings.value("path").value<QString>());
+	}
+
+	_ui->lineEditSearch->setText(_settings.value("search/word").value<QString>());
+	_ui->lineEditReplace->setText(_settings.value("search/replace").value<QString>());
+	_ui->radioButtonPlain->setChecked(_settings.value("search/mode").value<QString>() == "plain");
+	_ui->radioButtonRegex->setChecked(_settings.value("search/mode").value<QString>() == "regex");
+	_ui->checkBoxCaseSensitive->setChecked(_settings.value("search/casesensitive").value<bool>());
+
+	_ui->lineEditWildcards->setText(_settings.value("filter/wildcards").value<QString>());
+	_ui->comboBoxFileSize->setCurrentIndex(_settings.value("filter/size_opt").value<int>());
+	_ui->spinBoxFileSize->setValue(_settings.value("filter/size").value<int>());
+	_ui->comboBoxLastModified->setCurrentIndex(_settings.value("filter/time_opt").value<int>());
+	_ui->dateTimeEditLastModified->setDateTime(_settings.value("filter/time").value<QDateTime>());
 }
 
 MainWindow::~MainWindow()
 {
+	_settings.setValue("path", _ui->lineEditLocation->text());
+	_settings.setValue("search/word", _ui->lineEditSearch->text());
+	_settings.setValue("search/replace", _ui->lineEditReplace->text());
+
+	if (_ui->radioButtonPlain->isChecked())
+	{
+		_settings.setValue("search/mode", "plain");
+	}
+
+	if (_ui->radioButtonRegex->isChecked())
+	{
+		_settings.setValue("search/mode", "regex");
+	}
+
+	_settings.setValue("search/casesensitive", _ui->checkBoxCaseSensitive->isChecked());
+	_settings.setValue("filter/wildcards", _ui->lineEditWildcards->text());
+	_settings.setValue("filter/size_opt", _ui->comboBoxFileSize->currentIndex());
+	_settings.setValue("filter/size", _ui->spinBoxFileSize->value());
+	_settings.setValue("filter/time_opt", _ui->comboBoxLastModified->currentIndex());
+	_settings.setValue("filter/time", _ui->dateTimeEditLastModified->dateTime());
+
 	delete _ui;
 }
 

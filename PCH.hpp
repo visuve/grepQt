@@ -12,6 +12,7 @@
 #include <QMessageBox>
 #include <QObject>
 #include <QRegularExpression>
+#include <QSettings>
 #include <QStringView>
 #include <QThread>
 

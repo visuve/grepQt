@@ -20,6 +20,7 @@ public:
 	void onSearch();
 
 private:
+	QSettings _settings;
 	Ui::MainWindow* _ui;
 	SearchResultModel* _model;
 };
