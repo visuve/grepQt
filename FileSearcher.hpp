@@ -12,8 +12,8 @@ public:
 		QString lineContent;
 	};
 
-	FileSearcher(QObject* parent, const QDir& directory, const QRegularExpression& regex);
-	FileSearcher(QObject* parent, const QDir& directory, QStringView searchWord, Qt::CaseSensitivity caseSensitive);
+	FileSearcher(QObject* parent, const QDir& directory, const QStringList& fileWildCards, const QRegularExpression& regex);
+	FileSearcher(QObject* parent, const QDir& directory, const QStringList& fileWildCards, QStringView searchWord, Qt::CaseSensitivity caseSensitive);
 	~FileSearcher();
 
 signals:
@@ -22,8 +22,8 @@ signals:
 
 private:
 	void run() override;
-	void searchFile(QStringView path);
 
 	const QDir _directory;
+	const QStringList _wildcards;
 	std::function<bool(QStringView)> _matchFunction;
 };

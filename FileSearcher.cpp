@@ -3,9 +3,10 @@
 
 constexpr size_t BufferSize = 0x1000; // 4kib
 
-FileSearcher::FileSearcher(QObject* parent, const QDir& directory, const QRegularExpression& regex) :
+FileSearcher::FileSearcher(QObject* parent, const QDir& directory, const QStringList& fileWildCards, const QRegularExpression& regex) :
 	QThread(parent),
-	_directory(directory)
+	_directory(directory),
+	_wildcards(fileWildCards)
 {
 	connect(this, &QThread::terminate, []()
 	{
@@ -23,9 +24,10 @@ FileSearcher::FileSearcher(QObject* parent, const QDir& directory, const QRegula
 	};
 }
 
-FileSearcher::FileSearcher(QObject* parent, const QDir& directory, QStringView searchWord,  Qt::CaseSensitivity caseSensitive) :
+FileSearcher::FileSearcher(QObject* parent, const QDir& directory, const QStringList& fileWildCards, QStringView searchWord,  Qt::CaseSensitivity caseSensitive) :
 	QThread(parent),
-	_directory(directory)
+	_directory(directory),
+	_wildcards(fileWildCards)
 {
 	connect(this, &QThread::terminate, []()
 	{
@@ -53,33 +55,32 @@ FileSearcher::~FileSearcher()
 
 void FileSearcher::run()
 {
-	QDirIterator iter(_directory.absolutePath(), { "*.txt" }, QDir::Files, QDirIterator::Subdirectories);
+	std::array<wchar_t, BufferSize> buffer = {};
+	QDirIterator iter(_directory.absolutePath(), _wildcards, QDir::Files, QDirIterator::Subdirectories);
 
 	while (iter.hasNext())
 	{
-		searchFile(iter.next());
-	}
-}
+		const QString path = iter.next();
 
-void FileSearcher::searchFile(QStringView path)
-{
-	thread_local std::array<wchar_t, BufferSize> buffer = {};
-	std::wifstream stream(path.toString().toStdWString());
+		emit processing(path);
 
-	for (int lineNumber = 1; stream.getline(buffer.data(), BufferSize, '\n'); ++lineNumber)
-	{
-		const std::streamsize bytesRead = stream.gcount();
+		std::wifstream stream(path.toStdWString());
 
-		if (bytesRead <= 0)
+		for (int lineNumber = 1; stream.getline(buffer.data(), BufferSize, '\n'); ++lineNumber)
 		{
-			break;
-		}
+			const std::streamsize bytesRead = stream.gcount();
 
-		const QStringView line(buffer.data(), bytesRead);
+			if (bytesRead <= 0)
+			{
+				break;
+			}
 
-		if (_matchFunction(line))
-		{
-			emit matchFound({ path.toString(), lineNumber, line.toString() });
+			const QStringView line(buffer.data(), bytesRead);
+
+			if (_matchFunction(line))
+			{
+				emit matchFound({ path, lineNumber, line.toString() });
+			}
 		}
 	}
 }
