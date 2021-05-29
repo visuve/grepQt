@@ -68,6 +68,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(_ui->toolButtonBrowse, &QToolButton::clicked, this, &MainWindow::onOpenDirectoryDialog);
 
+	connect(_ui->pushButtonSearch, &QPushButton::clicked, this, &MainWindow::onSearch);
+
 	_ui->tableViewResults->setModel(_model);
 }
 
@@ -87,4 +89,50 @@ void MainWindow::onOpenDirectoryDialog()
 		const QString directory = dialog.selectedFiles().first();
 		_ui->lineEditLocation->setText(QDir::toNativeSeparators(directory));
 	}
+}
+
+void MainWindow::onSearch()
+{
+	FileSearcher* searcher = nullptr;
+	const QString location = _ui->lineEditLocation->text();
+	const QStringList wildcards = _ui->lineEditWildcards->text().split('|');
+	const QString searchExpression = _ui->lineEditSearch->text();
+	const bool caseSensitive = _ui->checkBoxCaseSensitive->isChecked();
+
+	if (_ui->radioButtonPlain->isChecked())
+	{
+		const Qt::CaseSensitivity options = caseSensitive ? Qt::CaseInsensitive : Qt::CaseInsensitive;
+		searcher = new FileSearcher(nullptr, location, wildcards, searchExpression, options);
+	}
+
+	if (_ui->radioButtonRegex->isChecked())
+	{
+		QRegularExpression::PatternOptions options = !caseSensitive ?
+			QRegularExpression::DontCaptureOption | QRegularExpression::CaseInsensitiveOption :
+			QRegularExpression::DontCaptureOption;
+
+		const QRegularExpression regex(searchExpression, options);
+		searcher = new FileSearcher(nullptr, location, wildcards, regex);
+	}
+
+	Q_ASSERT(searcher);
+
+	connect(searcher, &FileSearcher::processing, [this](const QString& filePath)
+	{
+		_ui->statusbar->showMessage(QTime::currentTime().toString() + " Processing: " + filePath);
+	});
+
+	connect(searcher, &FileSearcher::finished, [=]()
+	{
+		_ui->statusbar->showMessage(QTime::currentTime().toString() + " Finished searching: " + location);
+	});
+
+	connect(searcher, &FileSearcher::matchFound, [this](const FileSearcher::Match& match)
+	{
+		qDebug() << match.toString();
+	});
+
+	connect(searcher, &FileSearcher::finished, searcher, &QObject::deleteLater);
+
+	searcher->start();
 }

@@ -6,7 +6,6 @@ namespace Ui
 }
 
 class SearchResultModel;
-class FileSearcher;
 
 class MainWindow : public QMainWindow
 {
@@ -17,9 +16,9 @@ public:
 	~MainWindow();
 
 	void onOpenDirectoryDialog();
+	void onSearch();
 
 private:
 	Ui::MainWindow* _ui;
 	SearchResultModel* _model;
-	FileSearcher* _searcher;
 };
