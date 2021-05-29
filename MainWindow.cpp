@@ -1,9 +1,9 @@
-#include "MainWindow.hpp"
+#include "PCH.hpp"
 #include "./ui_MainWindow.h"
+
+#include "MainWindow.hpp"
 #include "SearchResultModel.hpp"
 #include "FileSearcher.hpp"
-#include <QFileInfo>
-#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 
 project(grepQt LANGUAGES CXX)
 
@@ -14,6 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 
-file(GLOB grepQtSrc "*.cpp" "*.hpp" "*.ui" "*.qrc")
-add_executable(grepQt ${grepQtSrc})
-target_link_libraries(grepQt PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+file(GLOB grepQtSrc "*.cpp" "*.ui" "*.qrc")
+qt_add_executable("grepQt" ${grepQtSrc})
+target_precompile_headers("grepQt" PRIVATE "PCH.hpp")
+target_link_libraries("grepQt" PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)

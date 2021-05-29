@@ -1,9 +1,5 @@
+#include "PCH.hpp"
 #include "FileSearcher.hpp"
-#include <QDebug>
-#include <QDirIterator>
-
-#include <filesystem>
-#include <fstream>
 
 constexpr size_t BufferSize = 0x1000; // 4kib
 
@@ -23,7 +19,7 @@ FileSearcher::FileSearcher(QObject* parent, const QDir& directory, const QRegula
 
 	_matchFunction = [&](QStringView haystack)
 	{
-		return haystack.contains(regex);
+		return regex.match(haystack).hasMatch();
 	};
 }
 
@@ -67,10 +63,8 @@ void FileSearcher::run()
 
 void FileSearcher::searchFile(QStringView path)
 {
-	thread_local std::array<QString::value_type, BufferSize> buffer = {};
-
-	std::filesystem::path p(path.cbegin(), path.cend());
-	std::basic_ifstream<QString::value_type> stream(p);
+	thread_local std::array<wchar_t, BufferSize> buffer = {};
+	std::wifstream stream(path.toString().toStdWString());
 
 	for (int lineNumber = 1; stream.getline(buffer.data(), BufferSize, '\n'); ++lineNumber)
 	{

@@ -1,3 +1,4 @@
+#include "PCH.hpp"
 #include "SearchResultModel.hpp"
 
 SearchResultModel::SearchResultModel(QObject *parent) :
@@ -8,6 +9,7 @@ SearchResultModel::SearchResultModel(QObject *parent) :
 QVariant SearchResultModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	// FIXME: Implement me!
+	return QVariant();
 }
 
 int SearchResultModel::rowCount(const QModelIndex &parent) const

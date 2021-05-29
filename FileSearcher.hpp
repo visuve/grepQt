@@ -1,13 +1,5 @@
 #pragma once
 
-#include <QObject>
-#include <QThread>
-#include <QDir>
-#include <QRegularExpression>
-#include <QStringView>
-
-#include <functional>
-
 class FileSearcher : public QThread
 {
 	Q_OBJECT

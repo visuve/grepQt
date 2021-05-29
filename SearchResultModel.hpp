@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QAbstractTableModel>
-
 class SearchResultModel : public QAbstractTableModel
 {
 	Q_OBJECT
