@@ -51,9 +51,10 @@ QVariant SearchResultModel::data(const QModelIndex& index, int role) const
 		return QVariant();
 	}
 
+	const int row = index.row();
+
 	if (role == Qt::DisplayRole)
 	{
-		const int row = index.row();
 		const int col = index.column();
 
 		switch (col)
@@ -65,6 +66,11 @@ QVariant SearchResultModel::data(const QModelIndex& index, int role) const
 			case 2:
 				return _matches[row].lineContent;
 		}
+	}
+
+	if (role == Qt::WhatsThisRole)
+	{
+		return _matches[row].filePath;
 	}
 
 	return QVariant();

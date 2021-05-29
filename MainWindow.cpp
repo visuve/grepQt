@@ -88,17 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	_ui->tableViewResults->setModel(_model);
 
-	const QStringList args = QCoreApplication::arguments();
-
-	if (args.count() == 2 && QDir().exists(args[1]))
-	{
-		const QString& path = args[1];
-		_ui->lineEditLocation->setText(path);
-	}
-	else
-	{
-		_ui->lineEditLocation->setText(_settings.value("path").value<QString>());
-	}
+	connect(_ui->tableViewResults, &QTableView::customContextMenuRequested, this, &MainWindow::createContextMenu);
 
 	_ui->lineEditSearch->setText(_settings.value("search/word").value<QString>());
 	_ui->lineEditReplace->setText(_settings.value("search/replace").value<QString>());
@@ -111,6 +101,18 @@ MainWindow::MainWindow(QWidget *parent) :
 	_ui->spinBoxFileSize->setValue(_settings.value("filter/size").value<int>());
 	_ui->comboBoxLastModified->setCurrentIndex(_settings.value("filter/time_opt").value<int>());
 	_ui->dateTimeEditLastModified->setDateTime(_settings.value("filter/time").value<QDateTime>());
+
+	const QStringList args = QCoreApplication::arguments();
+
+	if (args.count() == 2 && QDir().exists(args[1]))
+	{
+		const QString& path = args[1];
+		_ui->lineEditLocation->setText(path);
+	}
+	else
+	{
+		_ui->lineEditLocation->setText(_settings.value("path").value<QString>());
+	}
 }
 
 MainWindow::~MainWindow()
@@ -216,4 +218,63 @@ void MainWindow::onSearch()
 	connect(searcher, &FileSearcher::finished, searcher, &QObject::deleteLater);
 
 	searcher->start();
+}
+
+void MainWindow::createContextMenu(const QPoint& pos)
+{
+	const QModelIndex selection = _ui->tableViewResults->indexAt(pos);
+
+	if (!selection.isValid())
+	{
+		qDebug() << "Invalid selection";
+		return;
+	}
+
+	const QVariant variant = _model->data(selection, Qt::WhatsThisRole);
+
+	if (!variant.isValid())
+	{
+		qDebug() << "Invalid variant";
+		return;
+	}
+
+	const QString filePath = variant.toString();
+
+	if (filePath.isEmpty())
+	{
+		qDebug() << "File path is empty / no file selected";
+		return;
+	}
+
+	auto openFileAction = new QAction("Open file", this);
+	connect(openFileAction, &QAction::triggered, std::bind(&MainWindow::openFileWithDefaultAssociation, this, filePath));
+
+	auto openParentDirAction = new QAction("Open parent directory", this);
+	connect(openParentDirAction, &QAction::triggered, std::bind(&MainWindow::openParentDirectory, this, filePath));
+
+	QMenu menu(this);
+	menu.addActions({ openFileAction, openParentDirAction });
+	menu.exec(_ui->tableViewResults->mapToGlobal(pos));
+	
+}
+
+void MainWindow::openFileWithDefaultAssociation(const QString& filePath)
+{
+	const QUrl url = QUrl::fromLocalFile(filePath);
+
+	if (!QDesktopServices::openUrl(url))
+	{
+		QMessageBox::warning(this, "Failed to open", "Failed to open file:\n\n" + filePath + "\n");
+	}
+}
+
+void MainWindow::openParentDirectory(const QString& filePath)
+{
+	const QFileInfo fileInfo(filePath);
+	const QUrl url = QUrl::fromLocalFile(fileInfo.dir().path());
+
+	if (!QDesktopServices::openUrl(url))
+	{
+		QMessageBox::warning(this, "Failed to open", "Failed to open directory:\n\n" + filePath + "\n");
+	}
 }

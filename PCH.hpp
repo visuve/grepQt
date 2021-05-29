@@ -3,6 +3,7 @@
 #include <QAbstractTableModel>
 #include <QApplication>
 #include <QDebug>
+#include <QDesktopServices>
 #include <QFileInfo>
 #include <QFileDialog>
 #include <QDir>
