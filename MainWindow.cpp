@@ -191,14 +191,24 @@ void MainWindow::onSearch()
 
 	Q_ASSERT(searcher);
 
-	connect(searcher, &FileSearcher::processing, [this](const QString& filePath)
+	connect(searcher, &FileSearcher::processing, [this](const QString& filePath, int filesProcessed)
 	{
-		_ui->statusbar->showMessage(QTime::currentTime().toString() + " Processing: " + filePath);
+		QString message = QString("%1 Processing: %2. Processed %3 files.")
+			.arg(QTime::currentTime().toString())
+			.arg(filePath)
+			.arg(filesProcessed);
+
+		_ui->statusbar->showMessage(message);
 	});
 
-	connect(searcher, &FileSearcher::finished, [=]()
+	connect(searcher, &FileSearcher::seachCompleted, [=](int filesProcessed)
 	{
-		_ui->statusbar->showMessage(QTime::currentTime().toString() + " Finished searching: " + location);
+			QString message = QString("%1 Finished searching: %2. Files processed: %3.")
+				.arg(QTime::currentTime().toString())
+				.arg(location)
+				.arg(filesProcessed);
+
+		_ui->statusbar->showMessage(message);
 	});
 
 	connect(searcher, &FileSearcher::matchFound, _model, &SearchResultModel::addMatch);

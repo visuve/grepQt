@@ -58,13 +58,14 @@ void FileSearcher::run()
 	std::array<wchar_t, BufferSize> buffer = {};
 	QDirIterator iter(_directory.absolutePath(), _wildcards, QDir::Files, QDirIterator::Subdirectories);
 
+	int filesProcessed = 0;
+
 	while (iter.hasNext())
 	{
 		const QString path = iter.next();
-
-		emit processing(path);
-
 		std::wifstream stream(path.toStdWString());
+
+		emit processing(path, ++filesProcessed);
 
 		for (int lineNumber = 1; stream.getline(buffer.data(), BufferSize, '\n'); ++lineNumber)
 		{
@@ -83,4 +84,6 @@ void FileSearcher::run()
 			}
 		}
 	}
+
+	emit seachCompleted(filesProcessed);
 }

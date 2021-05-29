@@ -22,8 +22,9 @@ public:
 	~FileSearcher();
 
 signals:
-	void processing(const QString& filePath);
+	void processing(const QString& filePath, int filesProcessed);
 	void matchFound(const Match& match);
+	void seachCompleted(int filesProcessed);
 
 private:
 	void run() override;
