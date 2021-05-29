@@ -86,6 +86,14 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(_ui->pushButtonSearch, &QPushButton::clicked, this, &MainWindow::onSearch);
 
 	_ui->tableViewResults->setModel(_model);
+
+	const QStringList args = QCoreApplication::arguments();
+
+	if (args.count() == 2 && QDir().exists(args[1]))
+	{
+		const QString& path = args[1];
+		_ui->lineEditLocation->setText(path);
+	}
 }
 
 MainWindow::~MainWindow()
