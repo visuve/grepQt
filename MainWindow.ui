@@ -284,6 +284,23 @@
    </property>
   </action>
  </widget>
+ <tabstops>
+  <tabstop>lineEditLocation</tabstop>
+  <tabstop>toolButtonBrowse</tabstop>
+  <tabstop>lineEditSearch</tabstop>
+  <tabstop>lineEditReplace</tabstop>
+  <tabstop>radioButtonRegex</tabstop>
+  <tabstop>radioButtonPlain</tabstop>
+  <tabstop>checkBoxCaseSensitive</tabstop>
+  <tabstop>lineEditWildcards</tabstop>
+  <tabstop>comboBoxFileSize</tabstop>
+  <tabstop>spinBoxFileSize</tabstop>
+  <tabstop>comboBoxLastModified</tabstop>
+  <tabstop>dateTimeEditLastModified</tabstop>
+  <tabstop>pushButtonReplace</tabstop>
+  <tabstop>pushButtonSearch</tabstop>
+  <tabstop>tableViewResults</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
