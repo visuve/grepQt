@@ -10,6 +10,11 @@ public:
 		QString filePath;
 		int lineNumber;
 		QString lineContent;
+
+		inline QString toString() const
+		{
+			return QString("%1:%2:%3").arg(filePath).arg(lineNumber).arg(lineContent);
+		}
 	};
 
 	FileSearcher(QObject* parent, const QDir& directory, const QStringList& fileWildCards, const QRegularExpression& regex);
