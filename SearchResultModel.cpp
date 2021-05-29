@@ -8,7 +8,12 @@ SearchResultModel::SearchResultModel(QObject *parent) :
 
 QVariant SearchResultModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-	if (orientation == Qt::Orientation::Horizontal && role == Qt::DisplayRole)
+	if (role != Qt::DisplayRole)
+	{
+		return QVariant();
+	}
+
+	if (orientation == Qt::Orientation::Horizontal)
 	{
 		switch (section)
 		{
@@ -19,6 +24,11 @@ QVariant SearchResultModel::headerData(int section, Qt::Orientation orientation,
 			case 2:
 				return "Line Content";
 		}
+	}
+
+	if (orientation == Qt::Orientation::Vertical)
+	{
+		return ++section;
 	}
 
 	return QVariant();
