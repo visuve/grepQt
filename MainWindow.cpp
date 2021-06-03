@@ -181,7 +181,6 @@ void MainWindow::onSearch()
 	const int modifiedOption = _ui->comboBoxLastModified->currentIndex();
 	const QDateTime modifiedValue = _ui->dateTimeEditLastModified->dateTime();
 
-
 	std::function<bool(QStringView)> searchFunction;
 	std::function<bool(QFileInfo)> filterFunction;
 
@@ -234,7 +233,7 @@ void MainWindow::onSearch()
 		return true;
 	};
 
-	searcher = new FileSearcher(nullptr, location, wildcards, searchFunction, filterFunction);
+	searcher = new FileSearcher(this, location, wildcards, searchFunction, filterFunction);
 
 	connect(searcher, &FileSearcher::processing, [this](const QString& filePath, int filesProcessed)
 	{
@@ -246,11 +245,12 @@ void MainWindow::onSearch()
 		_ui->statusbar->showMessage(message);
 	});
 
-	connect(searcher, &FileSearcher::seachCompleted, [=](int filesProcessed)
+	connect(searcher, &FileSearcher::searchCompleted, [=](int hits, int filesProcessed)
 	{
-			QString message = QString("%1 Finished searching: %2. Files processed: %3.")
+			QString message = QString("%1 Finished searching: %2. Hits: %3. Files processed: %4.")
 				.arg(QTime::currentTime().toString())
 				.arg(location)
+				.arg(hits)
 				.arg(filesProcessed);
 
 		_ui->statusbar->showMessage(message);

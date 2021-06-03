@@ -15,15 +15,6 @@ FileSearcher::FileSearcher(
 	_matchFunction(matchFunction),
 	_filterFunction(filterFunction)
 {
-	connect(this, &QThread::terminate, []()
-	{
-		qDebug() << "Terminate requested";
-	});
-
-	connect(this, &QThread::quit, []()
-	{
-		qDebug() << "Quit requested";
-	});
 }
 
 FileSearcher::~FileSearcher()
@@ -40,6 +31,7 @@ void FileSearcher::run()
 	QDirIterator iter(_directory.absolutePath(), _wildcards, QDir::Files, QDirIterator::Subdirectories);
 
 	int filesProcessed = 0;
+	int hits = 0;
 
 	while (iter.hasNext())
 	{
@@ -67,10 +59,11 @@ void FileSearcher::run()
 
 			if (_matchFunction(line))
 			{
+				++hits;
 				emit matchFound({ QDir::toNativeSeparators(path), lineNumber, line.toString() });
 			}
 		}
 	}
 
-	emit seachCompleted(filesProcessed);
+	emit searchCompleted(hits, filesProcessed);
 }

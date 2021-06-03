@@ -29,7 +29,7 @@ public:
 signals:
 	void processing(const QString& filePath, int filesProcessed);
 	void matchFound(const Match& match);
-	void seachCompleted(int filesProcessed);
+	void searchCompleted(int hits, int filesProcessed);
 
 private:
 	void run() override;
