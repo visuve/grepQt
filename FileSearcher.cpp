@@ -5,7 +5,7 @@ constexpr size_t BufferSize = 0x1000; // 4kib
 
 FileSearcher::FileSearcher(
 	QObject* parent,
-	const QDir& directory,
+	const QString& directory,
 	const QStringList& fileWildCards,
 	const std::function<bool(QStringView)> matchFunction,
 	const std::function<bool(QFileInfo)> filterFunction) :
@@ -28,7 +28,7 @@ FileSearcher::~FileSearcher()
 void FileSearcher::run()
 {
 	std::array<wchar_t, BufferSize> buffer = {};
-	QDirIterator iter(_directory.absolutePath(), _wildcards, QDir::Files, QDirIterator::Subdirectories);
+	QDirIterator iter(_directory, _wildcards, QDir::Files, QDirIterator::Subdirectories);
 
 	int filesProcessed = 0;
 	int hits = 0;
@@ -68,5 +68,5 @@ void FileSearcher::run()
 		}
 	}
 
-	emit searchCompleted(hits, filesProcessed);
+	emit searchCompleted(_directory, hits, filesProcessed);
 }

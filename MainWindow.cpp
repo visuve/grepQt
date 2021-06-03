@@ -173,7 +173,6 @@ void MainWindow::onSearch()
 {
 	_model->clear();
 
-	FileSearcher* searcher = nullptr;
 	const QString location = _ui->lineEditLocation->text();
 	const QStringList wildcards = _ui->lineEditWildcards->text().split('|');
 	const QString searchExpression = _ui->lineEditSearch->text();
@@ -235,33 +234,11 @@ void MainWindow::onSearch()
 		return true;
 	};
 
-	searcher = new FileSearcher(this, location, wildcards, searchFunction, filterFunction);
-
-	connect(searcher, &FileSearcher::processing, [this](const QString& filePath, int filesProcessed)
-	{
-		QString message = QString("%1 Processing: %2. Processed %3 files.")
-			.arg(QTime::currentTime().toString())
-			.arg(filePath)
-			.arg(filesProcessed);
-
-		_ui->statusbar->showMessage(message);
-	});
-
-	connect(searcher, &FileSearcher::searchCompleted, [=](int hits, int filesProcessed)
-	{
-		QString message = QString("%1 Finished searching: %2. Hits: %3. Files processed: %4.")
-			.arg(QTime::currentTime().toString())
-			.arg(location)
-			.arg(hits)
-			.arg(filesProcessed);
-
-		_ui->statusbar->showMessage(message);
-	});
-
+	auto searcher = new FileSearcher(this, location, wildcards, searchFunction, filterFunction);
+	connect(searcher, &FileSearcher::processing, this, &MainWindow::onProcessing);
+	connect(searcher, &FileSearcher::searchCompleted, this, &MainWindow::onCompleted);
 	connect(searcher, &FileSearcher::matchFound, _model, &SearchResultModel::addMatch);
-
 	connect(searcher, &FileSearcher::finished, searcher, &QObject::deleteLater);
-
 	searcher->start();
 }
 
@@ -300,7 +277,29 @@ void MainWindow::createContextMenu(const QPoint& pos)
 	QMenu menu(this);
 	menu.addActions({ openFileAction, openParentDirAction });
 	menu.exec(_ui->tableViewResults->mapToGlobal(pos));
-	
+}
+
+void MainWindow::onProcessing(const QString& filePath, int filesProcessed)
+{
+	QString message = QString("%1 Processing: %2. Processed %3 files.")
+		.arg(QTime::currentTime().toString())
+		.arg(filePath)
+		.arg(filesProcessed);
+
+	_ui->statusbar->showMessage(message);
+}
+
+void MainWindow::onCompleted(const QString& directory, int hits, int filesProcessed)
+{
+	_ui->statusbar->clearMessage();
+
+	QString message = QString("%1 Finished searching: %2. Hits: %3. Files processed: %4.")
+		.arg(QTime::currentTime().toString())
+		.arg(directory)
+		.arg(hits)
+		.arg(filesProcessed);
+
+	_ui->statusbar->showMessage(message);
 }
 
 void MainWindow::openFileWithDefaultAssociation(const QString& filePath)
