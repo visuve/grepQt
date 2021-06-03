@@ -33,7 +33,7 @@ void FileSearcher::run()
 	int filesProcessed = 0;
 	int hits = 0;
 
-	while (iter.hasNext())
+	while (iter.hasNext() && QThread::currentThread()->isInterruptionRequested() == false)
 	{
 		const QString path = iter.next();
 
@@ -46,7 +46,10 @@ void FileSearcher::run()
 
 		emit processing(path, ++filesProcessed);
 
-		for (int lineNumber = 1; stream.getline(buffer.data(), BufferSize, '\n'); ++lineNumber)
+		for (int lineNumber = 1;
+			stream.getline(buffer.data(), BufferSize, '\n') &&
+			QThread::currentThread()->isInterruptionRequested() == false;
+			++lineNumber)
 		{
 			const std::streamsize bytesRead = stream.gcount();
 
