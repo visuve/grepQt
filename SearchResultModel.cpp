@@ -26,11 +26,6 @@ QVariant SearchResultModel::headerData(int section, Qt::Orientation orientation,
 		}
 	}
 
-	if (orientation == Qt::Orientation::Vertical)
-	{
-		return ++section;
-	}
-
 	return QVariant();
 }
 

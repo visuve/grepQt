@@ -14,6 +14,7 @@
 #include <QObject>
 #include <QRegularExpression>
 #include <QSettings>
+#include <QSortFilterProxyModel>
 #include <QStringView>
 #include <QThread>
 

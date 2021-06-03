@@ -86,7 +86,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(_ui->pushButtonSearch, &QPushButton::clicked, this, &MainWindow::onSearch);
 
-	_ui->tableViewResults->setModel(_model);
+	auto proxyModel = new QSortFilterProxyModel(this);
+	proxyModel->setSourceModel(_model);
+	_ui->tableViewResults->setModel(proxyModel);
 
 	connect(_ui->tableViewResults, &QTableView::customContextMenuRequested, this, &MainWindow::createContextMenu);
 
@@ -247,11 +249,11 @@ void MainWindow::onSearch()
 
 	connect(searcher, &FileSearcher::searchCompleted, [=](int hits, int filesProcessed)
 	{
-			QString message = QString("%1 Finished searching: %2. Hits: %3. Files processed: %4.")
-				.arg(QTime::currentTime().toString())
-				.arg(location)
-				.arg(hits)
-				.arg(filesProcessed);
+		QString message = QString("%1 Finished searching: %2. Hits: %3. Files processed: %4.")
+			.arg(QTime::currentTime().toString())
+			.arg(location)
+			.arg(hits)
+			.arg(filesProcessed);
 
 		_ui->statusbar->showMessage(message);
 	});
