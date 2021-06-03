@@ -187,7 +187,7 @@ void MainWindow::onSearch()
 
 	if (_ui->radioButtonPlain->isChecked())
 	{
-		const Qt::CaseSensitivity options = caseSensitive ? Qt::CaseInsensitive : Qt::CaseInsensitive;
+		const Qt::CaseSensitivity options = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
 		searchFunction = [=](QStringView haystack)
 		{
