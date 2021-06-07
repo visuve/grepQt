@@ -17,14 +17,14 @@ public:
 		}
 	};
 
-	FileSearcher(
-		QObject* parent,
-		const QString& directory,
-		const QStringList& fileWildCards,
-		const std::function<bool(QStringView)> matchFunction,
-		const std::function<bool(QFileInfo)> filterFunction);
+	FileSearcher(QObject* parent);
 
 	~FileSearcher();
+
+	void setDirectory(const QString& directory);
+	void setWildcards(const QStringList& wildcards);
+	void setMatchFunction(std::function<bool(QStringView)> matchFunction);
+	void setFilterFunction(std::function<bool(QFileInfo)> filterFunction);
 
 signals:
 	void processing(const QString& filePath, int filesProcessed);
@@ -34,8 +34,8 @@ signals:
 private:
 	void run() override;
 
-	const QString _directory;
-	const QStringList _wildcards;
+	QString _directory;
+	QStringList _wildcards;
 	std::function<bool(QStringView)> _matchFunction;
 	std::function<bool(QFileInfo)> _filterFunction;
 };

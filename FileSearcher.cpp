@@ -3,17 +3,8 @@
 
 constexpr size_t BufferSize = 0x1000; // 4kib
 
-FileSearcher::FileSearcher(
-	QObject* parent,
-	const QString& directory,
-	const QStringList& fileWildCards,
-	const std::function<bool(QStringView)> matchFunction,
-	const std::function<bool(QFileInfo)> filterFunction) :
-	QThread(parent),
-	_directory(directory),
-	_wildcards(fileWildCards),
-	_matchFunction(matchFunction),
-	_filterFunction(filterFunction)
+FileSearcher::FileSearcher(QObject* parent) :
+	QThread(parent)
 {
 }
 
@@ -23,6 +14,26 @@ FileSearcher::~FileSearcher()
 	requestInterruption();
 	wait();
 	qDebug() << "Destroyed.";
+}
+
+void FileSearcher::setDirectory(const QString& directory)
+{
+	_directory = directory;
+}
+
+void FileSearcher::setWildcards(const QStringList& wildcards)
+{
+	_wildcards = wildcards;
+}
+
+void FileSearcher::setMatchFunction(std::function<bool (QStringView)> matchFunction)
+{
+	_matchFunction = matchFunction;
+}
+
+void FileSearcher::setFilterFunction(std::function<bool (QFileInfo)> filterFunction)
+{
+	_filterFunction = filterFunction;
 }
 
 void FileSearcher::run()

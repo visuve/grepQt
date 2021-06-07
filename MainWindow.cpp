@@ -182,17 +182,18 @@ void MainWindow::onSearch()
 	const int modifiedOption = _ui->comboBoxLastModified->currentIndex();
 	const QDateTime modifiedValue = _ui->dateTimeEditLastModified->dateTime();
 
-	std::function<bool(QStringView)> searchFunction;
-	std::function<bool(QFileInfo)> filterFunction;
+	auto searcher = new FileSearcher(this);
+	searcher->setDirectory(location);
+	searcher->setWildcards(wildcards);
 
 	if (_ui->radioButtonPlain->isChecked())
 	{
 		const Qt::CaseSensitivity options = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
-		searchFunction = [=](QStringView haystack)
+		searcher->setMatchFunction([=](QStringView haystack)
 		{
 			return haystack.contains(searchExpression, options);
-		};
+		});
 	}
 
 	if (_ui->radioButtonRegex->isChecked())
@@ -203,13 +204,13 @@ void MainWindow::onSearch()
 
 		const QRegularExpression regex(searchExpression, options);
 
-		searchFunction = [=](QStringView haystack)
+		searcher->setMatchFunction([=](QStringView haystack)
 		{
 			return regex.match(haystack).hasMatch();
-		};
+		});
 	}
 
-	filterFunction = [=](const QFileInfo& fileInfo)
+	searcher->setFilterFunction([=](const QFileInfo& fileInfo)
 	{
 		switch (sizeOption)
 		{
@@ -232,9 +233,8 @@ void MainWindow::onSearch()
 		}
 
 		return true;
-	};
+	});
 
-	auto searcher = new FileSearcher(this, location, wildcards, searchFunction, filterFunction);
 	connect(searcher, &FileSearcher::processing, this, &MainWindow::onProcessing);
 	connect(searcher, &FileSearcher::searchCompleted, this, &MainWindow::onCompleted);
 	connect(searcher, &FileSearcher::matchFound, _model, &SearchResultModel::addMatch);
