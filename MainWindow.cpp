@@ -7,9 +7,10 @@
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
+	_settings(QSettings::IniFormat, QSettings::UserScope, "visuve", "grepQt"),
 	_ui(new Ui::MainWindow()),
 	_model(new SearchResultModel(this)),
-	_settings(QSettings::IniFormat, QSettings::UserScope, "visuve", "grepQt")
+	_searcher(new FileSearcher(this))
 {
 	_ui->setupUi(this);
 
@@ -71,9 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
 		}
 		else
 		{
-			const QString path = _ui->lineEditLocation->text();
-			const QFileInfo info(path);
-
+			const QFileInfo info(text);
 			bool hasDir = info.isDir();
 			_ui->pushButtonSearch->setEnabled(hasDir);
 			_ui->pushButtonReplace->setEnabled(hasDir);
@@ -104,12 +103,15 @@ MainWindow::MainWindow(QWidget *parent) :
 	_ui->comboBoxLastModified->setCurrentIndex(_settings.value("filter/time_opt").value<int>());
 	_ui->dateTimeEditLastModified->setDateTime(_settings.value("filter/time").value<QDateTime>());
 
+	connect(_searcher, &FileSearcher::processing, this, &MainWindow::onProcessing);
+	connect(_searcher, &FileSearcher::searchCompleted, this, &MainWindow::onCompleted);
+	connect(_searcher, &FileSearcher::matchFound, _model, &SearchResultModel::addMatch);
+
 	const QStringList args = QCoreApplication::arguments();
 
-	if (args.count() == 2 && QDir().exists(args[1]))
+	if (args.count() == 2)
 	{
-		const QString& path = args[1];
-		_ui->lineEditLocation->setText(path);
+		_ui->lineEditLocation->setText(args[1]);
 	}
 	else
 	{
@@ -171,6 +173,7 @@ void MainWindow::onOpenDirectoryDialog()
 
 void MainWindow::onSearch()
 {
+	_searcher->requestInterruption();
 	_model->clear();
 
 	const QString location = _ui->lineEditLocation->text();
@@ -182,15 +185,14 @@ void MainWindow::onSearch()
 	const int modifiedOption = _ui->comboBoxLastModified->currentIndex();
 	const QDateTime modifiedValue = _ui->dateTimeEditLastModified->dateTime();
 
-	auto searcher = new FileSearcher(this);
-	searcher->setDirectory(location);
-	searcher->setWildcards(wildcards);
+	_searcher->setDirectory(location);
+	_searcher->setWildcards(wildcards);
 
 	if (_ui->radioButtonPlain->isChecked())
 	{
 		const Qt::CaseSensitivity options = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
-		searcher->setMatchFunction([=](QStringView haystack)
+		_searcher->setMatchFunction([=](QStringView haystack)
 		{
 			return haystack.contains(searchExpression, options);
 		});
@@ -204,42 +206,48 @@ void MainWindow::onSearch()
 
 		const QRegularExpression regex(searchExpression, options);
 
-		searcher->setMatchFunction([=](QStringView haystack)
+		_searcher->setMatchFunction([=](QStringView haystack)
 		{
 			return regex.match(haystack).hasMatch();
 		});
 	}
 
-	searcher->setFilterFunction([=](const QFileInfo& fileInfo)
+	_searcher->setFilterFunction([=](const QFileInfo& fileInfo)
 	{
+		bool sizeMatches = true;
+
 		switch (sizeOption)
 		{
 			case 1:
-				return fileInfo.size() < sizeValue;
+				sizeMatches = fileInfo.size() < sizeValue;
+				break;
 			case 2:
-				return fileInfo.size() > sizeValue;
+				sizeMatches = fileInfo.size() > sizeValue;
+				break;
 			case 3:
-				return fileInfo.size() == sizeValue;
+				sizeMatches = fileInfo.size() == sizeValue;
+				break;
 		}
+
+		bool lastModifiedMatches = true;
 
 		switch (modifiedOption)
 		{
 			case 1:
-				return fileInfo.lastModified() < modifiedValue;
+				lastModifiedMatches = fileInfo.lastModified() < modifiedValue;
+				break;
 			case 2:
-				return fileInfo.lastModified() > modifiedValue;
+				lastModifiedMatches = fileInfo.lastModified() > modifiedValue;
+				break;
 			case 3:
-				return fileInfo.lastModified() == modifiedValue;
+				lastModifiedMatches = fileInfo.lastModified() == modifiedValue;
+				break;
 		}
 
-		return true;
+		return sizeMatches && lastModifiedMatches;
 	});
 
-	connect(searcher, &FileSearcher::processing, this, &MainWindow::onProcessing);
-	connect(searcher, &FileSearcher::searchCompleted, this, &MainWindow::onCompleted);
-	connect(searcher, &FileSearcher::matchFound, _model, &SearchResultModel::addMatch);
-	connect(searcher, &FileSearcher::finished, searcher, &QObject::deleteLater);
-	searcher->start();
+	_searcher->start();
 }
 
 void MainWindow::createContextMenu(const QPoint& pos)
@@ -281,7 +289,7 @@ void MainWindow::createContextMenu(const QPoint& pos)
 
 void MainWindow::onProcessing(const QString& filePath, int filesProcessed)
 {
-	QString message = QString("%1 Processing: %2. Processed %3 files.")
+	const QString message = QString("%1 Processing: %2. Processed %3 files.")
 		.arg(QTime::currentTime().toString())
 		.arg(filePath)
 		.arg(filesProcessed);
@@ -293,7 +301,7 @@ void MainWindow::onCompleted(const QString& directory, int hits, int filesProces
 {
 	_ui->statusbar->clearMessage();
 
-	QString message = QString("%1 Finished searching: %2. Hits: %3. Files processed: %4.")
+	const QString message = QString("%1 Finished searching: %2. Hits: %3. Files processed: %4.")
 		.arg(QTime::currentTime().toString())
 		.arg(directory)
 		.arg(hits)

@@ -6,6 +6,7 @@ namespace Ui
 }
 
 class SearchResultModel;
+class FileSearcher;
 
 class MainWindow : public QMainWindow
 {
@@ -28,4 +29,5 @@ private:
 	QSettings _settings;
 	Ui::MainWindow* _ui;
 	SearchResultModel* _model;
+	FileSearcher* _searcher;
 };
