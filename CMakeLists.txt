@@ -11,8 +11,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
+find_package(QT NAMES Qt6 COMPONENTS Widgets REQUIRED)
+find_package(Qt6 COMPONENTS Widgets REQUIRED)
 
 if(MSVC)
 	file(GLOB grepQtSrc "*.cpp" "*.ui" "*.qrc" "*.rc")
@@ -22,4 +22,4 @@ endif()
 
 qt_add_executable("grepQt" ${grepQtSrc})
 target_precompile_headers("grepQt" PRIVATE "PCH.hpp")
-target_link_libraries("grepQt" PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries("grepQt" PRIVATE Qt6::Widgets)
