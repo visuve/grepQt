@@ -22,7 +22,7 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QLineEdit" name="lineEditLocation"/>
+        <widget class="QLineEdit" name="lineEditDirectory"/>
        </item>
        <item>
         <widget class="QToolButton" name="toolButtonBrowse">
@@ -334,7 +334,7 @@
   </action>
  </widget>
  <tabstops>
-  <tabstop>lineEditLocation</tabstop>
+  <tabstop>lineEditDirectory</tabstop>
   <tabstop>toolButtonBrowse</tabstop>
   <tabstop>lineEditSearch</tabstop>
   <tabstop>lineEditReplace</tabstop>

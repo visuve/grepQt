@@ -39,50 +39,9 @@ MainWindow::MainWindow(QWidget *parent) :
 		_ui->dateTimeEditLastModified->setEnabled(index != 0);
 	});
 
-	connect(_ui->lineEditLocation, &QLineEdit::textChanged, [this](const QString& text)
-	{
-		const QFileInfo info(text);
-		QPalette palette;
-
-		if (!info.isDir())
-		{
-			palette.setColor(text.isEmpty() ? QPalette::Window : QPalette::Text, Qt::red);
-			_ui->pushButtonSearch->setEnabled(false);
-			_ui->pushButtonReplace->setEnabled(false);
-		}
-		else
-		{
-			bool hasSearchCriteria = !_ui->lineEditSearch->text().isEmpty();
-			_ui->pushButtonSearch->setEnabled(hasSearchCriteria);
-			_ui->pushButtonReplace->setEnabled(hasSearchCriteria);
-		}
-
-		_ui->lineEditLocation->setPalette(palette);
-	});
-
-	connect(_ui->lineEditSearch, &QLineEdit::textChanged, [this](const QString& text)
-	{
-		QPalette palette;
-
-		if (text.isEmpty())
-		{
-			palette.setColor(QPalette::Window, Qt::red);
-			_ui->pushButtonSearch->setEnabled(false);
-			_ui->pushButtonReplace->setEnabled(false);
-		}
-		else
-		{
-			const QFileInfo info(text);
-			bool hasDir = info.isDir();
-			_ui->pushButtonSearch->setEnabled(hasDir);
-			_ui->pushButtonReplace->setEnabled(hasDir);
-		}
-
-		_ui->lineEditSearch->setPalette(palette);
-	});
-
+	connect(_ui->lineEditDirectory, &QLineEdit::textChanged, this, &MainWindow::onDirectoryChanged);
+	connect(_ui->lineEditSearch, &QLineEdit::textChanged, this, &MainWindow::onSearchExpressionChanged);
 	connect(_ui->toolButtonBrowse, &QToolButton::clicked, this, &MainWindow::onOpenDirectoryDialog);
-
 	connect(_ui->pushButtonSearch, &QPushButton::clicked, this, &MainWindow::onSearch);
 
 	auto proxyModel = new QSortFilterProxyModel(this);
@@ -111,17 +70,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	if (args.count() == 2)
 	{
-		_ui->lineEditLocation->setText(args[1]);
+		_ui->lineEditDirectory->setText(args[1]);
 	}
 	else
 	{
-		_ui->lineEditLocation->setText(_settings.value("path").value<QString>());
+		_ui->lineEditDirectory->setText(_settings.value("path").value<QString>());
 	}
 }
 
 MainWindow::~MainWindow()
 {
-	_settings.setValue("path", _ui->lineEditLocation->text());
+	_settings.setValue("path", _ui->lineEditDirectory->text());
 	_settings.setValue("search/word", _ui->lineEditSearch->text());
 	_settings.setValue("search/replace", _ui->lineEditReplace->text());
 
@@ -143,6 +102,48 @@ MainWindow::~MainWindow()
 	_settings.setValue("filter/time", _ui->dateTimeEditLastModified->dateTime());
 
 	delete _ui;
+}
+
+void MainWindow::onDirectoryChanged(const QString& text)
+{
+	QPalette palette;
+
+	bool isDir = QFileInfo(text).isDir();
+
+	if (!isDir)
+	{
+		palette.setColor(text.isEmpty() ? QPalette::Window : QPalette::Text, Qt::red);
+		_ui->pushButtonSearch->setEnabled(false);
+		_ui->pushButtonReplace->setEnabled(false);
+	}
+	else
+	{
+		bool hasSearchCriteria = !_ui->lineEditSearch->text().isEmpty();
+		_ui->pushButtonSearch->setEnabled(hasSearchCriteria);
+		_ui->pushButtonReplace->setEnabled(hasSearchCriteria);
+	}
+
+	_ui->lineEditDirectory->setPalette(palette);
+}
+
+void MainWindow::onSearchExpressionChanged(const QString& text)
+{
+	QPalette palette;
+
+	if (text.isEmpty())
+	{
+		palette.setColor(QPalette::Window, Qt::red);
+		_ui->pushButtonSearch->setEnabled(false);
+		_ui->pushButtonReplace->setEnabled(false);
+	}
+	else
+	{
+		bool isDir = QFileInfo(text).isDir();
+		_ui->pushButtonSearch->setEnabled(isDir);
+		_ui->pushButtonReplace->setEnabled(isDir);
+	}
+
+	_ui->lineEditSearch->setPalette(palette);
 }
 
 void MainWindow::onAbout()
@@ -167,7 +168,7 @@ void MainWindow::onOpenDirectoryDialog()
 	if (dialog.exec() == QFileDialog::Accepted)
 	{
 		const QString directory = dialog.selectedFiles().first();
-		_ui->lineEditLocation->setText(QDir::toNativeSeparators(directory));
+		_ui->lineEditDirectory->setText(QDir::toNativeSeparators(directory));
 	}
 }
 
@@ -176,7 +177,7 @@ void MainWindow::onSearch()
 	_searcher->requestInterruption();
 	_model->clear();
 
-	const QString location = _ui->lineEditLocation->text();
+	const QString directoryPath = _ui->lineEditDirectory->text();
 	const QStringList wildcards = _ui->lineEditWildcards->text().split('|');
 	const QString searchExpression = _ui->lineEditSearch->text();
 	const bool caseSensitive = _ui->checkBoxCaseSensitive->isChecked();
@@ -185,7 +186,7 @@ void MainWindow::onSearch()
 	const int modifiedOption = _ui->comboBoxLastModified->currentIndex();
 	const QDateTime modifiedValue = _ui->dateTimeEditLastModified->dateTime();
 
-	_searcher->setDirectory(location);
+	_searcher->setDirectory(directoryPath);
 	_searcher->setWildcards(wildcards);
 
 	if (_ui->radioButtonPlain->isChecked())
