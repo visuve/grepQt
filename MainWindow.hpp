@@ -18,7 +18,8 @@ public:
 
 private:
 	void onDirectoryChanged(const QString& text);
-	void onSearchExpressionChanged(const QString& text);
+	void onSearchExpressionChanged(const QString& searchExpression);
+	void onWildcardsChanged(const QString& text);
 
 	void onAbout();
 	void onOpenDirectoryDialog();

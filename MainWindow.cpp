@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(_ui->lineEditDirectory, &QLineEdit::textChanged, this, &MainWindow::onDirectoryChanged);
 	connect(_ui->lineEditSearch, &QLineEdit::textChanged, this, &MainWindow::onSearchExpressionChanged);
+	connect(_ui->lineEditWildcards, &QLineEdit::textChanged, this, &MainWindow::onWildcardsChanged);
 	connect(_ui->toolButtonBrowse, &QToolButton::clicked, this, &MainWindow::onOpenDirectoryDialog);
 	connect(_ui->pushButtonSearch, &QPushButton::clicked, this, &MainWindow::onSearch);
 
@@ -118,32 +119,58 @@ void MainWindow::onDirectoryChanged(const QString& text)
 	}
 	else
 	{
-		bool hasSearchCriteria = !_ui->lineEditSearch->text().isEmpty();
-		_ui->pushButtonSearch->setEnabled(hasSearchCriteria);
-		_ui->pushButtonReplace->setEnabled(hasSearchCriteria);
+		_ui->pushButtonSearch->setEnabled(true);
+		_ui->pushButtonReplace->setEnabled(true);
+		_searcher->setDirectory(text);
 	}
 
 	_ui->lineEditDirectory->setPalette(palette);
 }
 
-void MainWindow::onSearchExpressionChanged(const QString& text)
+void MainWindow::onSearchExpressionChanged(const QString& searchExpression)
 {
-	QPalette palette;
-
-	if (text.isEmpty())
+	if (searchExpression.isEmpty())
 	{
+		QPalette palette;
 		palette.setColor(QPalette::Window, Qt::red);
-		_ui->pushButtonSearch->setEnabled(false);
-		_ui->pushButtonReplace->setEnabled(false);
-	}
-	else
-	{
-		bool isDir = QFileInfo(text).isDir();
-		_ui->pushButtonSearch->setEnabled(isDir);
-		_ui->pushButtonReplace->setEnabled(isDir);
+		_ui->lineEditSearch->setPalette(palette);
 	}
 
-	_ui->lineEditSearch->setPalette(palette);
+	const bool caseSensitive = _ui->checkBoxCaseSensitive->isChecked();
+
+	if (_ui->radioButtonPlain->isChecked())
+	{
+		const Qt::CaseSensitivity options = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
+		_searcher->setMatchFunction([=](QStringView haystack)
+		{
+			return haystack.contains(searchExpression, options);
+		});
+
+		qDebug() << "Match function set:" << options << searchExpression << "plain";
+	}
+
+	if (_ui->radioButtonRegex->isChecked())
+	{
+		const QRegularExpression::PatternOptions options = !caseSensitive ?
+			QRegularExpression::DontCaptureOption | QRegularExpression::CaseInsensitiveOption :
+			QRegularExpression::DontCaptureOption;
+
+		const QRegularExpression regex(searchExpression, options);
+
+		_searcher->setMatchFunction([=](QStringView haystack)
+		{
+			return regex.match(haystack).hasMatch();
+		});
+
+		qDebug() << "Match function set:" << options << searchExpression << "regex";
+	}
+}
+
+void MainWindow::onWildcardsChanged(const QString& text)
+{
+	const QStringList wildcards = _ui->lineEditWildcards->text().split('|');
+	_searcher->setWildcards(wildcards);
 }
 
 void MainWindow::onAbout()
@@ -177,41 +204,10 @@ void MainWindow::onSearch()
 	_searcher->requestInterruption();
 	_model->clear();
 
-	const QString directoryPath = _ui->lineEditDirectory->text();
-	const QStringList wildcards = _ui->lineEditWildcards->text().split('|');
-	const QString searchExpression = _ui->lineEditSearch->text();
-	const bool caseSensitive = _ui->checkBoxCaseSensitive->isChecked();
 	const int sizeOption = _ui->comboBoxFileSize->currentIndex();
 	const int sizeValue = _ui->spinBoxFileSize->value() * 1024;
 	const int modifiedOption = _ui->comboBoxLastModified->currentIndex();
 	const QDateTime modifiedValue = _ui->dateTimeEditLastModified->dateTime();
-
-	_searcher->setDirectory(directoryPath);
-	_searcher->setWildcards(wildcards);
-
-	if (_ui->radioButtonPlain->isChecked())
-	{
-		const Qt::CaseSensitivity options = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
-
-		_searcher->setMatchFunction([=](QStringView haystack)
-		{
-			return haystack.contains(searchExpression, options);
-		});
-	}
-
-	if (_ui->radioButtonRegex->isChecked())
-	{
-		const QRegularExpression::PatternOptions options = !caseSensitive ?
-			QRegularExpression::DontCaptureOption | QRegularExpression::CaseInsensitiveOption :
-			QRegularExpression::DontCaptureOption;
-
-		const QRegularExpression regex(searchExpression, options);
-
-		_searcher->setMatchFunction([=](QStringView haystack)
-		{
-			return regex.match(haystack).hasMatch();
-		});
-	}
 
 	_searcher->setFilterFunction([=](const QFileInfo& fileInfo)
 	{
