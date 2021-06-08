@@ -58,10 +58,10 @@ void FileSearcher::run()
 		emit processing(path, ++filesProcessed);
 
 		for (int lineNumber = 1;
-			stream.getline(buffer.data(), BufferSize, '\n') &&
-			QThread::currentThread()->isInterruptionRequested() == false;
+			stream && !QThread::currentThread()->isInterruptionRequested();
 			++lineNumber)
 		{
+			stream.getline(buffer.data(), BufferSize, '\n');
 			const std::streamsize bytesRead = stream.gcount();
 
 			if (bytesRead <= 0)
