@@ -8,13 +8,8 @@
     <max-ctu-depth>10</max-ctu-depth>
     <max-template-recursion>100</max-template-recursion>
     <paths>
-        <dir name="."/>
+        <dir name="src"/>
     </paths>
-    <exclude>
-        <path name=".git/"/>
-        <path name=".vs/"/>
-        <path name="out/"/>
-    </exclude>
     <libraries>
         <library>qt</library>
     </libraries>
