@@ -15,5 +15,4 @@ jobs:
 
     - name: Static analysis
       run: |
-        mkdir out
         cppcheck --project=grepQt.cppcheck
