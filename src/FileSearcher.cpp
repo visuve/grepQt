@@ -1,7 +1,7 @@
 #include "PCH.hpp"
 #include "FileSearcher.hpp"
 
-constexpr size_t BufferSize = 0x1000; // 4kib
+constexpr qint64 BufferSize = 0x1000; // 4kib
 
 FileSearcher::FileSearcher(QObject* parent) :
 	QThread(parent)
@@ -36,48 +36,80 @@ void FileSearcher::setFilterFunction(std::function<bool (QFileInfo)> filterFunct
 	_filterFunction = filterFunction;
 }
 
+void FileSearcher::setReplaceFunction(std::function<void(QString&)> replaceFunction)
+{
+	_replaceFunction = replaceFunction;
+}
+
 void FileSearcher::run()
 {
-	std::array<wchar_t, BufferSize> buffer = {};
+	qDebug() << "Started";
+
+	std::array<char, BufferSize> buffer = {};
 	QDirIterator iter(_directory, _wildcards, QDir::Files, QDirIterator::Subdirectories);
 
 	int filesProcessed = 0;
 	int hits = 0;
+	qint64 currentPositionInStream = 0;
+	qint64 rewindedPositionInStream = 0;
 
-	while (iter.hasNext() && QThread::currentThread()->isInterruptionRequested() == false)
+	while (!QThread::currentThread()->isInterruptionRequested() && iter.hasNext())
 	{
 		const QString path = iter.next();
 
 		if (!_filterFunction(QFileInfo(path)))
 		{
+			qDebug() << "Filtered:" << path;
 			continue;
 		}
 
-		std::wifstream stream(path.toStdWString());
+		QFile file(path);
+
+		if (!file.open(QIODevice::ReadWrite | QIODevice::ExistingOnly))
+		{
+			qWarning() << "Could not open:" << path;
+			continue;
+		}
 
 		emit processing(path, ++filesProcessed);
 
 		for (int lineNumber = 1;
-			stream && !QThread::currentThread()->isInterruptionRequested();
-			++lineNumber)
+			!QThread::currentThread()->isInterruptionRequested() && !file.atEnd(); ++lineNumber)
 		{
-			stream.getline(buffer.data(), BufferSize, '\n');
-			const std::streamsize bytesRead = stream.gcount();
+			qint64 lineSize = file.readLine(buffer.data(), BufferSize);
+			QString line = QString::fromLocal8Bit(buffer.data(), lineSize);
 
-			if (bytesRead <= 0)
+			if (!_matchFunction(line))
 			{
-				break;
+				continue;
 			}
 
-			const QStringView line(buffer.data(), bytesRead);
-
-			if (_matchFunction(line))
+			if (_replaceFunction)
 			{
-				++hits;
-				emit matchFound({ QDir::toNativeSeparators(path), lineNumber, line.toString() });
+				currentPositionInStream = file.pos();
+				rewindedPositionInStream = currentPositionInStream - lineSize;
+
+				if (!file.seek(rewindedPositionInStream))
+				{
+					qWarning() << "Failed to seek " << path <<
+						"from" << currentPositionInStream << "to" << rewindedPositionInStream;
+					break;
+				}
+
+				// TODO: shorter strings will fail
+
+				_replaceFunction(line);
+				QTextStream stream(&file);
+				stream << line;
+				stream.flush();
 			}
+
+			++hits;
+			emit matchFound({ QDir::toNativeSeparators(path), lineNumber, line });
 		}
 	}
 
 	emit searchCompleted(_directory, hits, filesProcessed);
+
+	qDebug() << "Finished";
 }

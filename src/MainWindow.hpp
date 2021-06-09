@@ -17,15 +17,18 @@ public:
 	~MainWindow();
 
 private:
-	void onDirectoryChanged(const QString& text);
+	void onDirectoryChanged(const QString& directory);
+	void onSearchExpressionChanged(const QString& searchExpression, bool isCaseSensitive);
 	void onSearchExpressionChanged(const QString& searchExpression);
-	void onWildcardsChanged(const QString& text);	
+	void onReplacementChanged(const QString& replacement);
+	void onWildcardsChanged(const QString& text);
+	void onCaseSensitivityChanged(bool caseSensitive);
 	void onFileSizeOptionChanged(int index);
 	void onFileTimeOptionChanged(int index);
 
 	void onAbout();
 	void onOpenDirectoryDialog();
-	void onSearch();
+	void onSearch(bool replace);
 	void onProcessing(const QString& filePath, int filesProcessed);
 	void onCompleted(const QString& directoryPath, int hits, int filesProcessed);
 	void createContextMenu(const QPoint& point);
