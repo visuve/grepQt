@@ -11,4 +11,7 @@ else()
 	add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
 
+set(EXECUTABLE_OUTPUT_PATH "..")
+set(LIBRARY_OUTPUT_PATH "..")
+
 add_subdirectory("src")
