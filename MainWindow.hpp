@@ -19,7 +19,9 @@ public:
 private:
 	void onDirectoryChanged(const QString& text);
 	void onSearchExpressionChanged(const QString& searchExpression);
-	void onWildcardsChanged(const QString& text);
+	void onWildcardsChanged(const QString& text);	
+	void onFileSizeOptionChanged(int index);
+	void onFileTimeOptionChanged(int index);
 
 	void onAbout();
 	void onOpenDirectoryDialog();
@@ -29,6 +31,9 @@ private:
 	void createContextMenu(const QPoint& point);
 	void openFileWithDefaultAssociation(const QString& filePath);
 	void openParentDirectory(const QString& filePath);
+
+	void loadSettings();
+	void saveSettings();
 
 	QSettings _settings;
 	Ui::MainWindow* _ui;

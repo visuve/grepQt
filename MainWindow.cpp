@@ -29,15 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
 		QMessageBox::aboutQt(this, "grepQt");
 	});
 
-	connect(_ui->comboBoxFileSize, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index)
-	{
-		_ui->spinBoxFileSize->setEnabled(index != 0);
-	});
-
-	connect(_ui->comboBoxLastModified, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index)
-	{
-		_ui->dateTimeEditLastModified->setEnabled(index != 0);
-	});
+	connect(_ui->comboBoxFileSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileSizeOptionChanged);
+	connect(_ui->comboBoxLastModified, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileTimeOptionChanged);
 
 	connect(_ui->lineEditDirectory, &QLineEdit::textChanged, this, &MainWindow::onDirectoryChanged);
 	connect(_ui->lineEditSearch, &QLineEdit::textChanged, this, &MainWindow::onSearchExpressionChanged);
@@ -50,58 +43,16 @@ MainWindow::MainWindow(QWidget *parent) :
 	_ui->tableViewResults->setModel(proxyModel);
 
 	connect(_ui->tableViewResults, &QTableView::customContextMenuRequested, this, &MainWindow::createContextMenu);
-
-	_ui->lineEditSearch->setText(_settings.value("search/word").value<QString>());
-	_ui->lineEditReplace->setText(_settings.value("search/replace").value<QString>());
-	_ui->radioButtonPlain->setChecked(_settings.value("search/mode").value<QString>() == "plain");
-	_ui->radioButtonRegex->setChecked(_settings.value("search/mode").value<QString>() == "regex");
-	_ui->checkBoxCaseSensitive->setChecked(_settings.value("search/casesensitive").value<bool>());
-
-	_ui->lineEditWildcards->setText(_settings.value("filter/wildcards").value<QString>());
-	_ui->comboBoxFileSize->setCurrentIndex(_settings.value("filter/size_opt").value<int>());
-	_ui->spinBoxFileSize->setValue(_settings.value("filter/size").value<int>());
-	_ui->comboBoxLastModified->setCurrentIndex(_settings.value("filter/time_opt").value<int>());
-	_ui->dateTimeEditLastModified->setDateTime(_settings.value("filter/time").value<QDateTime>());
-
 	connect(_searcher, &FileSearcher::processing, this, &MainWindow::onProcessing);
 	connect(_searcher, &FileSearcher::searchCompleted, this, &MainWindow::onCompleted);
 	connect(_searcher, &FileSearcher::matchFound, _model, &SearchResultModel::addMatch);
 
-	const QStringList args = QCoreApplication::arguments();
-
-	if (args.count() == 2)
-	{
-		_ui->lineEditDirectory->setText(args[1]);
-	}
-	else
-	{
-		_ui->lineEditDirectory->setText(_settings.value("path").value<QString>());
-	}
+	loadSettings();
 }
 
 MainWindow::~MainWindow()
 {
-	_settings.setValue("path", _ui->lineEditDirectory->text());
-	_settings.setValue("search/word", _ui->lineEditSearch->text());
-	_settings.setValue("search/replace", _ui->lineEditReplace->text());
-
-	if (_ui->radioButtonPlain->isChecked())
-	{
-		_settings.setValue("search/mode", "plain");
-	}
-
-	if (_ui->radioButtonRegex->isChecked())
-	{
-		_settings.setValue("search/mode", "regex");
-	}
-
-	_settings.setValue("search/casesensitive", _ui->checkBoxCaseSensitive->isChecked());
-	_settings.setValue("filter/wildcards", _ui->lineEditWildcards->text());
-	_settings.setValue("filter/size_opt", _ui->comboBoxFileSize->currentIndex());
-	_settings.setValue("filter/size", _ui->spinBoxFileSize->value());
-	_settings.setValue("filter/time_opt", _ui->comboBoxLastModified->currentIndex());
-	_settings.setValue("filter/time", _ui->dateTimeEditLastModified->dateTime());
-
+	saveSettings();
 	delete _ui;
 }
 
@@ -169,8 +120,18 @@ void MainWindow::onSearchExpressionChanged(const QString& searchExpression)
 
 void MainWindow::onWildcardsChanged(const QString& text)
 {
-	const QStringList wildcards = _ui->lineEditWildcards->text().split('|');
+	const QStringList wildcards = text.split('|');
 	_searcher->setWildcards(wildcards);
+}
+
+void MainWindow::onFileSizeOptionChanged(int index)
+{
+	_ui->spinBoxFileSize->setEnabled(index > 0);
+}
+
+void MainWindow::onFileTimeOptionChanged(int index)
+{
+	_ui->dateTimeEditLastModified->setEnabled(index > 0);
 }
 
 void MainWindow::onAbout()
@@ -326,4 +287,54 @@ void MainWindow::openParentDirectory(const QString& filePath)
 	{
 		QMessageBox::warning(this, "Failed to open", "Failed to open directory:\n\n" + filePath + "\n");
 	}
+}
+
+void MainWindow::loadSettings()
+{
+	_ui->lineEditSearch->setText(_settings.value("search/word").value<QString>());
+	_ui->lineEditReplace->setText(_settings.value("search/replace").value<QString>());
+	_ui->radioButtonPlain->setChecked(_settings.value("search/mode").value<QString>() == "plain");
+	_ui->radioButtonRegex->setChecked(_settings.value("search/mode").value<QString>() == "regex");
+	_ui->checkBoxCaseSensitive->setChecked(_settings.value("search/casesensitive").value<bool>());
+
+	_ui->lineEditWildcards->setText(_settings.value("filter/wildcards").value<QString>());
+	_ui->comboBoxFileSize->setCurrentIndex(_settings.value("filter/size_opt").value<int>());
+	_ui->spinBoxFileSize->setValue(_settings.value("filter/size").value<int>());
+	_ui->comboBoxLastModified->setCurrentIndex(_settings.value("filter/time_opt").value<int>());
+	_ui->dateTimeEditLastModified->setDateTime(_settings.value("filter/time").value<QDateTime>());
+
+	const QStringList args = QCoreApplication::arguments();
+
+	if (args.count() == 2)
+	{
+		_ui->lineEditDirectory->setText(args[1]);
+	}
+	else
+	{
+		_ui->lineEditDirectory->setText(_settings.value("path").value<QString>());
+	}
+}
+
+void MainWindow::saveSettings()
+{
+	_settings.setValue("path", _ui->lineEditDirectory->text());
+	_settings.setValue("search/word", _ui->lineEditSearch->text());
+	_settings.setValue("search/replace", _ui->lineEditReplace->text());
+
+	if (_ui->radioButtonPlain->isChecked())
+	{
+		_settings.setValue("search/mode", "plain");
+	}
+
+	if (_ui->radioButtonRegex->isChecked())
+	{
+		_settings.setValue("search/mode", "regex");
+	}
+
+	_settings.setValue("search/casesensitive", _ui->checkBoxCaseSensitive->isChecked());
+	_settings.setValue("filter/wildcards", _ui->lineEditWildcards->text());
+	_settings.setValue("filter/size_opt", _ui->comboBoxFileSize->currentIndex());
+	_settings.setValue("filter/size", _ui->spinBoxFileSize->value());
+	_settings.setValue("filter/time_opt", _ui->comboBoxLastModified->currentIndex());
+	_settings.setValue("filter/time", _ui->dateTimeEditLastModified->dateTime());
 }
