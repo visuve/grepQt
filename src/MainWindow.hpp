@@ -35,8 +35,8 @@ private:
 	void loadSettings();
 	void saveSettings();
 
-	QSettings _settings;
 	Ui::MainWindow* _ui;
+	QSettings* _settings;
 	SearchResultModel* _model;
 	FileSearcher* _searcher;
 };
