@@ -31,7 +31,7 @@ QVariant SearchResultModel::headerData(int section, Qt::Orientation orientation,
 
 int SearchResultModel::rowCount(const QModelIndex&) const
 {
-	return _matches.size();
+	return _results.size();
 }
 
 int SearchResultModel::columnCount(const QModelIndex&) const
@@ -55,34 +55,35 @@ QVariant SearchResultModel::data(const QModelIndex& index, int role) const
 		switch (col)
 		{
 			case 0:
-				return _matches[row].filePath;
+				return _results[row].filePath;
 			case 1:
-				return _matches[row].lineNumber;
+				return _results[row].lineNumber;
 			case 2:
-				return _matches[row].lineContent;
+				return _results[row].lineContent;
 		}
 	}
 
 	if (role == Qt::WhatsThisRole)
 	{
-		return _matches[row].filePath;
+		return _results[row].filePath;
 	}
 
 	return QVariant();
 }
 
-void SearchResultModel::addMatch(const FileSearcher::Match& match)
+void SearchResultModel::addResult(const QString& filePath, int lineNumber, const QString& lineContent)
 {
-	qDebug() << match.toString();
+	const Result result = {filePath, lineNumber, lineContent};
+	qDebug() << result.toString();
 
 	beginInsertRows(QModelIndex(), 0, 0);
-	_matches.emplaceBack(match);
+	_results.emplaceBack(result);
 	endInsertRows();
 }
 
 void SearchResultModel::clear()
 {
 	beginResetModel();
-	_matches.clear();
+	_results.clear();
 	endResetModel();
 }

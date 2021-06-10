@@ -61,7 +61,7 @@ void FileSearcher::run()
 			}
 
 			++hits;
-			emit matchFound({ QDir::toNativeSeparators(path), lineNumber, line });
+			emit matchFound(path, lineNumber, line);
 		}
 	}
 

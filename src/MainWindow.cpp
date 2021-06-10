@@ -54,8 +54,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(_ui->tableViewResults, &QTableView::customContextMenuRequested, this, &MainWindow::createContextMenu);
 	connect(_searcher, &FileSearcher::processing, this, &MainWindow::onProcessing);
-	connect(_searcher, &FileSearcher::searchCompleted, this, &MainWindow::onCompleted);
-	connect(_searcher, &FileSearcher::matchFound, _model, &SearchResultModel::addMatch);
+	connect(_searcher, &FileSearcher::searchCompleted, this, &MainWindow::onSearchCompleted);
+	connect(_searcher, &FileSearcher::matchFound, _model, &SearchResultModel::addResult);
+
+	connect(_replacer, &FileReplacer::processing, this, &MainWindow::onProcessing);
+	connect(_replacer, &FileReplacer::replaceCompleted, this, &MainWindow::onReplaceCompleted);
+	connect(_replacer, &FileReplacer::lineReplaced, _model, &SearchResultModel::addResult);
 
 	loadSettings();
 }
@@ -263,14 +267,27 @@ void MainWindow::onProcessing(const QString& filePath, int filesProcessed)
 	_ui->statusbar->showMessage(message);
 }
 
-void MainWindow::onCompleted(const QString& directory, int hits, int filesProcessed)
+void MainWindow::onSearchCompleted(const QString& directoryPath, int hits, int filesProcessed)
 {
 	_ui->statusbar->clearMessage();
 
 	const QString message = QString("%1 Finished searching: %2. Hits: %3. Files processed: %4.")
 		.arg(QTime::currentTime().toString())
-		.arg(directory)
+		.arg(directoryPath)
 		.arg(hits)
+		.arg(filesProcessed);
+
+	_ui->statusbar->showMessage(message);
+}
+
+
+void MainWindow::onReplaceCompleted(const QString& directoryPath, int filesProcessed)
+{
+	_ui->statusbar->clearMessage();
+
+	const QString message = QString("%1 Finished replacing: %2. Files processed: %3.")
+		.arg(QTime::currentTime().toString())
+		.arg(directoryPath)
 		.arg(filesProcessed);
 
 	_ui->statusbar->showMessage(message);

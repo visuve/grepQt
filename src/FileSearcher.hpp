@@ -7,24 +7,12 @@ class FileSearcher : public QThread
 	Q_OBJECT
 
 public:
-	struct Match
-	{
-		QString filePath;
-		int lineNumber;
-		QString lineContent;
-
-		inline QString toString() const
-		{
-			return QString("%1:%2:%3").arg(filePath).arg(lineNumber).arg(lineContent);
-		}
-	};
-
 	FileSearcher(Options* options, QObject* parent);
 	~FileSearcher();
 
 signals:
 	void processing(const QString& filePath, int filesProcessed);
-	void matchFound(const Match& match);
+	void matchFound(const QString& filePath, int lineNumber, const QString& lineContent);
 	void searchCompleted(const QString& directory, int hits, int filesProcessed);
 
 private:

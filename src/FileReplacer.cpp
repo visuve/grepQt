@@ -56,17 +56,21 @@ void FileReplacer::run()
 
 		emit processing(path, ++filesProcessed);
 
-		while (!QThread::currentThread()->isInterruptionRequested() && !inputFile.atEnd())
+		for (int lineNumber = 1;
+			!QThread::currentThread()->isInterruptionRequested() && !inputFile.atEnd(); ++lineNumber)
 		{
 			const qint64 lineSize = inputFile.readLine(buffer.data(), buffer.size());
 			QString line = QString::fromLocal8Bit(buffer.data(), lineSize);
 			replaceFunction(line);
 			outputFile.write(line.toLocal8Bit());
+			emit lineReplaced(path, lineNumber, line);
 		}
 
 		inputFile.close();
 		outputFile.commit();
 	}
+
+	emit replaceCompleted(_options->path(), filesProcessed);
 
 	qDebug() << "Finished";
 }

@@ -7,6 +7,18 @@ class SearchResultModel : public QAbstractTableModel
 	Q_OBJECT
 
 public:
+	struct Result
+	{
+		QString filePath;
+		int lineNumber;
+		QString lineContent;
+
+		inline QString toString() const
+		{
+			return QString("%1:%2:%3").arg(filePath).arg(lineNumber).arg(lineContent);
+		}
+	};
+
 	explicit SearchResultModel(QObject *parent = nullptr);
 
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -14,10 +26,10 @@ public:
 	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
-	void addMatch(const FileSearcher::Match& match);
+	void addResult(const QString& filePath, int lineNumber, const QString& lineContent);
 	void clear();
 
 private:
-	QList<FileSearcher::Match> _matches;
+	QList<Result> _results;
 };
 

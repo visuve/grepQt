@@ -36,7 +36,8 @@ private:
 	void onSearch();
 	void onReplace();
 	void onProcessing(const QString& filePath, int filesProcessed);
-	void onCompleted(const QString& directoryPath, int hits, int filesProcessed);
+	void onSearchCompleted(const QString& directoryPath, int hits, int filesProcessed);
+	void onReplaceCompleted(const QString& directoryPath, int filesProcessed);
 	void createContextMenu(const QPoint& point);
 	void openFileWithDefaultAssociation(const QString& filePath);
 	void openParentDirectory(const QString& filePath);

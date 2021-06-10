@@ -12,8 +12,8 @@ public:
 
 signals:
 	void processing(const QString& filePath, int filesProcessed);
-	void fileUpdated(const QString& filePath);
-	void replacementCompleted(const QString& directory, int hits, int filesProcessed);
+	void lineReplaced(const QString& filePath, int lineNumber, const QString& lineContent);
+	void replaceCompleted(const QString& directory, int filesProcessed);
 
 private:
 	void run() override;
