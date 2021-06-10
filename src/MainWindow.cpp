@@ -17,8 +17,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	_ui->setupUi(this);
 
-	loadSettings();
-
 	_ui->actionOpen->setIcon(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon));
 	connect(_ui->actionOpen, &QAction::triggered, this, &MainWindow::onOpenDirectoryDialog);
 
@@ -35,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	});
 
 	connect(_ui->lineEditDirectory, &QLineEdit::textChanged, this, &MainWindow::onDirectoryChanged);
-	connect(_ui->lineEditSearch, &QLineEdit::textChanged, this, QOverload<const QString&>::of(&MainWindow::onSearchExpressionChanged));
+	connect(_ui->lineEditSearch, &QLineEdit::textChanged, this, &MainWindow::onSearchExpressionChanged);
 	connect(_ui->lineEditReplace, &QLineEdit::textChanged, this, &MainWindow::onReplacementChanged);
 	connect(_ui->lineEditWildcards, &QLineEdit::textChanged, this, &MainWindow::onWildcardsChanged);
 	connect(_ui->radioButtonPlain, &QRadioButton::clicked, this, &MainWindow::onPlainToggled);
@@ -58,6 +56,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(_searcher, &FileSearcher::processing, this, &MainWindow::onProcessing);
 	connect(_searcher, &FileSearcher::searchCompleted, this, &MainWindow::onCompleted);
 	connect(_searcher, &FileSearcher::matchFound, _model, &SearchResultModel::addMatch);
+
+	loadSettings();
 }
 
 MainWindow::~MainWindow()
@@ -93,12 +93,27 @@ void MainWindow::onSearchExpressionChanged(const QString& value)
 {
 	qDebug() << value;
 	_options->setSearchExpression(value);
+
+	QPalette palette;
+
+	if (value.isEmpty())
+	{
+		palette.setColor(QPalette::Window, Qt::red);
+		_ui->pushButtonSearch->setEnabled(false);
+		_ui->pushButtonReplace->setEnabled(false);
+	}
+	else
+	{
+		_ui->pushButtonSearch->setEnabled(true);
+		_ui->pushButtonReplace->setEnabled(true);
+	}
 }
 
 void MainWindow::onReplacementChanged(const QString& value)
 {
 	qDebug() << value;
 	_options->setReplacementText(value);
+	_ui->pushButtonReplace->setEnabled(!value.isEmpty());
 }
 
 void MainWindow::onWildcardsChanged(const QString& value)
@@ -143,7 +158,7 @@ void MainWindow::onFileSizeOptionChanged(int index)
 void MainWindow::onFileSizeValueChanged(int value)
 {
 	qDebug() << value;
-	_options->setSizeFilterValue(value);
+	_options->setSizeFilterValue(value * 1024);
 }
 
 void MainWindow::onFileTimeOptionChanged(int index)
@@ -187,12 +202,18 @@ void MainWindow::onOpenDirectoryDialog()
 
 void MainWindow::onSearch()
 {
-	qDebug() << "TODO!";
+	_searcher->requestInterruption();
+	_model->clear();
+	_searcher->wait();
+	_searcher->start();
 }
 
 void MainWindow::onReplace()
 {
-	qDebug() << "TODO!";
+	_replacer->requestInterruption();
+	_model->clear();
+	_replacer->wait();
+	_replacer->start();
 }
 
 void MainWindow::createContextMenu(const QPoint& pos)
@@ -293,7 +314,7 @@ void MainWindow::loadSettings()
 
 	_ui->lineEditWildcards->setText(_options->wildcards().join('|'));
 	_ui->comboBoxFileSize->setCurrentIndex(static_cast<int>(_options->sizeFilterOption()));
-	_ui->spinBoxFileSize->setValue(_options->sizeFilterValue());
+	_ui->spinBoxFileSize->setValue(_options->sizeFilterValue() / 1024);
 	_ui->comboBoxLastModified->setCurrentIndex(static_cast<int>(_options->timeFilterOption()));
 	_ui->dateTimeEditLastModified->setDateTime(_options->timeFilterValue());
 }
