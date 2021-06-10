@@ -73,7 +73,7 @@ QVariant SearchResultModel::data(const QModelIndex& index, int role) const
 
 void SearchResultModel::addResult(const QString& filePath, int lineNumber, const QString& lineContent)
 {
-	const Result result = {filePath, lineNumber, lineContent};
+	const Result result(filePath, lineNumber, lineContent);
 	qDebug() << result.toString();
 
 	beginInsertRows(QModelIndex(), 0, 0);

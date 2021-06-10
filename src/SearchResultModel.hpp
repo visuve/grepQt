@@ -13,6 +13,14 @@ public:
 		int lineNumber;
 		QString lineContent;
 
+		inline Result(const QString& path, int line, const QString& content) :
+			filePath(QDir::toNativeSeparators(path)),
+			lineNumber(line),
+			lineContent(content)
+		{
+
+		}
+
 		inline QString toString() const
 		{
 			return QString("%1:%2:%3").arg(filePath).arg(lineNumber).arg(lineContent);
