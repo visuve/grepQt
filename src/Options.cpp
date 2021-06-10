@@ -10,6 +10,7 @@ namespace Keys
 	const QString SearchMode = "search/mode";
 
 	const QString Wildcards = "filter/wildcards";
+	const QString Excludes = "filter/excludes";
 	const QString SizeOption = "filter/size_option";
 	const QString SizeValue = "filter/size_value";
 	const QString TimeOption = "filter/time_option";
@@ -26,6 +27,7 @@ Options::Options(QObject* parent) :
 	_isCaseSensitive = value(Keys::CaseSensitive, false).value<bool>();
 	_searchMode = value(Keys::SearchMode, SearchMode::Plain).value<SearchMode>();
 	_wildcards = value(Keys::Wildcards, "*.*").value<QString>().split('|');
+	_excludes = value(Keys::Excludes, ".git").value<QString>().split('|');
 	_sizeFilterOption = value(Keys::SizeOption, 0).value<ComparisonOption>();
 	_sizeFilterValue = value(Keys::SizeValue, 4).value<qint64>();
 	_timeFilterOption = value(Keys::TimeOption, 0).value<ComparisonOption>();
@@ -40,6 +42,7 @@ Options::~Options()
 	setValue(Keys::CaseSensitive, _isCaseSensitive);
 	setValue(Keys::SearchMode, _searchMode);
 	setValue(Keys::Wildcards, _wildcards.join('|'));
+	setValue(Keys::Excludes, _excludes.join('|'));
 	setValue(Keys::SizeOption, _sizeFilterOption);
 	setValue(Keys::SizeValue, _sizeFilterValue);
 	setValue(Keys::TimeOption, _timeFilterOption);
@@ -139,6 +142,22 @@ void Options::setWildcards(const QStringList& value)
 		qDebug() << _wildcards << "->" << value;
 		_wildcards = value;
 		setValue(Keys::Wildcards, value.join('|'));
+	}
+}
+
+const QStringList& Options::excludes() const
+{
+	qDebug() << _excludes;
+	return _excludes;
+}
+
+void Options::setExcludes(const QStringList& value)
+{
+	if (_excludes != value)
+	{
+		qDebug() << _excludes << "->" << value;
+		_excludes = value;
+		setValue(Keys::Excludes, value.join('|'));
 	}
 }
 

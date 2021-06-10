@@ -23,6 +23,7 @@ private:
 	void onSearchExpressionChanged(const QString&);
 	void onReplacementChanged(const QString&);
 	void onWildcardsChanged(const QString&);
+	void onExcludesChanged(const QString&);
 	void onPlainToggled(bool);
 	void onRegexToggled(bool);
 	void onCaseSensitivityChanged(bool);

@@ -42,6 +42,9 @@ public:
 	const QStringList& wildcards() const;
 	void setWildcards(const QStringList& value);
 
+	const QStringList& excludes() const;
+	void setExcludes(const QStringList& value);
+
 	ComparisonOption sizeFilterOption() const;
 	void setSizeFilterOption(ComparisonOption value);
 
@@ -64,6 +67,7 @@ private:
 	QString _searchExpression;
 	QString _replacementText;
 	QStringList _wildcards;
+	QStringList _excludes;
 	bool _isCaseSensitive;
 	SearchMode _searchMode;
 	ComparisonOption _sizeFilterOption;

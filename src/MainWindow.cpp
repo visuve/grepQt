@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(_ui->lineEditSearch, &QLineEdit::textChanged, this, &MainWindow::onSearchExpressionChanged);
 	connect(_ui->lineEditReplace, &QLineEdit::textChanged, this, &MainWindow::onReplacementChanged);
 	connect(_ui->lineEditWildcards, &QLineEdit::textChanged, this, &MainWindow::onWildcardsChanged);
+	connect(_ui->lineEditExcludes, &QLineEdit::textChanged, this, &MainWindow::onExcludesChanged);
 	connect(_ui->radioButtonPlain, &QRadioButton::clicked, this, &MainWindow::onPlainToggled);
 	connect(_ui->radioButtonRegex, &QRadioButton::clicked, this, &MainWindow::onRegexToggled);
 	connect(_ui->checkBoxCaseSensitive, &QCheckBox::clicked, this, &MainWindow::onCaseSensitivityChanged);
@@ -124,6 +125,12 @@ void MainWindow::onWildcardsChanged(const QString& value)
 {
 	qDebug() << value;
 	_options->setWildcards(value.split('|'));
+}
+
+void MainWindow::onExcludesChanged(const QString& value)
+{
+	qDebug() << value;
+	_options->setExcludes(value.split('|'));
 }
 
 void MainWindow::onPlainToggled(bool value)
@@ -330,6 +337,7 @@ void MainWindow::loadSettings()
 	_ui->checkBoxCaseSensitive->setChecked(_options->isCaseSensitive());
 
 	_ui->lineEditWildcards->setText(_options->wildcards().join('|'));
+	_ui->lineEditExcludes->setText(_options->excludes().join('|'));
 	_ui->comboBoxFileSize->setCurrentIndex(static_cast<int>(_options->sizeFilterOption()));
 	_ui->spinBoxFileSize->setValue(_options->sizeFilterValue() / 1024);
 	_ui->comboBoxLastModified->setCurrentIndex(static_cast<int>(_options->timeFilterOption()));

@@ -93,31 +93,14 @@
        <string>Search limit</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="2" column="1">
-        <widget class="QComboBox" name="comboBoxLastModified">
-         <item>
-          <property name="text">
-           <string>Irrelevant</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Before</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>After</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>At</string>
-          </property>
-         </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="labelLastModified">
+         <property name="text">
+          <string>File last modified</string>
+         </property>
         </widget>
        </item>
-       <item row="1" column="2">
+       <item row="2" column="2">
         <widget class="QSpinBox" name="spinBoxFileSize">
          <property name="enabled">
           <bool>false</bool>
@@ -133,14 +116,21 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="labelFileSize">
-         <property name="text">
-          <string>File size</string>
+       <item row="3" column="2">
+        <widget class="QDateTimeEdit" name="dateTimeEditLastModified">
+         <property name="enabled">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
+       <item row="1" column="0">
+        <widget class="QLabel" name="labelExcludes">
+         <property name="text">
+          <string>Exlude dirs (pipe separated)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
         <widget class="QComboBox" name="comboBoxFileSize">
          <item>
           <property name="text">
@@ -164,18 +154,35 @@
          </item>
         </widget>
        </item>
-       <item row="2" column="2">
-        <widget class="QDateTimeEdit" name="dateTimeEditLastModified">
-         <property name="enabled">
-          <bool>false</bool>
+       <item row="2" column="0">
+        <widget class="QLabel" name="labelFileSize">
+         <property name="text">
+          <string>File size</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="labelLastModified">
-         <property name="text">
-          <string>File last modified</string>
-         </property>
+       <item row="3" column="1">
+        <widget class="QComboBox" name="comboBoxLastModified">
+         <item>
+          <property name="text">
+           <string>Irrelevant</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Before</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>After</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>At</string>
+          </property>
+         </item>
         </widget>
        </item>
        <item row="0" column="1" colspan="2">
@@ -186,11 +193,14 @@
         </widget>
        </item>
        <item row="0" column="0">
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="labelWildcards">
          <property name="text">
           <string>File name wildcards (pipe separated)</string>
          </property>
         </widget>
+       </item>
+       <item row="1" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEditExcludes"/>
        </item>
       </layout>
      </widget>
