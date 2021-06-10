@@ -27,19 +27,28 @@ Options::Options(QObject* parent) :
 	_searchMode = value(Keys::SearchMode, SearchMode::Plain).value<SearchMode>();
 	_wildcards = value(Keys::Wildcards, "*.*").value<QString>().split('|');
 	_sizeFilterOption = value(Keys::SizeOption, 0).value<ComparisonOption>();
-	_sizeFilterValue = value(Keys::SizeValue, 4).value<int>();
+	_sizeFilterValue = value(Keys::SizeValue, 4).value<qint64>();
 	_timeFilterOption = value(Keys::TimeOption, 0).value<ComparisonOption>();
-	_timeFilterValue = QDateTime().addSecs(value(Keys::TimeValue, 1623342562).value<int>());
+	_timeFilterValue = QDateTime::fromSecsSinceEpoch(value(Keys::TimeValue, 1623342562).value<qint64>());
 }
 
 Options::~Options()
 {
-	qDebug();
+	setValue(Keys::Path, _path);
+	setValue(Keys::SearchExpression, _searchExpression);
+	setValue(Keys::ReplacementText, _replacementText );
+	setValue(Keys::CaseSensitive, _isCaseSensitive);
+	setValue(Keys::SearchMode, _searchMode);
+	setValue(Keys::Wildcards, _wildcards.join('|'));
+	setValue(Keys::SizeOption, _sizeFilterOption);
+	setValue(Keys::SizeValue, _sizeFilterValue);
+	setValue(Keys::TimeOption, _timeFilterOption);
+	setValue(Keys::TimeValue, _timeFilterValue.toSecsSinceEpoch());
 }
 
 const QString& Options::path() const
 {
-	qDebug();
+	qDebug() << _path;
 	return _path;
 }
 
@@ -55,7 +64,7 @@ void Options::setPath(const QString& value)
 
 const QString& Options::searchExpression() const
 {
-	qDebug();
+	qDebug() << _searchExpression;
 	return _searchExpression;
 }
 
@@ -71,7 +80,7 @@ void Options::setSearchExpression(const QString& value)
 
 const QString& Options::replacementText() const
 {
-	qDebug();
+	qDebug() << _replacementText;
 	return _replacementText;
 }
 
@@ -87,7 +96,7 @@ void Options::setReplacementText(const QString& value)
 
 bool Options::isCaseSensitive() const
 {
-	qDebug();
+	qDebug() << _isCaseSensitive;
 	return _isCaseSensitive;
 }
 
@@ -103,7 +112,7 @@ void Options::setCaseSensitive(bool value)
 
 Options::SearchMode Options::searchMode() const
 {
-	qDebug();
+	qDebug() << _searchMode;
 	return _searchMode;
 }
 
@@ -119,7 +128,7 @@ void Options::setSearchMode(SearchMode value)
 
 const QStringList& Options::wildcards() const
 {
-	qDebug();
+	qDebug() << _wildcards;
 	return _wildcards;
 }
 
@@ -133,9 +142,9 @@ void Options::setWildcards(const QStringList& value)
 	}
 }
 
-Options::ComparisonOption Options::sizeFilterOptions() const
+Options::ComparisonOption Options::sizeFilterOption() const
 {
-	qDebug();
+	qDebug() << _sizeFilterOption;
 	return _sizeFilterOption;
 }
 
@@ -149,13 +158,13 @@ void Options::setSizeFilterOption(ComparisonOption value)
 	}
 }
 
-int Options::sizeFilterValue() const
+qint64 Options::sizeFilterValue() const
 {
-	qDebug();
+	qDebug() << _sizeFilterValue;
 	return _sizeFilterValue;
 }
 
-void Options::setSizeFilterValue(int value)
+void Options::setSizeFilterValue(qint64 value)
 {
 	if (_sizeFilterValue != value)
 	{
@@ -167,7 +176,7 @@ void Options::setSizeFilterValue(int value)
 
 Options::ComparisonOption Options::timeFilterOption() const
 {
-	qDebug();
+	qDebug() << _timeFilterOption;
 	return _timeFilterOption;
 }
 
@@ -181,9 +190,9 @@ void Options::setTimeFilterOption(ComparisonOption value)
 	}
 }
 
-const QDateTime& Options::timeFilterValue()
+const QDateTime& Options::timeFilterValue() const
 {
-	qDebug();
+	qDebug() << _timeFilterValue;
 	return _timeFilterValue;
 }
 
@@ -193,6 +202,114 @@ void Options::setTimeFilterValue(const QDateTime& value)
 	{
 		qDebug() << _timeFilterValue << "->" << value;
 		_timeFilterValue = value;
-		setValue(Keys::TimeValue, value.currentSecsSinceEpoch());
+		setValue(Keys::TimeValue, value.toSecsSinceEpoch());
 	}
+}
+
+std::function<bool (const QFileInfo&)> Options::createFilterFunction() const
+{
+	return [=](const QFileInfo& fileInfo)
+	{
+		bool sizeMatches = false;
+
+		switch (_sizeFilterOption)
+		{
+			case Options::ComparisonOption::Irrelevant:
+				sizeMatches = true;
+				break;
+			case Options::ComparisonOption::Lesser:
+				sizeMatches = fileInfo.size() < _sizeFilterValue;
+				break;
+			case Options::ComparisonOption::Greater:
+				sizeMatches = fileInfo.size() > _sizeFilterValue;
+				break;
+			case Options::ComparisonOption::Equals:
+				sizeMatches = fileInfo.size() == _sizeFilterValue;
+				break;
+		}
+
+		bool lastModifiedMatches = false;
+
+		switch (_timeFilterOption)
+		{
+			case Options::ComparisonOption::Irrelevant:
+				lastModifiedMatches = true;
+				break;
+			case Options::ComparisonOption::Lesser:
+				sizeMatches = fileInfo.lastModified() < _timeFilterValue;
+				break;
+			case Options::ComparisonOption::Greater:
+				sizeMatches = fileInfo.lastModified() > _timeFilterValue;
+				break;
+			case Options::ComparisonOption::Equals:
+				sizeMatches = fileInfo.lastModified() == _timeFilterValue;
+				break;
+		}
+
+		return sizeMatches && lastModifiedMatches;
+	};
+}
+
+std::function<bool(QStringView)> Options::createMatchFunction() const
+{
+	switch (_searchMode)
+	{
+		case Options::SearchMode::Plain:
+		{
+			const Qt::CaseSensitivity caseSensitivity = _isCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
+			return [=](QStringView haystack)->bool
+			{
+				return haystack.contains(_searchExpression, caseSensitivity);
+			};
+		}
+		case Options::SearchMode::Regex:
+		{
+			const QRegularExpression::PatternOptions options = !_isCaseSensitive ?
+				QRegularExpression::DontCaptureOption | QRegularExpression::CaseInsensitiveOption :
+				QRegularExpression::DontCaptureOption;
+
+			const QRegularExpression regex(_searchExpression, options);
+			regex.optimize();
+
+			return [=](QStringView haystack)->bool
+			{
+				return haystack.contains(regex);
+			};
+		}
+	}
+
+	return nullptr;
+}
+
+std::function<void (QString&)> Options::createReplaceFunction() const
+{
+	switch (_searchMode)
+	{
+		case Options::SearchMode::Plain:
+		{
+			const Qt::CaseSensitivity caseSensitivity = _isCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
+			return [=](QString& line)
+			{
+				line.replace(_searchExpression, _replacementText, caseSensitivity);
+			};
+		}
+		case Options::SearchMode::Regex:
+		{
+			const QRegularExpression::PatternOptions options = !_isCaseSensitive ?
+					QRegularExpression::CaseInsensitiveOption :
+					QRegularExpression::NoPatternOption;
+
+			const QRegularExpression regex(_searchExpression, options);
+			regex.optimize();
+
+			return [=](QString& line)
+			{
+				line.replace(regex, _replacementText);
+			};
+		}
+	}
+
+	return nullptr;
 }

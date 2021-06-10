@@ -1,5 +1,7 @@
 #pragma once
 
+class Options;
+
 class FileSearcher : public QThread
 {
 	Q_OBJECT
@@ -17,7 +19,7 @@ public:
 		}
 	};
 
-	FileSearcher(QObject* parent);
+	FileSearcher(Options* options, QObject* parent);
 	~FileSearcher();
 
 signals:
@@ -27,9 +29,5 @@ signals:
 
 private:
 	void run() override;
-
-	QString _directory;
-	QStringList _wildcards;
-	std::function<bool(QFileInfo)> _filterFunction;
-	std::function<bool(QStringView)> _matchFunction;
+	const Options* _options;
 };

@@ -12,7 +12,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	_ui(new Ui::MainWindow()),
 	_options(new Options(this)),
 	_model(new SearchResultModel(this)),
-	_searcher(new FileSearcher(this))
+	_searcher(new FileSearcher(_options, this)),
+	_replacer(new FileReplacer(_options, this))
 {
 	_ui->setupUi(this);
 
@@ -33,14 +34,18 @@ MainWindow::MainWindow(QWidget *parent) :
 		QMessageBox::aboutQt(this, "grepQt");
 	});
 
-	connect(_ui->comboBoxFileSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileSizeOptionChanged);
-	connect(_ui->comboBoxLastModified, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileTimeOptionChanged);
-
 	connect(_ui->lineEditDirectory, &QLineEdit::textChanged, this, &MainWindow::onDirectoryChanged);
 	connect(_ui->lineEditSearch, &QLineEdit::textChanged, this, QOverload<const QString&>::of(&MainWindow::onSearchExpressionChanged));
 	connect(_ui->lineEditReplace, &QLineEdit::textChanged, this, &MainWindow::onReplacementChanged);
 	connect(_ui->lineEditWildcards, &QLineEdit::textChanged, this, &MainWindow::onWildcardsChanged);
+	connect(_ui->radioButtonPlain, &QRadioButton::clicked, this, &MainWindow::onPlainToggled);
+	connect(_ui->radioButtonRegex, &QRadioButton::clicked, this, &MainWindow::onRegexToggled);
 	connect(_ui->checkBoxCaseSensitive, &QCheckBox::clicked, this, &MainWindow::onCaseSensitivityChanged);
+	connect(_ui->comboBoxFileSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileSizeOptionChanged);
+	connect(_ui->spinBoxFileSize, &QSpinBox::valueChanged, this, &MainWindow::onFileSizeValueChanged);
+	connect(_ui->comboBoxLastModified, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileTimeOptionChanged);
+	connect(_ui->dateTimeEditLastModified, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::onFileTimeValueChanged);
+
 	connect(_ui->toolButtonBrowse, &QToolButton::clicked, this, &MainWindow::onOpenDirectoryDialog);
 	connect(_ui->pushButtonSearch, &QPushButton::clicked, this, &MainWindow::onSearch);
 	connect(_ui->pushButtonReplace, &QPushButton::clicked, this, &MainWindow::onReplace);
@@ -62,6 +67,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::onDirectoryChanged(const QString& value)
 {
+	qDebug() << value;
+
 	QPalette palette;
 
 	const bool exists = QFileInfo(value).isDir();
@@ -76,40 +83,80 @@ void MainWindow::onDirectoryChanged(const QString& value)
 	{
 		_ui->pushButtonSearch->setEnabled(true);
 		_ui->pushButtonReplace->setEnabled(true);
-		_options->setPath(value);
 	}
 
 	_ui->lineEditDirectory->setPalette(palette);
+	_options->setPath(value);
 }
 
 void MainWindow::onSearchExpressionChanged(const QString& value)
 {
+	qDebug() << value;
 	_options->setSearchExpression(value);
 }
 
 void MainWindow::onReplacementChanged(const QString& value)
 {
+	qDebug() << value;
 	_options->setReplacementText(value);
 }
 
 void MainWindow::onWildcardsChanged(const QString& value)
 {
-	_options->setWildcards(value);
+	qDebug() << value;
+	_options->setWildcards(value.split('|'));
+}
+
+void MainWindow::onPlainToggled(bool value)
+{
+	qDebug() << value;
+
+	if (value)
+	{
+		_options->setSearchMode(Options::SearchMode::Plain);
+	}
+}
+
+void MainWindow::onRegexToggled(bool value)
+{
+	qDebug() << value;
+
+	if (value)
+	{
+		_options->setSearchMode(Options::SearchMode::Regex);
+	}
 }
 
 void MainWindow::onCaseSensitivityChanged(bool value)
 {
+	qDebug() << value;
 	_options->setCaseSensitive(value);
 }
 
 void MainWindow::onFileSizeOptionChanged(int index)
 {
+	qDebug() << index;
 	_ui->spinBoxFileSize->setEnabled(index > 0);
+	_options->setSizeFilterOption(static_cast<Options::ComparisonOption>(index));
+}
+
+void MainWindow::onFileSizeValueChanged(int value)
+{
+	qDebug() << value;
+	_options->setSizeFilterValue(value);
 }
 
 void MainWindow::onFileTimeOptionChanged(int index)
 {
+	qDebug() << index;
 	_ui->dateTimeEditLastModified->setEnabled(index > 0);
+	_options->setTimeFilterOption(static_cast<Options::ComparisonOption>(index));
+}
+
+void MainWindow::onFileTimeValueChanged(const QDateTime& value)
+{
+	qDebug() << value;
+	_options->setTimeFilterValue(value);
 }
 
 void MainWindow::onAbout()
@@ -234,17 +281,18 @@ void MainWindow::loadSettings()
 
 	if (args.count() == 2)
 	{
-		_options->setSearchExpression(args[1]);
+		_options->setPath(args[1]);
 	}
 
+	_ui->lineEditDirectory->setText(_options->path());
 	_ui->lineEditSearch->setText(_options->searchExpression());
 	_ui->lineEditReplace->setText(_options->replacementText());
 	_ui->radioButtonPlain->setChecked(_options->searchMode() == Options::SearchMode::Plain);
 	_ui->radioButtonRegex->setChecked(_options->searchMode() == Options::SearchMode::Regex);
 	_ui->checkBoxCaseSensitive->setChecked(_options->isCaseSensitive());
 
-	_ui->lineEditWildcards->setText(_options->wildcards());
-	_ui->comboBoxFileSize->setCurrentIndex(static_cast<int>(_options->sizeFilterOptions()));
+	_ui->lineEditWildcards->setText(_options->wildcards().join('|'));
+	_ui->comboBoxFileSize->setCurrentIndex(static_cast<int>(_options->sizeFilterOption()));
 	_ui->spinBoxFileSize->setValue(_options->sizeFilterValue());
 	_ui->comboBoxLastModified->setCurrentIndex(static_cast<int>(_options->timeFilterOption()));
 	_ui->dateTimeEditLastModified->setDateTime(_options->timeFilterValue());

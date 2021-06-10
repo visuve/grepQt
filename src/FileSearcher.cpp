@@ -1,8 +1,10 @@
 #include "PCH.hpp"
 #include "FileSearcher.hpp"
+#include "Options.hpp"
 
-FileSearcher::FileSearcher(QObject* parent) :
-	QThread(parent)
+FileSearcher::FileSearcher(Options* options, QObject* parent) :
+	QThread(parent),
+	_options(options)
 {
 }
 
@@ -18,8 +20,11 @@ void FileSearcher::run()
 {
 	qDebug() << "Started";
 
+	auto filterFunction = _options->createFilterFunction();
+	auto matchFunction = _options->createMatchFunction();
+
 	std::array<char, 0x1000> buffer;
-	QDirIterator iter(_directory, _wildcards, QDir::Files, QDirIterator::Subdirectories);
+	QDirIterator iter(_options->path(), _options->wildcards(), QDir::Files, QDirIterator::Subdirectories);
 
 	int filesProcessed = 0;
 	int hits = 0;
@@ -28,7 +33,7 @@ void FileSearcher::run()
 	{
 		const QString path = iter.next();
 
-		if (!_filterFunction(QFileInfo(path)))
+		if (!filterFunction(QFileInfo(path)))
 		{
 			qDebug() << "Filtered:" << path;
 			continue;
@@ -50,7 +55,7 @@ void FileSearcher::run()
 			qint64 lineSize = file.readLine(buffer.data(), buffer.size());
 			QString line = QString::fromLocal8Bit(buffer.data(), lineSize);
 
-			if (!_matchFunction(line))
+			if (!matchFunction(line))
 			{
 				continue;
 			}
@@ -60,7 +65,7 @@ void FileSearcher::run()
 		}
 	}
 
-	emit searchCompleted(_directory, hits, filesProcessed);
+	emit searchCompleted(_options->path(), hits, filesProcessed);
 
 	qDebug() << "Finished";
 }

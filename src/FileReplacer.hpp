@@ -1,11 +1,13 @@
 #pragma once
 
+class Options;
+
 class FileReplacer: public QThread
 {
 	Q_OBJECT
 
 public:
-	FileReplacer(QObject* parent);
+	FileReplacer(Options* options, QObject* parent);
 	~FileReplacer();
 
 signals:
@@ -15,9 +17,5 @@ signals:
 
 private:
 	void run() override;
-
-	QString _directory;
-	QStringList _wildcards;
-	std::function<bool(QFileInfo)> _filterFunction;
-	std::function<void(QString&)> _replaceFunction;
+	const Options* _options;
 };

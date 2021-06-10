@@ -7,17 +7,17 @@ class Options : public QSettings
 {
 	Q_OBJECT
 public:
-	enum SearchMode : char
+	enum SearchMode : int
 	{
-		Plain = 'p',
-		Regex = 'r'
+		Plain = 0,
+		Regex = 1
 	};
 
 	enum ComparisonOption : int
 	{
 		Irrelevant = 0,
-		SmallerThan = 1,
-		LargerThan = 2,
+		Lesser = 1,
+		Greater = 2,
 		Equals = 3
 	};
 
@@ -42,17 +42,22 @@ public:
 	const QStringList& wildcards() const;
 	void setWildcards(const QStringList& value);
 
-	ComparisonOption sizeFilterOptions() const;
+	ComparisonOption sizeFilterOption() const;
 	void setSizeFilterOption(ComparisonOption value);
 
-	int sizeFilterValue() const;
-	void setSizeFilterValue(int value);
+	qint64 sizeFilterValue() const;
+	void setSizeFilterValue(qint64 value);
 
 	ComparisonOption timeFilterOption() const;
 	void setTimeFilterOption(ComparisonOption value);
 
-	const QDateTime& timeFilterValue();
+	const QDateTime& timeFilterValue() const;
 	void setTimeFilterValue(const QDateTime& value);
+
+
+	std::function<bool(const QFileInfo&)> createFilterFunction() const;
+	std::function<bool(QStringView)> createMatchFunction() const;
+	std::function<void(QString&)> createReplaceFunction() const;
 
 private:
 	QString _path;
@@ -62,7 +67,7 @@ private:
 	bool _isCaseSensitive;
 	SearchMode _searchMode;
 	ComparisonOption _sizeFilterOption;
-	int _sizeFilterValue;
+	qint64 _sizeFilterValue;
 	ComparisonOption _timeFilterOption;
 	QDateTime _timeFilterValue;
 };

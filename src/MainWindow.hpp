@@ -23,9 +23,13 @@ private:
 	void onSearchExpressionChanged(const QString&);
 	void onReplacementChanged(const QString&);
 	void onWildcardsChanged(const QString&);
+	void onPlainToggled(bool);
+	void onRegexToggled(bool);
 	void onCaseSensitivityChanged(bool);
 	void onFileSizeOptionChanged(int);
+	void onFileSizeValueChanged(int);
 	void onFileTimeOptionChanged(int);
+	void onFileTimeValueChanged(const QDateTime&);
 
 	void onAbout();
 	void onOpenDirectoryDialog();

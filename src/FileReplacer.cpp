@@ -1,7 +1,9 @@
 #include "PCH.hpp"
 #include "FileReplacer.hpp"
+#include "Options.hpp"
 
-FileReplacer::FileReplacer(QObject* parent) :
+FileReplacer::FileReplacer(Options* options, QObject* parent) :
+	_options(options),
 	QThread(parent)
 {
 }
@@ -18,8 +20,11 @@ void FileReplacer::run()
 {
 	qDebug() << "Started";
 
+	auto filterFunction = _options->createFilterFunction();
+	auto replaceFunction = _options->createReplaceFunction();
+
 	std::array<char, 0x1000> buffer;
-	QDirIterator iter(_directory, _wildcards, QDir::Files, QDirIterator::Subdirectories);
+	QDirIterator iter(_options->path(), _options->wildcards(), QDir::Files, QDirIterator::Subdirectories);
 
 	int filesProcessed = 0;
 
@@ -27,7 +32,7 @@ void FileReplacer::run()
 	{
 		const QString path = iter.next();
 
-		if (!_filterFunction(QFileInfo(path)))
+		if (!filterFunction(QFileInfo(path)))
 		{
 			qDebug() << "Filtered:" << path;
 			continue;
@@ -49,7 +54,7 @@ void FileReplacer::run()
 		{
 			const qint64 lineSize = inputFile.readLine(buffer.data(), buffer.size());
 			QString line = QString::fromLocal8Bit(buffer.data(), lineSize);
-			_replaceFunction(line);
+			replaceFunction(line);
 			outputFile.write(line.toLocal8Bit());
 		}
 
