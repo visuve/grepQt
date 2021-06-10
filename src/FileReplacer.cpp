@@ -3,8 +3,8 @@
 #include "Options.hpp"
 
 FileReplacer::FileReplacer(Options* options, QObject* parent) :
-	_options(options),
-	QThread(parent)
+	QThread(parent),
+	_options(options)
 {
 }
 
@@ -47,6 +47,12 @@ void FileReplacer::run()
 		}
 
 		QSaveFile outputFile(path);
+
+		if (!outputFile.open(QIODevice::WriteOnly))
+		{
+			qWarning() << "Could not open temporary file";
+			continue;
+		}
 
 		emit processing(path, ++filesProcessed);
 
