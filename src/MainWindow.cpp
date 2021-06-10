@@ -2,6 +2,7 @@
 #include "./ui_MainWindow.h"
 
 #include "MainWindow.hpp"
+#include "Options.hpp"
 #include "SearchResultModel.hpp"
 #include "FileSearcher.hpp"
 #include "FileReplacer.hpp"
@@ -9,11 +10,13 @@
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	_ui(new Ui::MainWindow()),
-	_settings(new QSettings(QSettings::IniFormat, QSettings::UserScope, "visuve", "grepQt", this)),
+	_options(new Options(this)),
 	_model(new SearchResultModel(this)),
 	_searcher(new FileSearcher(this))
 {
 	_ui->setupUi(this);
+
+	loadSettings();
 
 	_ui->actionOpen->setIcon(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon));
 	connect(_ui->actionOpen, &QAction::triggered, this, &MainWindow::onOpenDirectoryDialog);
@@ -50,25 +53,22 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(_searcher, &FileSearcher::processing, this, &MainWindow::onProcessing);
 	connect(_searcher, &FileSearcher::searchCompleted, this, &MainWindow::onCompleted);
 	connect(_searcher, &FileSearcher::matchFound, _model, &SearchResultModel::addMatch);
-
-	loadSettings();
 }
 
 MainWindow::~MainWindow()
 {
-	saveSettings();
 	delete _ui;
 }
 
-void MainWindow::onDirectoryChanged(const QString& directory)
+void MainWindow::onDirectoryChanged(const QString& value)
 {
 	QPalette palette;
 
-	const bool exists = QFileInfo(directory).isDir();
+	const bool exists = QFileInfo(value).isDir();
 
 	if (!exists)
 	{
-		palette.setColor(directory.isEmpty() ? QPalette::Window : QPalette::Text, Qt::red);
+		palette.setColor(value.isEmpty() ? QPalette::Window : QPalette::Text, Qt::red);
 		_ui->pushButtonSearch->setEnabled(false);
 		_ui->pushButtonReplace->setEnabled(false);
 	}
@@ -76,101 +76,30 @@ void MainWindow::onDirectoryChanged(const QString& directory)
 	{
 		_ui->pushButtonSearch->setEnabled(true);
 		_ui->pushButtonReplace->setEnabled(true);
-		_searcher->setDirectory(directory);
+		_options->setPath(value);
 	}
 
 	_ui->lineEditDirectory->setPalette(palette);
 }
 
-void MainWindow::onSearchExpressionChanged(const QString& searchExpression, bool isCaseSensitive)
+void MainWindow::onSearchExpressionChanged(const QString& value)
 {
-	if (searchExpression.isEmpty())
-	{
-		QPalette palette;
-		palette.setColor(QPalette::Window, Qt::red);
-		_ui->lineEditSearch->setPalette(palette);
-	}
-
-	if (_ui->radioButtonPlain->isChecked())
-	{
-		const Qt::CaseSensitivity caseSensitivity = isCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
-
-		_searcher->setMatchFunction([=](QStringView haystack)
-		{
-			return haystack.contains(searchExpression, caseSensitivity);
-		});
-
-		qDebug() << "Match function set:" << caseSensitivity << searchExpression << "plain";
-	}
-
-	if (_ui->radioButtonRegex->isChecked())
-	{
-		const QRegularExpression::PatternOptions options = !isCaseSensitive ?
-			QRegularExpression::DontCaptureOption | QRegularExpression::CaseInsensitiveOption :
-			QRegularExpression::DontCaptureOption;
-
-		const QRegularExpression regex(searchExpression, options);
-		regex.optimize();
-
-		_searcher->setMatchFunction([=](QStringView haystack)
-		{
-			return regex.match(haystack).hasMatch();
-		});
-
-		qDebug() << "Match function set:" << options << searchExpression << "regex";
-	}
+	_options->setSearchExpression(value);
 }
 
-void MainWindow::onSearchExpressionChanged(const QString& searchExpression)
+void MainWindow::onReplacementChanged(const QString& value)
 {
-	onSearchExpressionChanged(searchExpression, _ui->checkBoxCaseSensitive->isChecked());
+	_options->setReplacementText(value);
 }
 
-void MainWindow::onReplacementChanged(const QString& replacement)
+void MainWindow::onWildcardsChanged(const QString& value)
 {
-	if (replacement.isEmpty())
-	{
-		return;
-	}
-
-	const bool isCaseSensitive = _ui->checkBoxCaseSensitive->isChecked();
-	const QString searchExpression = _ui->lineEditSearch->text();
-
-	if (_ui->radioButtonPlain->isChecked())
-	{
-		const Qt::CaseSensitivity caseSensitivity = isCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
-
-		_replacer->setReplaceFunction([=](QString& line)
-		{
-			line.replace(searchExpression, replacement, caseSensitivity);
-		});
-	}
-
-	if (_ui->radioButtonRegex->isChecked())
-	{
-		const QRegularExpression::PatternOptions options = !isCaseSensitive ?
-			QRegularExpression::CaseInsensitiveOption :
-			QRegularExpression::NoPatternOption;
-
-		const QRegularExpression regex(searchExpression, options);
-		regex.optimize();
-
-		_replacer->setReplaceFunction([=](QString& line)
-		{
-			line.replace(regex, replacement);
-		});
-	}
+	_options->setWildcards(value);
 }
 
-void MainWindow::onWildcardsChanged(const QString& text)
+void MainWindow::onCaseSensitivityChanged(bool value)
 {
-	const QStringList wildcards = text.split('|');
-	_searcher->setWildcards(wildcards);
-}
-
-void MainWindow::onCaseSensitivityChanged(bool checked)
-{
-	onSearchExpressionChanged(_ui->lineEditSearch->text(), checked);
+	_options->setCaseSensitive(value);
 }
 
 void MainWindow::onFileSizeOptionChanged(int index)
@@ -211,50 +140,7 @@ void MainWindow::onOpenDirectoryDialog()
 
 void MainWindow::onSearch()
 {
-	// _searcher->requestInterruption();
-	_model->clear();
-
-	const int sizeOption = _ui->comboBoxFileSize->currentIndex();
-	const int sizeValue = _ui->spinBoxFileSize->value() * 1024;
-	const int modifiedOption = _ui->comboBoxLastModified->currentIndex();
-	const QDateTime modifiedValue = _ui->dateTimeEditLastModified->dateTime();
-
-	_searcher->setFilterFunction([=](const QFileInfo& fileInfo)
-	{
-		bool sizeMatches = true;
-
-		switch (sizeOption)
-		{
-			case 1:
-				sizeMatches = fileInfo.size() < sizeValue;
-				break;
-			case 2:
-				sizeMatches = fileInfo.size() > sizeValue;
-				break;
-			case 3:
-				sizeMatches = fileInfo.size() == sizeValue;
-				break;
-		}
-
-		bool lastModifiedMatches = true;
-
-		switch (modifiedOption)
-		{
-			case 1:
-				lastModifiedMatches = fileInfo.lastModified() < modifiedValue;
-				break;
-			case 2:
-				lastModifiedMatches = fileInfo.lastModified() > modifiedValue;
-				break;
-			case 3:
-				lastModifiedMatches = fileInfo.lastModified() == modifiedValue;
-				break;
-		}
-
-		return sizeMatches && lastModifiedMatches;
-	});
-
-	_searcher->start();
+	qDebug() << "TODO!";
 }
 
 void MainWindow::onReplace()
@@ -342,53 +228,24 @@ void MainWindow::openParentDirectory(const QString& filePath)
 		QMessageBox::warning(this, "Failed to open", "Failed to open directory:\n\n" + filePath + "\n");
 	}
 }
-
 void MainWindow::loadSettings()
 {
-	_ui->checkBoxCaseSensitive->setChecked(_settings->value("search/casesensitive").value<bool>());
-	_ui->lineEditSearch->setText(_settings->value("search/word").value<QString>());
-	_ui->lineEditReplace->setText(_settings->value("search/replace").value<QString>());
-	_ui->radioButtonPlain->setChecked(_settings->value("search/mode").value<QString>() == "plain");
-	_ui->radioButtonRegex->setChecked(_settings->value("search/mode").value<QString>() == "regex");
-
-	_ui->lineEditWildcards->setText(_settings->value("filter/wildcards").value<QString>());
-	_ui->comboBoxFileSize->setCurrentIndex(_settings->value("filter/size_opt").value<int>());
-	_ui->spinBoxFileSize->setValue(_settings->value("filter/size").value<int>());
-	_ui->comboBoxLastModified->setCurrentIndex(_settings->value("filter/time_opt").value<int>());
-	_ui->dateTimeEditLastModified->setDateTime(_settings->value("filter/time").value<QDateTime>());
-
 	const QStringList args = QCoreApplication::arguments();
 
 	if (args.count() == 2)
 	{
-		_ui->lineEditDirectory->setText(args[1]);
-	}
-	else
-	{
-		_ui->lineEditDirectory->setText(_settings->value("path").value<QString>());
-	}
-}
-
-void MainWindow::saveSettings()
-{
-	_settings->setValue("path", _ui->lineEditDirectory->text());
-	_settings->setValue("search/word", _ui->lineEditSearch->text());
-	_settings->setValue("search/replace", _ui->lineEditReplace->text());
-
-	if (_ui->radioButtonPlain->isChecked())
-	{
-		_settings->setValue("search/mode", "plain");
+		_options->setSearchExpression(args[1]);
 	}
 
-	if (_ui->radioButtonRegex->isChecked())
-	{
-		_settings->setValue("search/mode", "regex");
-	}
+	_ui->lineEditSearch->setText(_options->searchExpression());
+	_ui->lineEditReplace->setText(_options->replacementText());
+	_ui->radioButtonPlain->setChecked(_options->searchMode() == Options::SearchMode::Plain);
+	_ui->radioButtonRegex->setChecked(_options->searchMode() == Options::SearchMode::Regex);
+	_ui->checkBoxCaseSensitive->setChecked(_options->isCaseSensitive());
 
-	_settings->setValue("search/casesensitive", _ui->checkBoxCaseSensitive->isChecked());
-	_settings->setValue("filter/wildcards", _ui->lineEditWildcards->text());
-	_settings->setValue("filter/size_opt", _ui->comboBoxFileSize->currentIndex());
-	_settings->setValue("filter/size", _ui->spinBoxFileSize->value());
-	_settings->setValue("filter/time_opt", _ui->comboBoxLastModified->currentIndex());
-	_settings->setValue("filter/time", _ui->dateTimeEditLastModified->dateTime());
+	_ui->lineEditWildcards->setText(_options->wildcards());
+	_ui->comboBoxFileSize->setCurrentIndex(static_cast<int>(_options->sizeFilterOptions()));
+	_ui->spinBoxFileSize->setValue(_options->sizeFilterValue());
+	_ui->comboBoxLastModified->setCurrentIndex(static_cast<int>(_options->timeFilterOption()));
+	_ui->dateTimeEditLastModified->setDateTime(_options->timeFilterValue());
 }

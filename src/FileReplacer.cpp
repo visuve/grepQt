@@ -14,26 +14,6 @@ FileReplacer::~FileReplacer()
 	qDebug() << "Destroyed.";
 }
 
-void FileReplacer::setDirectory(const QString& directory)
-{
-	_directory = directory;
-}
-
-void FileReplacer::setWildcards(const QStringList& wildcards)
-{
-	_wildcards = wildcards;
-}
-
-void FileReplacer::setFilterFunction(std::function<bool(QFileInfo)> filterFunction)
-{
-	_filterFunction = filterFunction;
-}
-
-void FileReplacer::setReplaceFunction(std::function<void(QString&)> replaceFunction)
-{
-	_replaceFunction = replaceFunction;
-}
-
 void FileReplacer::run()
 {
 	qDebug() << "Started";

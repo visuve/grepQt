@@ -20,11 +20,6 @@ public:
 	FileSearcher(QObject* parent);
 	~FileSearcher();
 
-	void setDirectory(const QString& directory);
-	void setWildcards(const QStringList& wildcards);
-
-	void setFilterFunction(std::function<bool(QFileInfo)> filterFunction);
-	void setMatchFunction(std::function<bool(QStringView)> matchFunction);
 signals:
 	void processing(const QString& filePath, int filesProcessed);
 	void matchFound(const Match& match);

@@ -8,11 +8,6 @@ public:
 	FileReplacer(QObject* parent);
 	~FileReplacer();
 
-	void setDirectory(const QString& directory);
-	void setWildcards(const QStringList& wildcards);
-
-	void setFilterFunction(std::function<bool(QFileInfo)> filterFunction);
-	void setReplaceFunction(std::function<void(QString&)> replaceFunction);
 signals:
 	void processing(const QString& filePath, int filesProcessed);
 	void fileUpdated(const QString& filePath);

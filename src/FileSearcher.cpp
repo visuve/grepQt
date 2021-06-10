@@ -14,26 +14,6 @@ FileSearcher::~FileSearcher()
 	qDebug() << "Destroyed.";
 }
 
-void FileSearcher::setDirectory(const QString& directory)
-{
-	_directory = directory;
-}
-
-void FileSearcher::setWildcards(const QStringList& wildcards)
-{
-	_wildcards = wildcards;
-}
-
-void FileSearcher::setMatchFunction(std::function<bool (QStringView)> matchFunction)
-{
-	_matchFunction = matchFunction;
-}
-
-void FileSearcher::setFilterFunction(std::function<bool (QFileInfo)> filterFunction)
-{
-	_filterFunction = filterFunction;
-}
-
 void FileSearcher::run()
 {
 	qDebug() << "Started";
