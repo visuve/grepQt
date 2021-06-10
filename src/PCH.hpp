@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QDesktopServices>
+#include <QFile>
 #include <QFileInfo>
 #include <QFileDialog>
 #include <QDir>
@@ -13,6 +14,7 @@
 #include <QMessageBox>
 #include <QObject>
 #include <QRegularExpression>
+#include <QSaveFile>
 #include <QSettings>
 #include <QSortFilterProxyModel>
 #include <QStringView>

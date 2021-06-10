@@ -1,8 +1,6 @@
 #include "PCH.hpp"
 #include "FileSearcher.hpp"
 
-constexpr qint64 BufferSize = 0x1000; // 4kib
-
 FileSearcher::FileSearcher(QObject* parent) :
 	QThread(parent)
 {
@@ -40,7 +38,7 @@ void FileSearcher::run()
 {
 	qDebug() << "Started";
 
-	std::array<char, BufferSize> buffer = {};
+	std::array<char, 0x1000> buffer;
 	QDirIterator iter(_directory, _wildcards, QDir::Files, QDirIterator::Subdirectories);
 
 	int filesProcessed = 0;
@@ -58,7 +56,7 @@ void FileSearcher::run()
 
 		QFile file(path);
 
-		if (!file.open(QIODevice::ReadWrite | QIODevice::ExistingOnly))
+		if (!file.open(QIODevice::ReadOnly))
 		{
 			qWarning() << "Could not open:" << path;
 			continue;
@@ -69,7 +67,7 @@ void FileSearcher::run()
 		for (int lineNumber = 1;
 			!QThread::currentThread()->isInterruptionRequested() && !file.atEnd(); ++lineNumber)
 		{
-			qint64 lineSize = file.readLine(buffer.data(), BufferSize);
+			qint64 lineSize = file.readLine(buffer.data(), buffer.size());
 			QString line = QString::fromLocal8Bit(buffer.data(), lineSize);
 
 			if (!_matchFunction(line))
