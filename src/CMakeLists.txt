@@ -7,9 +7,9 @@ find_package(QT NAMES Qt6 COMPONENTS Widgets REQUIRED)
 find_package(Qt6 COMPONENTS Widgets REQUIRED)
 
 if(MSVC)
-	file(GLOB grepQtSrc "*.cpp" "*.ui" "../res/*.qrc" "../res/*.rc")
+	file(GLOB grepQtSrc "*.cpp" "*.hpp" "*.ui" "../res/*.qrc" "../res/*.rc")
 else()
-	file(GLOB grepQtSrc "*.cpp" "*.ui" "../res/*.qrc")
+	file(GLOB grepQtSrc "*.cpp" "*.hpp" "*.ui" "../res/*.qrc")
 endif()
 
 qt_add_executable("grepQt" ${grepQtSrc})
