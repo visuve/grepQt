@@ -2,7 +2,7 @@
 
 #include "FileSearcher.hpp"
 
-class SearchResultModel : public QAbstractTableModel
+class ResultModel : public QAbstractTableModel
 {
 	Q_OBJECT
 
@@ -27,7 +27,7 @@ public:
 		}
 	};
 
-	explicit SearchResultModel(QObject *parent = nullptr);
+	explicit ResultModel(QObject *parent = nullptr);
 
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override;

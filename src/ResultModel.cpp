@@ -1,12 +1,12 @@
 #include "PCH.hpp"
-#include "SearchResultModel.hpp"
+#include "ResultModel.hpp"
 
-SearchResultModel::SearchResultModel(QObject *parent) :
+ResultModel::ResultModel(QObject *parent) :
 	QAbstractTableModel(parent)
 {
 }
 
-QVariant SearchResultModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ResultModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (role != Qt::DisplayRole)
 	{
@@ -29,17 +29,17 @@ QVariant SearchResultModel::headerData(int section, Qt::Orientation orientation,
 	return QVariant();
 }
 
-int SearchResultModel::rowCount(const QModelIndex&) const
+int ResultModel::rowCount(const QModelIndex&) const
 {
 	return _results.size();
 }
 
-int SearchResultModel::columnCount(const QModelIndex&) const
+int ResultModel::columnCount(const QModelIndex&) const
 {
 	return 3;
 }
 
-QVariant SearchResultModel::data(const QModelIndex& index, int role) const
+QVariant ResultModel::data(const QModelIndex& index, int role) const
 {
 	if (!index.isValid())
 	{
@@ -71,7 +71,7 @@ QVariant SearchResultModel::data(const QModelIndex& index, int role) const
 	return QVariant();
 }
 
-void SearchResultModel::addResult(const QString& filePath, int lineNumber, const QString& lineContent)
+void ResultModel::addResult(const QString& filePath, int lineNumber, const QString& lineContent)
 {
 	const Result result(filePath, lineNumber, lineContent);
 	qDebug() << result.toString();
@@ -81,7 +81,7 @@ void SearchResultModel::addResult(const QString& filePath, int lineNumber, const
 	endInsertRows();
 }
 
-void SearchResultModel::clear()
+void ResultModel::clear()
 {
 	beginResetModel();
 	_results.clear();

@@ -6,7 +6,7 @@ namespace Ui
 }
 
 class Options;
-class SearchResultModel;
+class ResultModel;
 class FileSearcher;
 class FileReplacer;
 
@@ -45,7 +45,7 @@ private:
 
 	Ui::MainWindow* _ui;
 	Options* _options;
-	SearchResultModel* _model;
+	ResultModel* _model;
 	FileSearcher* _searcher;
 	FileReplacer* _replacer;
 };

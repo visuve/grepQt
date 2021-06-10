@@ -3,7 +3,7 @@
 
 #include "MainWindow.hpp"
 #include "Options.hpp"
-#include "SearchResultModel.hpp"
+#include "ResultModel.hpp"
 #include "FileSearcher.hpp"
 #include "FileReplacer.hpp"
 
@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	_ui(new Ui::MainWindow()),
 	_options(new Options(this)),
-	_model(new SearchResultModel(this)),
+	_model(new ResultModel(this)),
 	_searcher(new FileSearcher(_options, this)),
 	_replacer(new FileReplacer(_options, this))
 {
@@ -55,11 +55,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(_ui->tableViewResults, &QTableView::customContextMenuRequested, this, &MainWindow::createContextMenu);
 	connect(_searcher, &FileSearcher::processing, this, &MainWindow::onProcessing);
 	connect(_searcher, &FileSearcher::searchCompleted, this, &MainWindow::onSearchCompleted);
-	connect(_searcher, &FileSearcher::matchFound, _model, &SearchResultModel::addResult);
+	connect(_searcher, &FileSearcher::matchFound, _model, &ResultModel::addResult);
 
 	connect(_replacer, &FileReplacer::processing, this, &MainWindow::onProcessing);
 	connect(_replacer, &FileReplacer::replaceCompleted, this, &MainWindow::onReplaceCompleted);
-	connect(_replacer, &FileReplacer::lineReplaced, _model, &SearchResultModel::addResult);
+	connect(_replacer, &FileReplacer::lineReplaced, _model, &ResultModel::addResult);
 
 	loadSettings();
 }
