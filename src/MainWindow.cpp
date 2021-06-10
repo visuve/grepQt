@@ -4,6 +4,7 @@
 #include "MainWindow.hpp"
 #include "SearchResultModel.hpp"
 #include "FileSearcher.hpp"
+#include "FileReplacer.hpp"
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -38,8 +39,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(_ui->lineEditWildcards, &QLineEdit::textChanged, this, &MainWindow::onWildcardsChanged);
 	connect(_ui->checkBoxCaseSensitive, &QCheckBox::clicked, this, &MainWindow::onCaseSensitivityChanged);
 	connect(_ui->toolButtonBrowse, &QToolButton::clicked, this, &MainWindow::onOpenDirectoryDialog);
-	connect(_ui->pushButtonSearch, &QPushButton::clicked, std::bind(&MainWindow::onSearch, this, false));
-	connect(_ui->pushButtonReplace, &QPushButton::clicked, std::bind(&MainWindow::onSearch, this, true));
+	connect(_ui->pushButtonSearch, &QPushButton::clicked, this, &MainWindow::onSearch);
+	connect(_ui->pushButtonReplace, &QPushButton::clicked, this, &MainWindow::onReplace);
 
 	auto proxyModel = new QSortFilterProxyModel(this);
 	proxyModel->setSourceModel(_model);
@@ -139,7 +140,7 @@ void MainWindow::onReplacementChanged(const QString& replacement)
 	{
 		const Qt::CaseSensitivity caseSensitivity = isCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
-		_searcher->setReplaceFunction([=](QString& line)
+		_replacer->setReplaceFunction([=](QString& line)
 		{
 			line.replace(searchExpression, replacement, caseSensitivity);
 		});
@@ -154,7 +155,7 @@ void MainWindow::onReplacementChanged(const QString& replacement)
 		const QRegularExpression regex(searchExpression, options);
 		regex.optimize();
 
-		_searcher->setReplaceFunction([=](QString& line)
+		_replacer->setReplaceFunction([=](QString& line)
 		{
 			line.replace(regex, replacement);
 		});
@@ -208,7 +209,7 @@ void MainWindow::onOpenDirectoryDialog()
 	}
 }
 
-void MainWindow::onSearch(bool replace)
+void MainWindow::onSearch()
 {
 	// _searcher->requestInterruption();
 	_model->clear();
@@ -253,13 +254,12 @@ void MainWindow::onSearch(bool replace)
 		return sizeMatches && lastModifiedMatches;
 	});
 
-	if (!replace)
-	{
-		// TODO: hacky...
-		_searcher->setReplaceFunction(nullptr);
-	}
-
 	_searcher->start();
+}
+
+void MainWindow::onReplace()
+{
+	qDebug() << "TODO!";
 }
 
 void MainWindow::createContextMenu(const QPoint& pos)

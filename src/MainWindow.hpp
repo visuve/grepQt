@@ -7,6 +7,7 @@ namespace Ui
 
 class SearchResultModel;
 class FileSearcher;
+class FileReplacer;
 
 class MainWindow : public QMainWindow
 {
@@ -28,7 +29,8 @@ private:
 
 	void onAbout();
 	void onOpenDirectoryDialog();
-	void onSearch(bool replace);
+	void onSearch();
+	void onReplace();
 	void onProcessing(const QString& filePath, int filesProcessed);
 	void onCompleted(const QString& directoryPath, int hits, int filesProcessed);
 	void createContextMenu(const QPoint& point);
@@ -42,4 +44,5 @@ private:
 	QSettings* _settings;
 	SearchResultModel* _model;
 	FileSearcher* _searcher;
+	FileReplacer* _replacer;
 };

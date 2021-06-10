@@ -36,11 +36,6 @@ void FileSearcher::setFilterFunction(std::function<bool (QFileInfo)> filterFunct
 	_filterFunction = filterFunction;
 }
 
-void FileSearcher::setReplaceFunction(std::function<void(QString&)> replaceFunction)
-{
-	_replaceFunction = replaceFunction;
-}
-
 void FileSearcher::run()
 {
 	qDebug() << "Started";
@@ -50,8 +45,6 @@ void FileSearcher::run()
 
 	int filesProcessed = 0;
 	int hits = 0;
-	qint64 currentPositionInStream = 0;
-	qint64 rewindedPositionInStream = 0;
 
 	while (!QThread::currentThread()->isInterruptionRequested() && iter.hasNext())
 	{
@@ -82,26 +75,6 @@ void FileSearcher::run()
 			if (!_matchFunction(line))
 			{
 				continue;
-			}
-
-			if (_replaceFunction)
-			{
-				currentPositionInStream = file.pos();
-				rewindedPositionInStream = currentPositionInStream - lineSize;
-
-				if (!file.seek(rewindedPositionInStream))
-				{
-					qWarning() << "Failed to seek " << path <<
-						"from" << currentPositionInStream << "to" << rewindedPositionInStream;
-					break;
-				}
-
-				// TODO: shorter strings will fail
-
-				_replaceFunction(line);
-				QTextStream stream(&file);
-				stream << line;
-				stream.flush();
 			}
 
 			++hits;
