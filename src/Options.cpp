@@ -229,6 +229,16 @@ std::function<bool (const QFileInfo&)> Options::createFilterFunction() const
 {
 	return [=](const QFileInfo& fileInfo)
 	{
+		const QString dirName = fileInfo.dir().dirName();
+
+		for (const QString& excluded : _excludes)
+		{
+			if (dirName == excluded)
+			{
+				return false;
+			}
+		}
+
 		bool sizeMatches = false;
 
 		switch (_sizeFilterOption)
