@@ -1,3 +1,4 @@
+#include "PCH.hpp"
 #include "Options.hpp"
 
 namespace Keys
@@ -19,13 +20,12 @@ namespace Keys
 Options::Options(QObject* parent) :
 	QSettings(QSettings::IniFormat, QSettings::UserScope, "visuve", "grepQt", parent)
 {
-
 	_path = value(Keys::Path).value<QString>();
 	_searchExpression = value(Keys::SearchExpression).value<QString>();
 	_replacementText = value(Keys::ReplacementText).value<QString>();
 	_isCaseSensitive = value(Keys::CaseSensitive, false).value<bool>();
 	_searchMode = value(Keys::SearchMode, SearchMode::Plain).value<SearchMode>();
-	_wildcards = value(Keys::Wildcards, "*.*").value<QString>();
+	_wildcards = value(Keys::Wildcards, "*.*").value<QString>().split('|');
 	_sizeFilterOption = value(Keys::SizeOption, 0).value<ComparisonOption>();
 	_sizeFilterValue = value(Keys::SizeValue, 4).value<int>();
 	_timeFilterOption = value(Keys::TimeOption, 0).value<ComparisonOption>();
@@ -117,19 +117,19 @@ void Options::setSearchMode(SearchMode value)
 	}
 }
 
-const QString& Options::wildcards() const
+const QStringList& Options::wildcards() const
 {
 	qDebug();
 	return _wildcards;
 }
 
-void Options::setWildcards(const QString& value)
+void Options::setWildcards(const QStringList& value)
 {
 	if (_wildcards != value)
 	{
 		qDebug() << _wildcards << "->" << value;
 		_wildcards = value;
-		setValue(Keys::Wildcards, value);
+		setValue(Keys::Wildcards, value.join('|'));
 	}
 }
 

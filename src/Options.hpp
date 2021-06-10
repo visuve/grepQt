@@ -39,8 +39,8 @@ public:
 	SearchMode searchMode() const;
 	void setSearchMode(SearchMode value);
 
-	const QString& wildcards() const;
-	void setWildcards(const QString& value);
+	const QStringList& wildcards() const;
+	void setWildcards(const QStringList& value);
 
 	ComparisonOption sizeFilterOptions() const;
 	void setSizeFilterOption(ComparisonOption value);
@@ -58,12 +58,11 @@ private:
 	QString _path;
 	QString _searchExpression;
 	QString _replacementText;
-	QString _wildcards;
+	QStringList _wildcards;
 	bool _isCaseSensitive;
 	SearchMode _searchMode;
 	ComparisonOption _sizeFilterOption;
 	int _sizeFilterValue;
 	ComparisonOption _timeFilterOption;
 	QDateTime _timeFilterValue;
-
 };
