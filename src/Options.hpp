@@ -57,7 +57,7 @@ public:
 
 	std::function<bool(const QFileInfo&)> createFilterFunction() const;
 	std::function<bool(QStringView)> createMatchFunction() const;
-	std::function<void(QString&)> createReplaceFunction() const;
+	std::function<bool(QString&)> createReplaceFunction() const;
 
 private:
 	QString _path;

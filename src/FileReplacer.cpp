@@ -61,9 +61,13 @@ void FileReplacer::run()
 		{
 			const qint64 lineSize = inputFile.readLine(buffer.data(), buffer.size());
 			QString line = QString::fromLocal8Bit(buffer.data(), lineSize);
-			replaceFunction(line);
+
+			if (replaceFunction(line))
+			{
+				emit lineReplaced(path, lineNumber, line);
+			}
+
 			outputFile.write(line.toLocal8Bit());
-			emit lineReplaced(path, lineNumber, line);
 		}
 
 		inputFile.close();

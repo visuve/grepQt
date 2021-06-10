@@ -282,7 +282,7 @@ std::function<bool(QStringView)> Options::createMatchFunction() const
 	return nullptr;
 }
 
-std::function<void (QString&)> Options::createReplaceFunction() const
+std::function<bool(QString&)> Options::createReplaceFunction() const
 {
 	switch (_searchMode)
 	{
@@ -290,9 +290,10 @@ std::function<void (QString&)> Options::createReplaceFunction() const
 		{
 			const Qt::CaseSensitivity caseSensitivity = _isCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
-			return [=](QString& line)
+			return [=](QString& line)->bool
 			{
-				line.replace(_searchExpression, _replacementText, caseSensitivity);
+				const QString before(line);
+				return line.replace(_searchExpression, _replacementText, caseSensitivity) != before;
 			};
 		}
 		case Options::SearchMode::Regex:
@@ -304,9 +305,10 @@ std::function<void (QString&)> Options::createReplaceFunction() const
 			const QRegularExpression regex(_searchExpression, options);
 			regex.optimize();
 
-			return [=](QString& line)
+			return [=](QString& line)->bool
 			{
-				line.replace(regex, _replacementText);
+				const QString before(line);
+				return line.replace(regex, _replacementText) != before;
 			};
 		}
 	}
