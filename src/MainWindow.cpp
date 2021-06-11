@@ -188,7 +188,7 @@ void MainWindow::onFileTimeValueChanged(const QDateTime& value)
 void MainWindow::onAbout()
 {
 	QStringList text;
-	text << "grepQt - File Content Finder version 0.1.";
+	text << "grepQt - File Content Finder & Replacer version 0.1.";
 	text << "";
 	text << "grepQt is yet another grep like file content searched GUI.";
 	text << "";
