@@ -227,7 +227,7 @@ void Options::setTimeFilterValue(const QDateTime& value)
 
 std::function<bool (const QFileInfo&)> Options::createFilterFunction() const
 {
-	return [=](const QFileInfo& fileInfo)
+	return [&](const QFileInfo& fileInfo)
 	{
 		const QString dirName = fileInfo.dir().dirName();
 
@@ -287,7 +287,7 @@ std::function<bool(QStringView)> Options::createMatchFunction() const
 		{
 			const Qt::CaseSensitivity caseSensitivity = _isCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
-			return [=](QStringView haystack)->bool
+			return [&](QStringView haystack)->bool
 			{
 				return haystack.contains(_searchExpression, caseSensitivity);
 			};
@@ -301,7 +301,7 @@ std::function<bool(QStringView)> Options::createMatchFunction() const
 			const QRegularExpression regex(_searchExpression, options);
 			regex.optimize();
 
-			return [=](QStringView haystack)->bool
+			return [&](QStringView haystack)->bool
 			{
 				return haystack.contains(regex);
 			};
@@ -319,7 +319,7 @@ std::function<bool(QString&)> Options::createReplaceFunction() const
 		{
 			const Qt::CaseSensitivity caseSensitivity = _isCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
-			return [=](QString& line)->bool
+			return [&](QString& line)->bool
 			{
 				const QString before(line);
 				return line.replace(_searchExpression, _replacementText, caseSensitivity) != before;
@@ -334,7 +334,7 @@ std::function<bool(QString&)> Options::createReplaceFunction() const
 			const QRegularExpression regex(_searchExpression, options);
 			regex.optimize();
 
-			return [=](QString& line)->bool
+			return [&](QString& line)->bool
 			{
 				const QString before(line);
 				return line.replace(regex, _replacementText) != before;
