@@ -14,22 +14,53 @@
    <string>grepQt</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_3">
+   <layout class="QGridLayout" name="gridLayout_4">
     <item row="0" column="0" colspan="3">
      <widget class="QGroupBox" name="groupBox">
       <property name="title">
-       <string>Search Location</string>
+       <string>Target</string>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Search path</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="labelWildcards">
+         <property name="text">
+          <string>File name wildcards (pipe separated)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
         <widget class="QLineEdit" name="lineEditDirectory"/>
        </item>
-       <item>
+       <item row="3" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEditWildcards">
+         <property name="text">
+          <string>*.*</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
         <widget class="QToolButton" name="toolButtonBrowse">
          <property name="text">
           <string>...</string>
          </property>
         </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="labelExcludes">
+         <property name="text">
+          <string>Exluded dirs (pipe separated)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEditExcludes"/>
        </item>
       </layout>
      </widget>
@@ -37,7 +68,7 @@
     <item row="1" column="0" colspan="3">
      <widget class="QGroupBox" name="groupBoxExpressions">
       <property name="title">
-       <string>Search Expression</string>
+       <string>Expression</string>
       </property>
       <layout class="QGridLayout" name="gridLayout">
        <item row="1" column="0">
@@ -90,78 +121,17 @@
     <item row="2" column="0" colspan="3">
      <widget class="QGroupBox" name="groupBoxLimits">
       <property name="title">
-       <string>Search limit</string>
+       <string>Limit</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="3" column="0">
-        <widget class="QLabel" name="labelLastModified">
-         <property name="text">
-          <string>File last modified</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QSpinBox" name="spinBoxFileSize">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="suffix">
-          <string> KiB</string>
-         </property>
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>1024</number>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2">
+       <item row="1" column="2">
         <widget class="QDateTimeEdit" name="dateTimeEditLastModified">
          <property name="enabled">
           <bool>false</bool>
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="labelExcludes">
-         <property name="text">
-          <string>Exlude dirs (pipe separated)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QComboBox" name="comboBoxFileSize">
-         <item>
-          <property name="text">
-           <string>Irrelevant</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Less than</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>More than</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Exactly</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="labelFileSize">
-         <property name="text">
-          <string>File size</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
+       <item row="1" column="1">
         <widget class="QComboBox" name="comboBoxLastModified">
          <item>
           <property name="text">
@@ -185,22 +155,59 @@
          </item>
         </widget>
        </item>
-       <item row="0" column="1" colspan="2">
-        <widget class="QLineEdit" name="lineEditWildcards">
+       <item row="0" column="1">
+        <widget class="QComboBox" name="comboBoxFileSize">
+         <item>
+          <property name="text">
+           <string>Irrelevant</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Less than</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>More than</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Exactly</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="labelLastModified">
          <property name="text">
-          <string>*.*</string>
+          <string>File last modified</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QSpinBox" name="spinBoxFileSize">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="suffix">
+          <string> KiB</string>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>1024</number>
          </property>
         </widget>
        </item>
        <item row="0" column="0">
-        <widget class="QLabel" name="labelWildcards">
+        <widget class="QLabel" name="labelFileSize">
          <property name="text">
-          <string>File name wildcards (pipe separated)</string>
+          <string>File size</string>
          </property>
         </widget>
-       </item>
-       <item row="1" column="1" colspan="2">
-        <widget class="QLineEdit" name="lineEditExcludes"/>
        </item>
       </layout>
      </widget>
@@ -366,13 +373,11 @@
   <tabstop>radioButtonRegex</tabstop>
   <tabstop>radioButtonPlain</tabstop>
   <tabstop>checkBoxCaseSensitive</tabstop>
-  <tabstop>lineEditWildcards</tabstop>
   <tabstop>comboBoxFileSize</tabstop>
   <tabstop>spinBoxFileSize</tabstop>
   <tabstop>comboBoxLastModified</tabstop>
   <tabstop>dateTimeEditLastModified</tabstop>
   <tabstop>pushButtonReplace</tabstop>
-  <tabstop>pushButtonSearch</tabstop>
   <tabstop>tableViewResults</tabstop>
  </tabstops>
  <resources/>

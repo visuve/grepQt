@@ -33,13 +33,15 @@ MainWindow::MainWindow(QWidget *parent) :
 	});
 
 	connect(_ui->lineEditDirectory, &QLineEdit::textChanged, this, &MainWindow::onDirectoryChanged);
-	connect(_ui->lineEditSearch, &QLineEdit::textChanged, this, &MainWindow::onSearchExpressionChanged);
-	connect(_ui->lineEditReplace, &QLineEdit::textChanged, this, &MainWindow::onReplacementChanged);
 	connect(_ui->lineEditWildcards, &QLineEdit::textChanged, this, &MainWindow::onWildcardsChanged);
 	connect(_ui->lineEditExcludes, &QLineEdit::textChanged, this, &MainWindow::onExcludesChanged);
+
+	connect(_ui->lineEditSearch, &QLineEdit::textChanged, this, &MainWindow::onSearchExpressionChanged);
+	connect(_ui->lineEditReplace, &QLineEdit::textChanged, this, &MainWindow::onReplacementChanged);
 	connect(_ui->radioButtonPlain, &QRadioButton::clicked, this, &MainWindow::onPlainToggled);
 	connect(_ui->radioButtonRegex, &QRadioButton::clicked, this, &MainWindow::onRegexToggled);
 	connect(_ui->checkBoxCaseSensitive, &QCheckBox::clicked, this, &MainWindow::onCaseSensitivityChanged);
+
 	connect(_ui->comboBoxFileSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileSizeOptionChanged);
 	connect(_ui->spinBoxFileSize, &QSpinBox::valueChanged, this, &MainWindow::onFileSizeValueChanged);
 	connect(_ui->comboBoxLastModified, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileTimeOptionChanged);
@@ -330,14 +332,15 @@ void MainWindow::loadSettings()
 	}
 
 	_ui->lineEditDirectory->setText(_options->path());
+	_ui->lineEditWildcards->setText(_options->wildcards().join('|'));
+	_ui->lineEditExcludes->setText(_options->excludes().join('|'));
+
 	_ui->lineEditSearch->setText(_options->searchExpression());
 	_ui->lineEditReplace->setText(_options->replacementText());
 	_ui->radioButtonPlain->setChecked(_options->searchMode() == Options::SearchMode::Plain);
 	_ui->radioButtonRegex->setChecked(_options->searchMode() == Options::SearchMode::Regex);
 	_ui->checkBoxCaseSensitive->setChecked(_options->isCaseSensitive());
 
-	_ui->lineEditWildcards->setText(_options->wildcards().join('|'));
-	_ui->lineEditExcludes->setText(_options->excludes().join('|'));
 	_ui->comboBoxFileSize->setCurrentIndex(static_cast<int>(_options->sizeFilterOption()));
 	_ui->spinBoxFileSize->setValue(_options->sizeFilterValue() / 1024);
 	_ui->comboBoxLastModified->setCurrentIndex(static_cast<int>(_options->timeFilterOption()));

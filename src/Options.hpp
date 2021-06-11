@@ -27,6 +27,12 @@ public:
 	const QString& path() const;
 	void setPath(const QString& path);
 
+	const QStringList& wildcards() const;
+	void setWildcards(const QStringList& value);
+
+	const QStringList& excludes() const;
+	void setExcludes(const QStringList& value);
+
 	const QString& searchExpression() const;
 	void setSearchExpression(const QString& value);
 
@@ -38,12 +44,6 @@ public:
 
 	SearchMode searchMode() const;
 	void setSearchMode(SearchMode value);
-
-	const QStringList& wildcards() const;
-	void setWildcards(const QStringList& value);
-
-	const QStringList& excludes() const;
-	void setExcludes(const QStringList& value);
 
 	ComparisonOption sizeFilterOption() const;
 	void setSizeFilterOption(ComparisonOption value);
