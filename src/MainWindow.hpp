@@ -28,9 +28,11 @@ private:
 	void onRegexToggled(bool);
 	void onCaseSensitivityChanged(bool);
 	void onFileSizeOptionChanged(int);
-	void onFileSizeValueChanged(int);
+	void onFileSizeFromChanged(int);
+	void onFileSizeToChanged(int);
 	void onFileTimeOptionChanged(int);
-	void onFileTimeValueChanged(const QDateTime&);
+	void onFileTimeFromChanged(const QDateTime&);
+	void onFileTimeToChanged(const QDateTime&);
 
 	void onAbout();
 	void onOpenDirectoryDialog();

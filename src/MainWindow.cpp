@@ -43,9 +43,12 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(_ui->checkBoxCaseSensitive, &QCheckBox::clicked, this, &MainWindow::onCaseSensitivityChanged);
 
 	connect(_ui->comboBoxFileSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileSizeOptionChanged);
-	connect(_ui->spinBoxFileSize, &QSpinBox::valueChanged, this, &MainWindow::onFileSizeValueChanged);
+	connect(_ui->spinBoxSizeFrom, &QSpinBox::valueChanged, this, &MainWindow::onFileSizeFromChanged);
+	connect(_ui->spinBoxSizeTo, &QSpinBox::valueChanged, this, &MainWindow::onFileSizeToChanged);
+
 	connect(_ui->comboBoxLastModified, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileTimeOptionChanged);
-	connect(_ui->dateTimeEditLastModified, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::onFileTimeValueChanged);
+	connect(_ui->dateTimeEditFrom, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::onFileTimeFromChanged);
+	connect(_ui->dateTimeEditTo, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::onFileTimeToChanged);
 
 	connect(_ui->toolButtonBrowse, &QToolButton::clicked, this, &MainWindow::onOpenDirectoryDialog);
 	connect(_ui->pushButtonSearch, &QPushButton::clicked, this, &MainWindow::onSearch);
@@ -164,27 +167,83 @@ void MainWindow::onCaseSensitivityChanged(bool value)
 void MainWindow::onFileSizeOptionChanged(int index)
 {
 	qDebug() << index;
-	_ui->spinBoxFileSize->setEnabled(index > 0);
-	_options->setSizeFilterOption(static_cast<Options::ComparisonOption>(index));
-}
 
-void MainWindow::onFileSizeValueChanged(int value)
+	switch (static_cast<Options::ComparisonOption>(index))
+	{
+		case Options::ComparisonOption::Irrelevant:
+			_ui->spinBoxSizeFrom->setEnabled(false);
+			_ui->spinBoxSizeTo->setEnabled(false);
+			_options->setSizeFilterOption(Options::ComparisonOption::Irrelevant);
+			break;
+		case Options::ComparisonOption::Lesser:
+			_ui->spinBoxSizeFrom->setEnabled(true);
+			_ui->spinBoxSizeTo->setEnabled(false);
+			_options->setSizeFilterOption(Options::ComparisonOption::Lesser);
+			break;
+		case Options::ComparisonOption::Greater:
+			_ui->spinBoxSizeFrom->setEnabled(true);
+			_ui->spinBoxSizeTo->setEnabled(false);
+			_options->setSizeFilterOption(Options::ComparisonOption::Greater);
+			break;
+		case Options::ComparisonOption::Between:
+			_ui->spinBoxSizeFrom->setEnabled(true);
+			_ui->spinBoxSizeTo->setEnabled(true);
+			_options->setSizeFilterOption(Options::ComparisonOption::Between);
+			break;
+	}
+}
+void MainWindow::onFileSizeFromChanged(int value)
 {
 	qDebug() << value;
-	_options->setSizeFilterValue(value * 1024);
+	_options->setSizeFilterFrom(value * 1024);
+}
+
+
+void MainWindow::onFileSizeToChanged(int value)
+{
+	qDebug() << value;
+	_options->setSizeFilterTo(value * 1024);
 }
 
 void MainWindow::onFileTimeOptionChanged(int index)
 {
 	qDebug() << index;
-	_ui->dateTimeEditLastModified->setEnabled(index > 0);
-	_options->setTimeFilterOption(static_cast<Options::ComparisonOption>(index));
+
+	switch (static_cast<Options::ComparisonOption>(index))
+	{
+		case Options::ComparisonOption::Irrelevant:
+			_ui->dateTimeEditFrom->setEnabled(false);
+			_ui->dateTimeEditTo->setEnabled(false);
+			_options->setTimeFilterOption(Options::ComparisonOption::Irrelevant);
+			break;
+		case Options::ComparisonOption::Lesser:
+			_ui->dateTimeEditFrom->setEnabled(true);
+			_ui->dateTimeEditTo->setEnabled(false);
+			_options->setTimeFilterOption(Options::ComparisonOption::Lesser);
+			break;
+		case Options::ComparisonOption::Greater:
+			_ui->dateTimeEditFrom->setEnabled(true);
+			_ui->dateTimeEditTo->setEnabled(false);
+			_options->setTimeFilterOption(Options::ComparisonOption::Greater);
+			break;
+		case Options::ComparisonOption::Between:
+			_ui->dateTimeEditFrom->setEnabled(true);
+			_ui->dateTimeEditTo->setEnabled(true);
+			_options->setTimeFilterOption(Options::ComparisonOption::Between);
+			break;
+	}
 }
 
-void MainWindow::onFileTimeValueChanged(const QDateTime& value)
+void MainWindow::onFileTimeFromChanged(const QDateTime& value)
 {
 	qDebug() << value;
-	_options->setTimeFilterValue(value);
+	_options->setTimeFilterFrom(value);
+}
+
+void MainWindow::onFileTimeToChanged(const QDateTime& value)
+{
+	qDebug() << value;
+	_options->setTimeFilterTo(value);
 }
 
 void MainWindow::onAbout()
@@ -341,8 +400,13 @@ void MainWindow::loadSettings()
 	_ui->radioButtonRegex->setChecked(_options->searchMode() == Options::SearchMode::Regex);
 	_ui->checkBoxCaseSensitive->setChecked(_options->isCaseSensitive());
 
-	_ui->comboBoxFileSize->setCurrentIndex(static_cast<int>(_options->sizeFilterOption()));
-	_ui->spinBoxFileSize->setValue(_options->sizeFilterValue() / 1024);
-	_ui->comboBoxLastModified->setCurrentIndex(static_cast<int>(_options->timeFilterOption()));
-	_ui->dateTimeEditLastModified->setDateTime(_options->timeFilterValue());
+	int x = static_cast<int>(_options->sizeFilterOption());
+	_ui->comboBoxFileSize->setCurrentIndex(x);
+	_ui->spinBoxSizeFrom->setValue(_options->sizeFilterFrom() / 1024);
+	_ui->spinBoxSizeTo->setValue(_options->sizeFilterTo() / 1024);
+
+	int y = static_cast<int>(_options->timeFilterOption());
+	_ui->comboBoxLastModified->setCurrentIndex(y);
+	_ui->dateTimeEditFrom ->setDateTime(_options->timeFilterFrom());
+	_ui->dateTimeEditTo->setDateTime(_options->timeFilterTo());
 }

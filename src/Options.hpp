@@ -18,7 +18,7 @@ public:
 		Irrelevant = 0,
 		Lesser = 1,
 		Greater = 2,
-		Equals = 3
+		Between = 3
 	};
 
 	explicit Options(QObject *parent = nullptr);
@@ -39,24 +39,29 @@ public:
 	const QString& replacementText() const;
 	void setReplacementText(const QString& value);
 
-	bool isCaseSensitive() const;
-	void setCaseSensitive(bool value);
-
 	SearchMode searchMode() const;
 	void setSearchMode(SearchMode value);
+
+	bool isCaseSensitive() const;
+	void setCaseSensitive(bool value);
 
 	ComparisonOption sizeFilterOption() const;
 	void setSizeFilterOption(ComparisonOption value);
 
-	qint64 sizeFilterValue() const;
-	void setSizeFilterValue(qint64 value);
+	qint64 sizeFilterFrom() const;
+	void setSizeFilterFrom(qint64 value);
+
+	qint64 sizeFilterTo() const;
+	void setSizeFilterTo(qint64 value);
 
 	ComparisonOption timeFilterOption() const;
 	void setTimeFilterOption(ComparisonOption value);
 
-	const QDateTime& timeFilterValue() const;
-	void setTimeFilterValue(const QDateTime& value);
+	const QDateTime& timeFilterFrom() const;
+	void setTimeFilterFrom(const QDateTime& value);
 
+	const QDateTime& timeFilterTo() const;
+	void setTimeFilterTo(const QDateTime& value);
 
 	std::function<bool(const QFileInfo&)> createFilterFunction() const;
 	std::function<bool(QStringView)> createMatchFunction() const;
@@ -64,14 +69,19 @@ public:
 
 private:
 	QString _path;
-	QString _searchExpression;
-	QString _replacementText;
 	QStringList _wildcards;
 	QStringList _excludes;
-	bool _isCaseSensitive;
+
+	QString _searchExpression;
+	QString _replacementText;
 	SearchMode _searchMode;
+	bool _isCaseSensitive;
+
 	ComparisonOption _sizeFilterOption;
-	qint64 _sizeFilterValue;
+	qint64 _sizeFilterFrom;
+	qint64 _sizeFilterTo;
+
 	ComparisonOption _timeFilterOption;
-	QDateTime _timeFilterValue;
+	QDateTime _timeFilterFrom;
+	QDateTime _timeFilterTo;
 };

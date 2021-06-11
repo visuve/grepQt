@@ -9,13 +9,16 @@ namespace Keys
 
 	const QString SearchExpression = "search/expression";
 	const QString ReplacementText = "search/replacement";
-	const QString CaseSensitive = "search/casesensitive";
+	const QString CaseSensitive = "search/case_sensitive";
 	const QString SearchMode = "search/mode";
 
 	const QString SizeOption = "filter/size_option";
-	const QString SizeValue = "filter/size_value";
+	const QString SizeFrom = "filter/size_from";
+	const QString SizeTo = "filter/size_to";
+
 	const QString TimeOption = "filter/time_option";
-	const QString TimeValue = "filter/time_value";
+	const QString TimeFrom = "filter/time_from";
+	const QString TimeTo = "filter/time_to";
 }
 
 Options::Options(QObject* parent) :
@@ -24,14 +27,19 @@ Options::Options(QObject* parent) :
 	_path = value(Keys::Path).value<QString>();
 	_wildcards = value(Keys::Wildcards, "*.*").value<QString>().split('|');
 	_excludes = value(Keys::Excludes, ".git").value<QString>().split('|');
+
 	_searchExpression = value(Keys::SearchExpression).value<QString>();
 	_replacementText = value(Keys::ReplacementText).value<QString>();
 	_isCaseSensitive = value(Keys::CaseSensitive, false).value<bool>();
 	_searchMode = value(Keys::SearchMode, SearchMode::Plain).value<SearchMode>();
-	_sizeFilterOption = value(Keys::SizeOption, 0).value<ComparisonOption>();
-	_sizeFilterValue = value(Keys::SizeValue, 4).value<qint64>();
-	_timeFilterOption = value(Keys::TimeOption, 0).value<ComparisonOption>();
-	_timeFilterValue = QDateTime::fromSecsSinceEpoch(value(Keys::TimeValue, 1623342562).value<qint64>());
+
+	_sizeFilterOption = static_cast<ComparisonOption>(value(Keys::SizeOption, 0).value<int>());
+	_sizeFilterFrom = value(Keys::SizeFrom, 1).value<qint64>();
+	_sizeFilterTo = value(Keys::SizeTo, 10).value<qint64>();
+
+	_timeFilterOption = static_cast<ComparisonOption>(value(Keys::TimeOption, 0).value<int>());
+	_timeFilterFrom = QDateTime::fromSecsSinceEpoch(value(Keys::TimeFrom, 1623342562).value<qint64>());
+	_timeFilterTo = QDateTime::fromSecsSinceEpoch(value(Keys::TimeTo, 1623397338).value<qint64>());
 }
 
 Options::~Options()
@@ -39,14 +47,21 @@ Options::~Options()
 	setValue(Keys::Path, _path);
 	setValue(Keys::Wildcards, _wildcards.join('|'));
 	setValue(Keys::Excludes, _excludes.join('|'));
+
 	setValue(Keys::SearchExpression, _searchExpression);
 	setValue(Keys::ReplacementText, _replacementText );
 	setValue(Keys::CaseSensitive, _isCaseSensitive);
 	setValue(Keys::SearchMode, _searchMode);
-	setValue(Keys::SizeOption, _sizeFilterOption);
-	setValue(Keys::SizeValue, _sizeFilterValue);
-	setValue(Keys::TimeOption, _timeFilterOption);
-	setValue(Keys::TimeValue, _timeFilterValue.toSecsSinceEpoch());
+
+	setValue(Keys::SizeOption, static_cast<int>(_sizeFilterOption));
+	setValue(Keys::SizeFrom, _sizeFilterFrom);
+	setValue(Keys::SizeTo, _sizeFilterTo);
+
+	setValue(Keys::TimeOption, static_cast<int>(_timeFilterOption));
+	setValue(Keys::TimeFrom, _timeFilterFrom.toSecsSinceEpoch());
+	setValue(Keys::TimeTo, _timeFilterTo.toSecsSinceEpoch());
+
+	sync(); // TODO: probably not needed
 }
 
 const QString& Options::path() const
@@ -129,22 +144,6 @@ void Options::setReplacementText(const QString& value)
 	}
 }
 
-bool Options::isCaseSensitive() const
-{
-	qDebug() << _isCaseSensitive;
-	return _isCaseSensitive;
-}
-
-void Options::setCaseSensitive(bool value)
-{
-	if (_isCaseSensitive != value)
-	{
-		qDebug() << _isCaseSensitive << "->" << value;
-		_isCaseSensitive = value;
-		setValue(Keys::CaseSensitive, value);
-	}
-}
-
 Options::SearchMode Options::searchMode() const
 {
 	qDebug() << _searchMode;
@@ -161,6 +160,22 @@ void Options::setSearchMode(SearchMode value)
 	}
 }
 
+bool Options::isCaseSensitive() const
+{
+	qDebug() << _isCaseSensitive;
+	return _isCaseSensitive;
+}
+
+void Options::setCaseSensitive(bool value)
+{
+	if (_isCaseSensitive != value)
+	{
+		qDebug() << _isCaseSensitive << "->" << value;
+		_isCaseSensitive = value;
+		setValue(Keys::CaseSensitive, value);
+	}
+}
+
 Options::ComparisonOption Options::sizeFilterOption() const
 {
 	qDebug() << _sizeFilterOption;
@@ -173,23 +188,39 @@ void Options::setSizeFilterOption(ComparisonOption value)
 	{
 		qDebug() << _sizeFilterOption << "->" << value;
 		_sizeFilterOption = value;
-		setValue(Keys::SizeOption, value);
+		setValue(Keys::SizeOption, static_cast<int>(value));
 	}
 }
 
-qint64 Options::sizeFilterValue() const
+qint64 Options::sizeFilterFrom() const
 {
-	qDebug() << _sizeFilterValue;
-	return _sizeFilterValue;
+	qDebug() << _sizeFilterFrom;
+	return _sizeFilterFrom;
 }
 
-void Options::setSizeFilterValue(qint64 value)
+void Options::setSizeFilterFrom(qint64 value)
 {
-	if (_sizeFilterValue != value)
+	if (_sizeFilterFrom != value)
 	{
-		qDebug() << _sizeFilterValue << "->" << value;
-		_sizeFilterValue = value;
-		setValue(Keys::SizeValue, value);
+		qDebug() << _sizeFilterFrom << "->" << value;
+		_sizeFilterFrom = value;
+		setValue(Keys::SizeFrom, value);
+	}
+}
+
+qint64 Options::sizeFilterTo() const
+{
+	qDebug() << _sizeFilterTo;
+	return _sizeFilterTo;
+}
+
+void Options::setSizeFilterTo(qint64 value)
+{
+	if (_sizeFilterTo != value)
+	{
+		qDebug() << _sizeFilterTo<< "->" << value;
+		_sizeFilterTo = value;
+		setValue(Keys::SizeTo, value);
 	}
 }
 
@@ -205,23 +236,39 @@ void Options::setTimeFilterOption(ComparisonOption value)
 	{
 		qDebug() << _timeFilterOption << "->" << value;
 		_timeFilterOption = value;
-		setValue(Keys::TimeOption, value);
+		setValue(Keys::TimeOption, static_cast<int>(value));
 	}
 }
 
-const QDateTime& Options::timeFilterValue() const
+const QDateTime& Options::timeFilterFrom() const
 {
-	qDebug() << _timeFilterValue;
-	return _timeFilterValue;
+	qDebug() << _timeFilterFrom;
+	return _timeFilterFrom;
 }
 
-void Options::setTimeFilterValue(const QDateTime& value)
+void Options::setTimeFilterFrom(const QDateTime& value)
 {
-	if (_timeFilterValue != value)
+	if (_timeFilterFrom != value)
 	{
-		qDebug() << _timeFilterValue << "->" << value;
-		_timeFilterValue = value;
-		setValue(Keys::TimeValue, value.toSecsSinceEpoch());
+		qDebug() << _timeFilterFrom << "->" << value;
+		_timeFilterFrom = value;
+		setValue(Keys::TimeFrom, value.toSecsSinceEpoch());
+	}
+}
+
+const QDateTime& Options::timeFilterTo() const
+{
+	qDebug() << _timeFilterTo;
+	return _timeFilterTo;
+}
+
+void Options::setTimeFilterTo(const QDateTime& value)
+{
+	if (_timeFilterTo != value)
+	{
+		qDebug() << _timeFilterTo << "->" << value;
+		_timeFilterTo = value;
+		setValue(Keys::TimeTo, value.toSecsSinceEpoch());
 	}
 }
 
@@ -247,13 +294,13 @@ std::function<bool (const QFileInfo&)> Options::createFilterFunction() const
 				sizeMatches = true;
 				break;
 			case Options::ComparisonOption::Lesser:
-				sizeMatches = fileInfo.size() < _sizeFilterValue;
+				sizeMatches = fileInfo.size() < _sizeFilterFrom;
 				break;
 			case Options::ComparisonOption::Greater:
-				sizeMatches = fileInfo.size() > _sizeFilterValue;
+				sizeMatches = fileInfo.size() > _sizeFilterFrom;
 				break;
-			case Options::ComparisonOption::Equals:
-				sizeMatches = fileInfo.size() == _sizeFilterValue;
+			case Options::ComparisonOption::Between:
+				sizeMatches = fileInfo.size() > _sizeFilterFrom && fileInfo.size() < _sizeFilterTo;
 				break;
 		}
 
@@ -265,13 +312,13 @@ std::function<bool (const QFileInfo&)> Options::createFilterFunction() const
 				lastModifiedMatches = true;
 				break;
 			case Options::ComparisonOption::Lesser:
-				sizeMatches = fileInfo.lastModified() < _timeFilterValue;
+				sizeMatches = fileInfo.lastModified() < _timeFilterFrom;
 				break;
 			case Options::ComparisonOption::Greater:
-				sizeMatches = fileInfo.lastModified() > _timeFilterValue;
+				sizeMatches = fileInfo.lastModified() > _timeFilterFrom;
 				break;
-			case Options::ComparisonOption::Equals:
-				sizeMatches = fileInfo.lastModified() == _timeFilterValue;
+			case Options::ComparisonOption::Between:
+				sizeMatches = fileInfo.lastModified() > _timeFilterFrom && fileInfo.lastModified() < _timeFilterTo;
 				break;
 		}
 
