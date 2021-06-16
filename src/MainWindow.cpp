@@ -282,6 +282,15 @@ void MainWindow::onSearch()
 
 void MainWindow::onReplace()
 {
+	if (QMessageBox::question(
+		this,
+		"Replace file contents?", "Are you sure you want to replace file contents?\n",
+		QMessageBox::Yes | QMessageBox::No,
+		QMessageBox::No) != QMessageBox::Yes)
+	{
+		return;
+	}
+
 	_replacer->requestInterruption();
 	_model->clear();
 	_replacer->wait();
