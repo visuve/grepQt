@@ -67,6 +67,7 @@ public:
 	void setTimeFilterTo(const QDateTime& value);
 
 	std::function<bool(const QFileInfo&)> createFilterFunction() const;
+	std::function<bool(QStringView)> createBreakFunction() const;
 	std::function<bool(QStringView)> createMatchFunction() const;
 	std::function<bool(QString&)> createReplaceFunction() const;
 

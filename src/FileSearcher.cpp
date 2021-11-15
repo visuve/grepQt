@@ -21,6 +21,7 @@ void FileSearcher::run()
 	qDebug() << "Started";
 
 	auto filterFunction = _options->createFilterFunction();
+	auto breakFunction = _options->createBreakFunction();
 	auto matchFunction = _options->createMatchFunction();
 
 	std::array<char, 0x1000> buffer;
@@ -54,6 +55,12 @@ void FileSearcher::run()
 		{
 			qint64 lineSize = file.readLine(buffer.data(), buffer.size());
 			QString line = QString::fromLocal8Bit(buffer.data(), lineSize);
+
+			if (breakFunction(line))
+			{
+				qDebug() << "Skipped:" << path;
+				break;
+			}
 
 			if (!matchFunction(line))
 			{

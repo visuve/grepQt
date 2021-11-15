@@ -345,6 +345,38 @@ std::function<bool (const QFileInfo&)> Options::createFilterFunction() const
 	};
 }
 
+std::function<bool (QStringView)> Options::createBreakFunction() const
+{
+	return [&](QStringView line)->bool
+	{
+		if (_skipBinary)
+		{
+			QMap<QChar, float> frequencies = {};
+
+			for (QChar x : line)
+			{
+				++frequencies[x];
+			}
+
+			float entropy = 0;
+
+			for (float value : frequencies)
+			{
+				float frequency = value / line.size();
+				entropy -= frequency * std::log2(frequency);
+			}
+
+			if (entropy >= 4.5f) // TODO: make this adjustable
+			{
+				qDebug() << "Too high entropy: " << entropy << "skipping";
+				return true;
+			}
+		}
+
+		return false; // Don't break
+	};
+}
+
 std::function<bool(QStringView)> Options::createMatchFunction() const
 {
 	switch (_searchMode)
