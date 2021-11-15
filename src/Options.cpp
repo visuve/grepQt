@@ -15,6 +15,7 @@ namespace Keys
 	const QString SizeOption = "filter/size_option";
 	const QString SizeFrom = "filter/size_from";
 	const QString SizeTo = "filter/size_to";
+	const QString SkipBinary = "filter/skip_binary";
 
 	const QString TimeOption = "filter/time_option";
 	const QString TimeFrom = "filter/time_from";
@@ -36,6 +37,7 @@ Options::Options(QObject* parent) :
 	_sizeFilterOption = static_cast<ComparisonOption>(value(Keys::SizeOption, 0).value<int>());
 	_sizeFilterFrom = value(Keys::SizeFrom, 1).value<qint64>();
 	_sizeFilterTo = value(Keys::SizeTo, 10).value<qint64>();
+	_skipBinary = value(Keys::SkipBinary, true).value<bool>();
 
 	_timeFilterOption = static_cast<ComparisonOption>(value(Keys::TimeOption, 0).value<int>());
 	_timeFilterFrom = QDateTime::fromSecsSinceEpoch(value(Keys::TimeFrom, 1623342562).value<qint64>());
@@ -56,6 +58,7 @@ Options::~Options()
 	setValue(Keys::SizeOption, static_cast<int>(_sizeFilterOption));
 	setValue(Keys::SizeFrom, _sizeFilterFrom);
 	setValue(Keys::SizeTo, _sizeFilterTo);
+	setValue(Keys::SkipBinary, _skipBinary);
 
 	setValue(Keys::TimeOption, static_cast<int>(_timeFilterOption));
 	setValue(Keys::TimeFrom, _timeFilterFrom.toSecsSinceEpoch());
@@ -221,6 +224,22 @@ void Options::setSizeFilterTo(qint64 value)
 		qDebug() << _sizeFilterTo<< "->" << value;
 		_sizeFilterTo = value;
 		setValue(Keys::SizeTo, value);
+	}
+}
+
+bool Options::skipBinary() const
+{
+	qDebug() << _skipBinary;
+	return _skipBinary;
+}
+
+void Options::setSkipBinary(bool value)
+{
+	if (_skipBinary != value)
+	{
+		qDebug() << _skipBinary << "->" << value;
+		_skipBinary = value;
+		setValue(Keys::SkipBinary, value);
 	}
 }
 

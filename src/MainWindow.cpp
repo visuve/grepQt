@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(_ui->comboBoxFileSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileSizeOptionChanged);
 	connect(_ui->spinBoxSizeFrom, &QSpinBox::valueChanged, this, &MainWindow::onFileSizeFromChanged);
 	connect(_ui->spinBoxSizeTo, &QSpinBox::valueChanged, this, &MainWindow::onFileSizeToChanged);
+	connect(_ui->checkBoxSkipBinary, &QCheckBox::clicked, this, &MainWindow::onSkipBinaryChanged);
 
 	connect(_ui->comboBoxLastModified, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileTimeOptionChanged);
 	connect(_ui->dateTimeEditFrom, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::onFileTimeFromChanged);
@@ -203,6 +204,12 @@ void MainWindow::onFileSizeToChanged(int value)
 {
 	qDebug() << value;
 	_options->setSizeFilterTo(value * 1024);
+}
+
+void MainWindow::onSkipBinaryChanged(bool value)
+{
+	qDebug() << value;
+	_options->setSkipBinary(value);
 }
 
 void MainWindow::onFileTimeOptionChanged(int index)
@@ -413,6 +420,7 @@ void MainWindow::loadSettings()
 	_ui->comboBoxFileSize->setCurrentIndex(x);
 	_ui->spinBoxSizeFrom->setValue(_options->sizeFilterFrom() / 1024);
 	_ui->spinBoxSizeTo->setValue(_options->sizeFilterTo() / 1024);
+	_ui->checkBoxSkipBinary->setChecked(_options->skipBinary());
 
 	int y = static_cast<int>(_options->timeFilterOption());
 	_ui->comboBoxLastModified->setCurrentIndex(y);

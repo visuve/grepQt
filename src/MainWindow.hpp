@@ -30,6 +30,7 @@ private:
 	void onFileSizeOptionChanged(int);
 	void onFileSizeFromChanged(int);
 	void onFileSizeToChanged(int);
+	void onSkipBinaryChanged(bool);
 	void onFileTimeOptionChanged(int);
 	void onFileTimeFromChanged(const QDateTime&);
 	void onFileTimeToChanged(const QDateTime&);

@@ -15,55 +15,165 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_4">
-    <item row="0" column="0" colspan="3">
-     <widget class="QGroupBox" name="groupBox">
-      <property name="title">
-       <string>Target</string>
+    <item row="4" column="1">
+     <widget class="QPushButton" name="pushButtonReplace">
+      <property name="enabled">
+       <bool>false</bool>
       </property>
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Search path</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="labelWildcards">
-         <property name="text">
-          <string>File name wildcards (pipe separated)</string>
-         </property>
-        </widget>
-       </item>
+      <property name="text">
+       <string>Replace</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0" colspan="3">
+     <widget class="QGroupBox" name="groupBoxLimits">
+      <property name="title">
+       <string>Limit</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="1">
-        <widget class="QLineEdit" name="lineEditDirectory"/>
-       </item>
-       <item row="3" column="1" colspan="2">
-        <widget class="QLineEdit" name="lineEditWildcards">
-         <property name="text">
-          <string>*.*</string>
-         </property>
+        <widget class="QComboBox" name="comboBoxFileSize">
+         <item>
+          <property name="text">
+           <string>Irrelevant</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Less than</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>More than</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Between</string>
+          </property>
+         </item>
         </widget>
        </item>
        <item row="0" column="2">
-        <widget class="QToolButton" name="toolButtonBrowse">
-         <property name="text">
-          <string>...</string>
+        <widget class="QSpinBox" name="spinBoxSizeFrom">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="suffix">
+          <string> KiB</string>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>1024</number>
          </property>
         </widget>
        </item>
        <item row="4" column="0">
-        <widget class="QLabel" name="labelExcludes">
+        <widget class="QLabel" name="labelLastModified">
          <property name="text">
-          <string>Exluded dirs (pipe separated)</string>
+          <string>File last modified</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="1" colspan="2">
-        <widget class="QLineEdit" name="lineEditExcludes"/>
+       <item row="4" column="1">
+        <widget class="QComboBox" name="comboBoxLastModified">
+         <item>
+          <property name="text">
+           <string>Irrelevant</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Before</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>After</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Between</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QDateTimeEdit" name="dateTimeEditFrom">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="displayFormat">
+          <string>M/d/yy h:mm AP</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="labelFileSize">
+         <property name="text">
+          <string>File size</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QSpinBox" name="spinBoxSizeTo">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="suffix">
+          <string> KiB</string>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>1024</number>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QDateTimeEdit" name="dateTimeEditTo">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QCheckBox" name="checkBoxSkipBinary">
+         <property name="text">
+          <string>Skip binary files</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
+    </item>
+    <item row="4" column="2">
+     <widget class="QPushButton" name="pushButtonSearch">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Search</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>507</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
     </item>
     <item row="1" column="0" colspan="3">
      <widget class="QGroupBox" name="groupBoxExpressions">
@@ -188,155 +298,52 @@
       </layout>
      </widget>
     </item>
-    <item row="4" column="0">
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>507</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="4" column="1">
-     <widget class="QPushButton" name="pushButtonReplace">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Replace</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="2">
-     <widget class="QPushButton" name="pushButtonSearch">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Search</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0" colspan="3">
-     <widget class="QGroupBox" name="groupBoxLimits">
+    <item row="0" column="0" colspan="3">
+     <widget class="QGroupBox" name="groupBox">
       <property name="title">
-       <string>Limit</string>
+       <string>Target</string>
       </property>
-      <layout class="QGridLayout" name="gridLayout_2">
+      <layout class="QGridLayout" name="gridLayout_3">
        <item row="0" column="0">
-        <widget class="QLabel" name="labelFileSize">
+        <widget class="QLabel" name="label">
          <property name="text">
-          <string>File size</string>
+          <string>Search path</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="labelWildcards">
+         <property name="text">
+          <string>File name wildcards (pipe separated)</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QComboBox" name="comboBoxFileSize">
-         <item>
-          <property name="text">
-           <string>Irrelevant</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Less than</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>More than</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Between</string>
-          </property>
-         </item>
+        <widget class="QLineEdit" name="lineEditDirectory"/>
+       </item>
+       <item row="3" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEditWildcards">
+         <property name="text">
+          <string>*.*</string>
+         </property>
         </widget>
        </item>
        <item row="0" column="2">
-        <widget class="QSpinBox" name="spinBoxSizeFrom">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="suffix">
-          <string> KiB</string>
-         </property>
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>1024</number>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QSpinBox" name="spinBoxSizeTo">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="suffix">
-          <string> KiB</string>
-         </property>
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>1024</number>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="labelLastModified">
+        <widget class="QToolButton" name="toolButtonBrowse">
          <property name="text">
-          <string>File last modified</string>
+          <string>...</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
-        <widget class="QComboBox" name="comboBoxLastModified">
-         <item>
-          <property name="text">
-           <string>Irrelevant</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Before</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>After</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Between</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QDateTimeEdit" name="dateTimeEditFrom">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="displayFormat">
-          <string>M/d/yy h:mm AP</string>
+       <item row="4" column="0">
+        <widget class="QLabel" name="labelExcludes">
+         <property name="text">
+          <string>Exluded dirs (pipe separated)</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="2">
-        <widget class="QDateTimeEdit" name="dateTimeEditTo">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
+       <item row="4" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEditExcludes"/>
        </item>
       </layout>
      </widget>
@@ -349,7 +356,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
