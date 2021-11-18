@@ -31,50 +31,10 @@
        <string>Limit</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="1">
-        <widget class="QComboBox" name="comboBoxFileSize">
-         <item>
-          <property name="text">
-           <string>Irrelevant</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Less than</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>More than</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Between</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QSpinBox" name="spinBoxSizeFrom">
+       <item row="5" column="2">
+        <widget class="QDateTimeEdit" name="dateTimeEditTo">
          <property name="enabled">
           <bool>false</bool>
-         </property>
-         <property name="suffix">
-          <string> KiB</string>
-         </property>
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>1024</number>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="labelLastModified">
-         <property name="text">
-          <string>File last modified</string>
          </property>
         </widget>
        </item>
@@ -102,20 +62,34 @@
          </item>
         </widget>
        </item>
-       <item row="4" column="2">
-        <widget class="QDateTimeEdit" name="dateTimeEditFrom">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="displayFormat">
-          <string>M/d/yy h:mm AP</string>
-         </property>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="comboBoxFileSize">
+         <item>
+          <property name="text">
+           <string>Irrelevant</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Less than</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>More than</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Between</string>
+          </property>
+         </item>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="labelFileSize">
+       <item row="4" column="0">
+        <widget class="QLabel" name="labelLastModified">
          <property name="text">
-          <string>File size</string>
+          <string>File last modified</string>
          </property>
         </widget>
        </item>
@@ -135,17 +109,63 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="2">
-        <widget class="QDateTimeEdit" name="dateTimeEditTo">
+       <item row="0" column="2">
+        <widget class="QSpinBox" name="spinBoxSizeFrom">
          <property name="enabled">
           <bool>false</bool>
          </property>
+         <property name="suffix">
+          <string> KiB</string>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>1024</number>
+         </property>
         </widget>
        </item>
-       <item row="3" column="2">
-        <widget class="QCheckBox" name="checkBoxSkipBinary">
+       <item row="4" column="2">
+        <widget class="QDateTimeEdit" name="dateTimeEditFrom">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="displayFormat">
+          <string>M/d/yy h:mm AP</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="labelFileSize">
          <property name="text">
-          <string>Skip binary files</string>
+          <string>File size</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="2">
+        <widget class="QCheckBox" name="checkBoxEntropy">
+         <property name="text">
+          <string>Limit</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QDoubleSpinBox" name="doubleSpinBoxEntropy">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="maximum">
+          <double>8.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="labelEntropy">
+         <property name="text">
+          <string>File entropy</string>
          </property>
         </widget>
        </item>

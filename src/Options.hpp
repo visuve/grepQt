@@ -54,8 +54,11 @@ public:
 	qint64 sizeFilterTo() const;
 	void setSizeFilterTo(qint64 value);
 
-	bool skipBinary() const;
-	void setSkipBinary(bool value);
+	bool isEntropySensitive() const;
+	void setEntropySensitive(bool value);
+
+	double entropyLimit() const;
+	void setEntropyLimit(double value);
 
 	ComparisonOption timeFilterOption() const;
 	void setTimeFilterOption(ComparisonOption value);
@@ -84,7 +87,9 @@ private:
 	ComparisonOption _sizeFilterOption;
 	qint64 _sizeFilterFrom;
 	qint64 _sizeFilterTo;
-	bool _skipBinary;
+
+	bool _isEntropySensitive;
+	double _entropyLimit;
 
 	ComparisonOption _timeFilterOption;
 	QDateTime _timeFilterFrom;

@@ -15,7 +15,9 @@ namespace Keys
 	const QString SizeOption = "filter/size_option";
 	const QString SizeFrom = "filter/size_from";
 	const QString SizeTo = "filter/size_to";
-	const QString SkipBinary = "filter/skip_binary";
+
+	const QString EntropySensitive = "filter/entropy_sensitive";
+	const QString EntropyLimit = "filter/entropy_limit";
 
 	const QString TimeOption = "filter/time_option";
 	const QString TimeFrom = "filter/time_from";
@@ -37,7 +39,9 @@ Options::Options(QObject* parent) :
 	_sizeFilterOption = static_cast<ComparisonOption>(value(Keys::SizeOption, 0).value<int>());
 	_sizeFilterFrom = value(Keys::SizeFrom, 1).value<qint64>();
 	_sizeFilterTo = value(Keys::SizeTo, 10).value<qint64>();
-	_skipBinary = value(Keys::SkipBinary, true).value<bool>();
+
+	_isEntropySensitive = value(Keys::EntropySensitive, false).value<bool>();
+	_entropyLimit = value(Keys::EntropyLimit, 4.5).value<double>();
 
 	_timeFilterOption = static_cast<ComparisonOption>(value(Keys::TimeOption, 0).value<int>());
 	_timeFilterFrom = QDateTime::fromSecsSinceEpoch(value(Keys::TimeFrom, 1623342562).value<qint64>());
@@ -58,7 +62,9 @@ Options::~Options()
 	setValue(Keys::SizeOption, static_cast<int>(_sizeFilterOption));
 	setValue(Keys::SizeFrom, _sizeFilterFrom);
 	setValue(Keys::SizeTo, _sizeFilterTo);
-	setValue(Keys::SkipBinary, _skipBinary);
+
+	setValue(Keys::EntropySensitive, _isEntropySensitive);
+	setValue(Keys::EntropyLimit, _entropyLimit);
 
 	setValue(Keys::TimeOption, static_cast<int>(_timeFilterOption));
 	setValue(Keys::TimeFrom, _timeFilterFrom.toSecsSinceEpoch());
@@ -227,19 +233,35 @@ void Options::setSizeFilterTo(qint64 value)
 	}
 }
 
-bool Options::skipBinary() const
+bool Options::isEntropySensitive() const
 {
-	qDebug() << _skipBinary;
-	return _skipBinary;
+	qDebug() << _isEntropySensitive;
+	return _isEntropySensitive;
 }
 
-void Options::setSkipBinary(bool value)
+void Options::setEntropySensitive(bool value)
 {
-	if (_skipBinary != value)
+	if (_isEntropySensitive != value)
 	{
-		qDebug() << _skipBinary << "->" << value;
-		_skipBinary = value;
-		setValue(Keys::SkipBinary, value);
+		qDebug() << _isEntropySensitive << "->" << value;
+		_isEntropySensitive = value;
+		setValue(Keys::EntropySensitive, value);
+	}
+}
+
+double Options::entropyLimit() const
+{
+	qDebug() << _entropyLimit;
+	return _entropyLimit;
+}
+
+void Options::setEntropyLimit(double value)
+{
+	if (_entropyLimit != value)
+	{
+		qDebug() << _entropyLimit << "->" << value;
+		_entropyLimit = value;
+		setValue(Keys::EntropyLimit, value);
 	}
 }
 
@@ -349,24 +371,24 @@ std::function<bool (QStringView)> Options::createBreakFunction() const
 {
 	return [&](QStringView line)->bool
 	{
-		if (_skipBinary)
+		if (_entropyLimit)
 		{
-			QMap<QChar, float> frequencies = {};
+			QMap<QChar, double> frequencies = {};
 
 			for (QChar x : line)
 			{
 				++frequencies[x];
 			}
 
-			float entropy = 0;
+			double entropy = 0;
 
-			for (float value : frequencies)
+			for (double value : frequencies)
 			{
-				float frequency = value / line.size();
+				double frequency = value / line.size();
 				entropy -= frequency * std::log2(frequency);
 			}
 
-			if (entropy >= 4.5f) // TODO: make this adjustable
+			if (entropy >= _entropyLimit)
 			{
 				qDebug() << "Too high entropy: " << entropy << "skipping";
 				return true;
