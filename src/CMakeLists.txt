@@ -13,6 +13,4 @@ endif()
 
 qt_add_executable("grepQt" ${grepQtSrc})
 target_precompile_headers("grepQt" PRIVATE "PCH.hpp")
-target_include_directories("grepQt" PRIVATE "${uchardet_SOURCE_DIR}/src")
-target_link_directories("grepQt" PRIVATE "${uchardet_BINARY_DIR}/src")
-target_link_libraries("grepQt" PRIVATE Qt6::Widgets Qt6::Core5Compat uchardet)
+target_link_libraries("grepQt" PRIVATE Qt6::Widgets Qt6::Core5Compat icu)

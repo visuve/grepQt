@@ -5,8 +5,6 @@ project("grepQt" LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include("uchardet.cmake")
-
 set(EXECUTABLE_OUTPUT_PATH "..")
 set(LIBRARY_OUTPUT_PATH "..")
 

@@ -1,29 +1,27 @@
 #include "FileSearcher.hpp"
 #include "Options.hpp"
-#include <nscore.h>
-#include <nsUniversalDetector.h>
+#include <icu.h>
 
 const QRegularExpression lineSplit(QString::fromUtf16(u"\x2029|\\r\\n|\\r|\\n"));
 
-class EncodingDetector : public nsUniversalDetector
+class EncodingDetector
 {
 public:
-	EncodingDetector() :
-		nsUniversalDetector(NS_FILTER_ALL)
+	EncodingDetector() 
 	{
+		UErrorCode status = U_ZERO_ERROR;
+		_detector = ucsdet_open(&status);
+		Q_ASSERT(status == U_ZERO_ERROR);
 	}
 
-	virtual void Report(const char* charset) override
+	~EncodingDetector()
 	{
-		_charset = QByteArray(charset);
+		if (_detector)
+		{
+			ucsdet_close(_detector);
+		}
 	}
 
-	bool sample(QByteArrayView data)
-	{
-		nsresult result = HandleData(data.data(), data.size());
-		DataEnd();
-		return result == NS_OK;
-	}
 
 	bool sample(QFile& file)
 	{
@@ -47,8 +45,30 @@ public:
 
 		return QTextCodec::codecForName(_charset);
 	}
-
 private:
+	bool sample(QByteArrayView sample)
+	{
+		UErrorCode status = U_ZERO_ERROR;
+		ucsdet_setText(_detector, sample.data(), sample.size(), &status);
+
+		if (status != U_ZERO_ERROR)
+		{
+			return false;
+		}
+
+		const UCharsetMatch* match = ucsdet_detect(_detector, &status);
+
+		if (status != U_ZERO_ERROR)
+		{
+			return false;
+		}
+
+		_charset = ucsdet_getName(match, &status);
+
+		return status == U_ZERO_ERROR;
+	}
+
+	UCharsetDetector* _detector;
 	QByteArray _charset;
 };
 
