@@ -37,8 +37,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(_ui->lineEditSearch, &QLineEdit::textChanged, this, &MainWindow::onSearchExpressionChanged);
 	connect(_ui->lineEditReplace, &QLineEdit::textChanged, this, &MainWindow::onReplacementChanged);
-	connect(_ui->radioButtonPlain, &QRadioButton::clicked, this, &MainWindow::onPlainToggled);
-	connect(_ui->radioButtonRegex, &QRadioButton::clicked, this, &MainWindow::onRegexToggled);
+	connect(_ui->radioButtonPlain, &QRadioButton::clicked, this, std::bind(&MainWindow::onSearchModeChanged, this, Options::SearchMode::Plain));
+	connect(_ui->radioButtonRegex, &QRadioButton::clicked, this, std::bind(&MainWindow::onSearchModeChanged, this, Options::SearchMode::Regex));
 	connect(_ui->checkBoxCaseSensitive, &QCheckBox::toggled, this, &MainWindow::onCaseSensitivityChanged);
 
 	connect(_ui->comboBoxFileSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileSizeOptionChanged);
@@ -51,6 +51,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(_ui->comboBoxLastModified, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileTimeOptionChanged);
 	connect(_ui->dateTimeEditFrom, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::onFileTimeFromChanged);
 	connect(_ui->dateTimeEditTo, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::onFileTimeToChanged);
+	connect(_ui->radioButtonFiles, &QRadioButton::clicked, std::bind(&MainWindow::onResultModeChanged, this, Options::ResultMode::ShowFiles));
+	connect(_ui->radioButtonContent, &QRadioButton::clicked, std::bind(&MainWindow::onResultModeChanged, this, Options::ResultMode::ShowContent));
 
 	connect(_ui->toolButtonBrowse, &QToolButton::clicked, this, &MainWindow::onOpenDirectoryDialog);
 	connect(_ui->pushButtonSearch, &QPushButton::clicked, this, &MainWindow::onSearch);
@@ -140,24 +142,10 @@ void MainWindow::onExcludesChanged(const QString& value)
 	_options->setExcludes(value.split('|'));
 }
 
-void MainWindow::onPlainToggled(bool value)
+void MainWindow::onSearchModeChanged(Options::SearchMode value)
 {
 	qDebug() << value;
-
-	if (value)
-	{
-		_options->setSearchMode(Options::SearchMode::Plain);
-	}
-}
-
-void MainWindow::onRegexToggled(bool value)
-{
-	qDebug() << value;
-
-	if (value)
-	{
-		_options->setSearchMode(Options::SearchMode::Regex);
-	}
+	_options->setSearchMode(value);
 }
 
 void MainWindow::onCaseSensitivityChanged(bool value)
@@ -259,6 +247,12 @@ void MainWindow::onFileTimeToChanged(const QDateTime& value)
 {
 	qDebug() << value;
 	_options->setTimeFilterTo(value);
+}
+
+void MainWindow::onResultModeChanged(Options::ResultMode value)
+{
+	qDebug() << value;
+	_options->setResultMode(value);
 }
 
 void MainWindow::onAbout()

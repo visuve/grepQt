@@ -1,11 +1,12 @@
 #pragma once
 
+#include "Options.hpp"
+
 namespace Ui
 {
 	class MainWindow;
 }
 
-class Options;
 class ResultModel;
 class FileSearcher;
 class FileReplacer;
@@ -24,8 +25,7 @@ private:
 	void onReplacementChanged(const QString&);
 	void onWildcardsChanged(const QString&);
 	void onExcludesChanged(const QString&);
-	void onPlainToggled(bool);
-	void onRegexToggled(bool);
+	void onSearchModeChanged(Options::SearchMode);
 	void onCaseSensitivityChanged(bool);
 	void onFileSizeOptionChanged(int);
 	void onFileSizeFromChanged(int);
@@ -35,6 +35,7 @@ private:
 	void onFileTimeOptionChanged(int);
 	void onFileTimeFromChanged(const QDateTime&);
 	void onFileTimeToChanged(const QDateTime&);
+	void onResultModeChanged(Options::ResultMode);
 
 	void onAbout();
 	void onOpenDirectoryDialog();

@@ -21,6 +21,8 @@ namespace Keys
 	const QString TimeOption = "filter/time_option";
 	const QString TimeFrom = "filter/time_from";
 	const QString TimeTo = "filter/time_to";
+
+	const QString ResultMode = "result/mode";
 }
 
 Options::Options(QObject* parent) :
@@ -45,6 +47,8 @@ Options::Options(QObject* parent) :
 	_timeFilterOption = static_cast<ComparisonOption>(value(Keys::TimeOption, 0).value<int>());
 	_timeFilterFrom = QDateTime::fromSecsSinceEpoch(value(Keys::TimeFrom, 1623342562).value<qint64>());
 	_timeFilterTo = QDateTime::fromSecsSinceEpoch(value(Keys::TimeTo, 1623397338).value<qint64>());
+
+	_resultMode = value(Keys::ResultMode, ResultMode::ShowContent).value<ResultMode>();
 }
 
 Options::~Options()
@@ -68,6 +72,8 @@ Options::~Options()
 	setValue(Keys::TimeOption, static_cast<int>(_timeFilterOption));
 	setValue(Keys::TimeFrom, _timeFilterFrom.toSecsSinceEpoch());
 	setValue(Keys::TimeTo, _timeFilterTo.toSecsSinceEpoch());
+
+	setValue(Keys::ResultMode, static_cast<int>(_resultMode));
 
 	sync(); // TODO: probably not needed
 }
@@ -312,6 +318,22 @@ void Options::setTimeFilterTo(const QDateTime& value)
 	}
 }
 
+Options::ResultMode Options::resultMode() const
+{
+	qDebug() << _resultMode;
+	return _resultMode;
+}
+
+void Options::setResultMode(ResultMode value)
+{
+	if (_resultMode != value)
+	{
+		qDebug() << _resultMode << "->" << value;
+		_resultMode = value;
+		setValue(Keys::ResultMode, value);
+	}
+}
+
 std::function<bool (const QFileInfo&)> Options::createFilterFunction() const
 {
 	return [&](const QFileInfo& fileInfo)
@@ -372,7 +394,7 @@ std::function<bool (QStringView)> Options::createBreakFunction() const
 	{
 		if (_entropyLimit)
 		{
-			QMap<QChar, double> frequencies = {};
+			QMap<QChar, double> frequencies;
 
 			for (QChar x : line)
 			{

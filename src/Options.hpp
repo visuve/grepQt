@@ -18,53 +18,62 @@ public:
 		Between = 3
 	};
 
+	enum ResultMode : int
+	{
+		ShowContent = 0,
+		ShowFiles = 1
+	};
+
 	explicit Options(QObject *parent = nullptr);
 	~Options();
 
 	const QString& path() const;
-	void setPath(const QString& path);
+	void setPath(const QString&);
 
 	const QStringList& wildcards() const;
-	void setWildcards(const QStringList& value);
+	void setWildcards(const QStringList&);
 
 	const QStringList& excludes() const;
-	void setExcludes(const QStringList& value);
+	void setExcludes(const QStringList&);
 
 	const QString& searchExpression() const;
-	void setSearchExpression(const QString& value);
+	void setSearchExpression(const QString&);
 
 	const QString& replacementText() const;
-	void setReplacementText(const QString& value);
+	void setReplacementText(const QString&);
 
 	SearchMode searchMode() const;
-	void setSearchMode(SearchMode value);
+	void setSearchMode(SearchMode);
 
 	bool isCaseSensitive() const;
-	void setCaseSensitive(bool value);
+	void setCaseSensitive(bool);
 
 	ComparisonOption sizeFilterOption() const;
-	void setSizeFilterOption(ComparisonOption value);
+	void setSizeFilterOption(ComparisonOption);
 
 	qint64 sizeFilterFrom() const;
-	void setSizeFilterFrom(qint64 value);
+	void setSizeFilterFrom(qint64);
 
 	qint64 sizeFilterTo() const;
-	void setSizeFilterTo(qint64 value);
+	void setSizeFilterTo(qint64);
 
 	bool isEntropySensitive() const;
-	void setEntropySensitive(bool value);
+	void setEntropySensitive(bool);
 
 	double entropyLimit() const;
-	void setEntropyLimit(double value);
+	void setEntropyLimit(double);
 
 	ComparisonOption timeFilterOption() const;
-	void setTimeFilterOption(ComparisonOption value);
+	void setTimeFilterOption(ComparisonOption);
 
 	const QDateTime& timeFilterFrom() const;
-	void setTimeFilterFrom(const QDateTime& value);
+	void setTimeFilterFrom(const QDateTime&);
 
 	const QDateTime& timeFilterTo() const;
-	void setTimeFilterTo(const QDateTime& value);
+	void setTimeFilterTo(const QDateTime&);
+
+	ResultMode resultMode() const;
+	void setResultMode(ResultMode);
 
 	std::function<bool(const QFileInfo&)> createFilterFunction() const;
 	std::function<bool(QStringView)> createBreakFunction() const;
@@ -91,4 +100,6 @@ private:
 	ComparisonOption _timeFilterOption;
 	QDateTime _timeFilterFrom;
 	QDateTime _timeFilterTo;
+
+	ResultMode _resultMode;
 };
