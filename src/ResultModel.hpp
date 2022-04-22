@@ -1,7 +1,5 @@
 #pragma once
 
-#include "FileSearcher.hpp"
-
 class ResultModel : public QAbstractTableModel
 {
 	Q_OBJECT

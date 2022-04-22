@@ -1,8 +1,5 @@
 #pragma once
 
-#include <QSettings>
-#include <QObject>
-
 class Options : public QSettings
 {
 	Q_OBJECT

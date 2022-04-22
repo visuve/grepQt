@@ -1,5 +1,4 @@
-#include "PCH.hpp"
-#include "./ui_MainWindow.h"
+#include "ui_MainWindow.h"
 
 #include "MainWindow.hpp"
 #include "Options.hpp"

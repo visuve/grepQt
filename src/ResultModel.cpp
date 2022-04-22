@@ -1,4 +1,3 @@
-#include "PCH.hpp"
 #include "ResultModel.hpp"
 
 ResultModel::ResultModel(QObject *parent) :

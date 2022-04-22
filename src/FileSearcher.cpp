@@ -1,4 +1,3 @@
-#include "PCH.hpp"
 #include "FileSearcher.hpp"
 #include "Options.hpp"
 

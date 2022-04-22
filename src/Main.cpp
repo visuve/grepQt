@@ -1,4 +1,3 @@
-#include "PCH.hpp"
 #include "MainWindow.hpp"
 #include "FileSearcher.hpp"
 
