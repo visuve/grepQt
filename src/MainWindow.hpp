@@ -50,7 +50,7 @@ private:
 	void loadSettings();
 
 	Ui::MainWindow* _ui;
-	Options* _options;
+	Options _options;
 	ResultModel* _model;
 	FileSearcher* _searcher;
 	FileReplacer* _replacer;

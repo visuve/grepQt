@@ -53,6 +53,8 @@ Options::Options(QObject* parent) :
 
 Options::~Options()
 {
+	qDebug() << "Destroying...";
+
 	setValue(Keys::Path, _path);
 	setValue(Keys::Wildcards, _wildcards.join('|'));
 	setValue(Keys::Excludes, _excludes.join('|'));
@@ -76,6 +78,8 @@ Options::~Options()
 	setValue(Keys::ResultMode, static_cast<int>(_resultMode));
 
 	sync(); // TODO: probably not needed
+
+	qDebug() << "Destroyed.";
 }
 
 const QString& Options::path() const

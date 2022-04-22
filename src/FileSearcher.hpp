@@ -7,7 +7,7 @@ class FileSearcher : public QThread
 	Q_OBJECT
 
 public:
-	FileSearcher(Options* options, QObject* parent);
+	FileSearcher(const Options& options, QObject* parent);
 	~FileSearcher();
 
 signals:
@@ -17,5 +17,5 @@ signals:
 
 private:
 	void run() override;
-	const Options* _options;
+	const Options& _options;
 };

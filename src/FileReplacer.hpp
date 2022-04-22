@@ -7,7 +7,7 @@ class FileReplacer: public QThread
 	Q_OBJECT
 
 public:
-	FileReplacer(Options* options, QObject* parent);
+	FileReplacer(const Options& options, QObject* parent);
 	~FileReplacer();
 
 signals:
@@ -17,5 +17,5 @@ signals:
 
 private:
 	void run() override;
-	const Options* _options;
+	const Options& _options;
 };

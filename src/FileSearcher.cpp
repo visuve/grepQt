@@ -1,7 +1,7 @@
 #include "FileSearcher.hpp"
 #include "Options.hpp"
 
-FileSearcher::FileSearcher(Options* options, QObject* parent) :
+FileSearcher::FileSearcher(const Options& options, QObject* parent) :
 	QThread(parent),
 	_options(options)
 {
@@ -19,12 +19,12 @@ void FileSearcher::run()
 {
 	qDebug() << "Started";
 
-	auto filterFunction = _options->createFilterFunction();
-	auto breakFunction = _options->createBreakFunction();
-	auto matchFunction = _options->createMatchFunction();
+	auto filterFunction = _options.createFilterFunction();
+	auto breakFunction = _options.createBreakFunction();
+	auto matchFunction = _options.createMatchFunction();
 
 	std::array<char, 0x1000> buffer;
-	QDirIterator iter(_options->path(), _options->wildcards(), QDir::Files, QDirIterator::Subdirectories);
+	QDirIterator iter(_options.path(), _options.wildcards(), QDir::Files, QDirIterator::Subdirectories);
 
 	int filesProcessed = 0;
 	int hits = 0;
@@ -71,7 +71,9 @@ void FileSearcher::run()
 		}
 	}
 
-	emit searchCompleted(_options->path(), hits, filesProcessed);
-
-	qDebug() << "Finished";
+	if (!QThread::currentThread()->isInterruptionRequested())
+	{
+		emit searchCompleted(_options.path(), hits, filesProcessed);
+		qDebug() << "Finished";
+	}
 }

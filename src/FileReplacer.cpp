@@ -1,7 +1,7 @@
 #include "FileReplacer.hpp"
 #include "Options.hpp"
 
-FileReplacer::FileReplacer(Options* options, QObject* parent) :
+FileReplacer::FileReplacer(const Options& options, QObject* parent) :
 	QThread(parent),
 	_options(options)
 {
@@ -19,11 +19,11 @@ void FileReplacer::run()
 {
 	qDebug() << "Started";
 
-	auto filterFunction = _options->createFilterFunction();
-	auto replaceFunction = _options->createReplaceFunction();
+	auto filterFunction = _options.createFilterFunction();
+	auto replaceFunction = _options.createReplaceFunction();
 
 	std::array<char, 0x1000> buffer;
-	QDirIterator iter(_options->path(), _options->wildcards(), QDir::Files, QDirIterator::Subdirectories);
+	QDirIterator iter(_options.path(), _options.wildcards(), QDir::Files, QDirIterator::Subdirectories);
 
 	int filesProcessed = 0;
 
@@ -73,7 +73,9 @@ void FileReplacer::run()
 		outputFile.commit();
 	}
 
-	emit replaceCompleted(_options->path(), filesProcessed);
-
-	qDebug() << "Finished";
+	if (!QThread::currentThread()->isInterruptionRequested())
+	{
+		emit replaceCompleted(_options.path(), filesProcessed);
+		qDebug() << "Finished";
+	}
 }
