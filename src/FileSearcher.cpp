@@ -132,20 +132,24 @@ void FileSearcher::run()
 			raw = file.read(0x400);
 			decoded = decoder->toUnicode(raw);
 
+			auto lines = decoded.split(lineSplit);
 			int lineNumber = 0;
 
-			for (QString line : decoded.split(lineSplit))
+			// TODO: what if the last line does not produce a hit,
+			// when in fact it's just truncated... :-(
+
+			for (qsizetype i = 0; i < lines.size(); ++i)
 			{
 				++lineNumber;
 
-				if (!matchFunction(line))
+				if (!matchFunction(lines[i]))
 				{
 					continue;
 				}
 
 				++hits;
 
-				emit matchFound(path, lineNumber, line);
+				emit matchFound(path, lineNumber, lines[i]);
 			}
 		}
 
