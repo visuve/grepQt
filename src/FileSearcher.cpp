@@ -1,43 +1,31 @@
 #include "FileSearcher.hpp"
 #include "Options.hpp"
-#include <uchardet.h>
+#include <nscore.h>
+#include <nsUniversalDetector.h>
 
 const QRegularExpression lineSplit(QString::fromUtf16(u"\x2029|\\r\\n|\\r|\\n"));
 
-class Uchardet
+class EncodingDetector : public nsUniversalDetector
 {
 public:
-	Uchardet() :
-		_handle(uchardet_new())
+	EncodingDetector() :
+		nsUniversalDetector(NS_FILTER_ALL)
 	{
 	}
 
-	~Uchardet()
+	virtual void Report(const char* charset) override
 	{
-		if (_handle)
-		{
-			uchardet_delete(_handle);
-		}
+		_charset = QByteArray(charset);
 	}
 
-	int handleData(const char* data, size_t size) const
+	bool sample(QByteArrayView data)
 	{
-		return uchardet_handle_data(_handle, data, size);
+		nsresult result = HandleData(data.data(), data.size());
+		DataEnd();
+		return result == NS_OK;
 	}
 
-	void dataEnd() const
-	{
-		uchardet_data_end(_handle);
-	}
-
-	bool sample(QByteArrayView data) const
-	{
-		int result = handleData(data.data(), data.size());
-		dataEnd();
-		return result == 0;
-	}
-
-	bool sample(QFile& file) const
+	bool sample(QFile& file)
 	{
 		QByteArray data = file.read(0x400);
 		file.reset();
@@ -52,18 +40,16 @@ public:
 
 	QTextCodec* guessCodec() const
 	{
-		const char* charset = uchardet_get_charset(_handle);
-
-		if (!charset || !charset[0])
+		if (_charset.isEmpty())
 		{
 			return nullptr;
 		}
 
-		return QTextCodec::codecForName(charset);
+		return QTextCodec::codecForName(_charset);
 	}
 
 private:
-	uchardet_t _handle;
+	QByteArray _charset;
 };
 
 FileSearcher::FileSearcher(const Options& options, QObject* parent) :
@@ -114,7 +100,7 @@ void FileSearcher::run()
 
 		emit processing(path, ++filesProcessed);
 
-		Uchardet detector;
+		EncodingDetector detector;
 		detector.sample(file);
 
 		QTextCodec* codec = detector.guessCodec();
