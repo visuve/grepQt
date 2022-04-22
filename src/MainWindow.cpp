@@ -45,9 +45,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(_ui->spinBoxSizeFrom, &QSpinBox::valueChanged, this, &MainWindow::onFileSizeFromChanged);
 	connect(_ui->spinBoxSizeTo, &QSpinBox::valueChanged, this, &MainWindow::onFileSizeToChanged);
 
-	connect(_ui->checkBoxEntropy, &QCheckBox::toggled, this, &MainWindow::onFileEntropyToggled);
-	connect(_ui->doubleSpinBoxEntropy, &QDoubleSpinBox::valueChanged, this, &MainWindow::onFileEntropyChanged);
-
 	connect(_ui->comboBoxLastModified, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileTimeOptionChanged);
 	connect(_ui->dateTimeEditFrom, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::onFileTimeFromChanged);
 	connect(_ui->dateTimeEditTo, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::onFileTimeToChanged);
@@ -193,19 +190,6 @@ void MainWindow::onFileSizeToChanged(int value)
 {
 	qDebug() << value;
 	_options.setSizeFilterTo(value * 1024);
-}
-
-void MainWindow::onFileEntropyToggled(bool value)
-{
-	qDebug() << value;
-	_ui->doubleSpinBoxEntropy->setEnabled(value);
-	_options.setEntropySensitive(value);
-}
-
-void MainWindow::onFileEntropyChanged(double value)
-{
-	qDebug() << value;
-	_options.setEntropyLimit(value);
 }
 
 void MainWindow::onFileTimeOptionChanged(int index)
@@ -422,9 +406,6 @@ void MainWindow::loadSettings()
 	_ui->comboBoxFileSize->setCurrentIndex(x);
 	_ui->spinBoxSizeFrom->setValue(_options.sizeFilterFrom() / 1024);
 	_ui->spinBoxSizeTo->setValue(_options.sizeFilterTo() / 1024);
-
-	_ui->checkBoxEntropy->setChecked(_options.isEntropySensitive());
-	_ui->doubleSpinBoxEntropy->setValue(_options.entropyLimit());
 
 	int y = static_cast<int>(_options.timeFilterOption());
 	_ui->comboBoxLastModified->setCurrentIndex(y);

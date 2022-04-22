@@ -1,5 +1,70 @@
 #include "FileSearcher.hpp"
 #include "Options.hpp"
+#include <uchardet.h>
+
+const QRegularExpression lineSplit(QString::fromUtf16(u"\x2029|\\r\\n|\\r|\\n"));
+
+class Uchardet
+{
+public:
+	Uchardet() :
+		_handle(uchardet_new())
+	{
+	}
+
+	~Uchardet()
+	{
+		if (_handle)
+		{
+			uchardet_delete(_handle);
+		}
+	}
+
+	int handleData(const char* data, size_t size) const
+	{
+		return uchardet_handle_data(_handle, data, size);
+	}
+
+	void dataEnd() const
+	{
+		uchardet_data_end(_handle);
+	}
+
+	bool sample(QByteArrayView data) const
+	{
+		int result = handleData(data.data(), data.size());
+		dataEnd();
+		return result == 0;
+	}
+
+	bool sample(QFile& file) const
+	{
+		QByteArray data = file.read(0x400);
+		file.reset();
+
+		if (data.isEmpty())
+		{
+			return false;
+		}
+
+		return sample(data);
+	}
+
+	QTextCodec* guessCodec() const
+	{
+		const char* charset = uchardet_get_charset(_handle);
+
+		if (!charset || !charset[0])
+		{
+			return nullptr;
+		}
+
+		return QTextCodec::codecForName(charset);
+	}
+
+private:
+	uchardet_t _handle;
+};
 
 FileSearcher::FileSearcher(const Options& options, QObject* parent) :
 	QThread(parent),
@@ -20,13 +85,13 @@ void FileSearcher::run()
 	qDebug() << "Started";
 
 	auto filterFunction = _options.createFilterFunction();
-	auto breakFunction = _options.createBreakFunction();
 	auto matchFunction = _options.createMatchFunction();
 
-	std::array<char, 0x1000> buffer;
 	QDirIterator iter(_options.path(), _options.wildcards(), QDir::Files, QDirIterator::Subdirectories);
 
 	int filesProcessed = 0;
+	QByteArray raw;
+	QString decoded;
 	int hits = 0;
 
 	while (!QThread::currentThread()->isInterruptionRequested() && iter.hasNext())
@@ -49,26 +114,42 @@ void FileSearcher::run()
 
 		emit processing(path, ++filesProcessed);
 
-		for (int lineNumber = 1;
-			!QThread::currentThread()->isInterruptionRequested() && !file.atEnd(); ++lineNumber)
+		Uchardet detector;
+		detector.sample(file);
+
+		QTextCodec* codec = detector.guessCodec();
+
+		if (!codec)
 		{
-			qint64 lineSize = file.readLine(buffer.data(), buffer.size());
-			QString line = QString::fromLocal8Bit(buffer.data(), lineSize);
-
-			if (breakFunction(line))
-			{
-				qDebug() << "Skipped:" << path;
-				break;
-			}
-
-			if (!matchFunction(line))
-			{
-				continue;
-			}
-
-			++hits;
-			emit matchFound(path, lineNumber, line);
+			qInfo() << "Cannot detect encoding for" << file.fileName();
+			continue;
 		}
+
+		QTextDecoder* decoder = codec->makeDecoder(QStringConverter::Flag::ConvertInvalidToNull);
+
+		while (!QThread::currentThread()->isInterruptionRequested() && !file.atEnd())
+		{
+			raw = file.read(0x400);
+			decoded = decoder->toUnicode(raw);
+
+			int lineNumber = 0;
+
+			for (QString line : decoded.split(lineSplit))
+			{
+				++lineNumber;
+
+				if (!matchFunction(line))
+				{
+					continue;
+				}
+
+				++hits;
+
+				emit matchFound(path, lineNumber, line);
+			}
+		}
+
+		delete decoder;
 	}
 
 	if (!QThread::currentThread()->isInterruptionRequested())

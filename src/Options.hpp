@@ -57,12 +57,6 @@ public:
 	qint64 sizeFilterTo() const;
 	void setSizeFilterTo(qint64);
 
-	bool isEntropySensitive() const;
-	void setEntropySensitive(bool);
-
-	double entropyLimit() const;
-	void setEntropyLimit(double);
-
 	ComparisonOption timeFilterOption() const;
 	void setTimeFilterOption(ComparisonOption);
 
@@ -76,7 +70,6 @@ public:
 	void setResultMode(ResultMode);
 
 	std::function<bool(const QFileInfo&)> createFilterFunction() const;
-	std::function<bool(QStringView)> createBreakFunction() const;
 	std::function<bool(QStringView)> createMatchFunction() const;
 	std::function<bool(QString&)> createReplaceFunction() const;
 
@@ -93,9 +86,6 @@ private:
 	ComparisonOption _sizeFilterOption;
 	qint64 _sizeFilterFrom;
 	qint64 _sizeFilterTo;
-
-	bool _isEntropySensitive;
-	double _entropyLimit;
 
 	ComparisonOption _timeFilterOption;
 	QDateTime _timeFilterFrom;

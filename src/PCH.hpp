@@ -18,6 +18,7 @@
 #include <QSettings>
 #include <QSortFilterProxyModel>
 #include <QStringView>
+#include <QTextCodec>
 #include <QTimer>
 #include <QThread>
 
