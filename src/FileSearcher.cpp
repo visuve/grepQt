@@ -55,7 +55,7 @@ void FileSearcher::run()
 		const QPair<int, QString> encoding = detector.encoding();
 
 		// Buggy ICU...
-		if (encoding.first < 10 || (encoding.first <= 30 && encoding.second == "UTF-16BE"))
+		if (encoding.first <= 10 || (encoding.first <= 30 && encoding.second == "UTF-16BE"))
 		{
 			qInfo() << "Cannot detect encoding for" << file.fileName();
 			continue;
@@ -68,7 +68,12 @@ void FileSearcher::run()
 		while (!QThread::currentThread()->isInterruptionRequested() && !file.atEnd())
 		{
 			const qint64 bytesRead = file.read(raw.data(), raw.size());
-			matcher.feed(raw.data(), static_cast<size_t>(bytesRead), file.atEnd());
+
+			if (!matcher.feed(raw.data(), static_cast<size_t>(bytesRead), file.atEnd()))
+			{
+				qInfo() << "Cannot process" << path;
+				break;
+			}
 		}
 
 		for (const auto& [line, content] : matcher)

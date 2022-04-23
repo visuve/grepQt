@@ -3,12 +3,21 @@
 
 MatchDetector::MatchDetector(const Options& options, const QString& encoding)
 {
-	UErrorCode status = U_ZERO_ERROR;
-	_converter = ucnv_open(qPrintable(encoding), &status);
-	Q_ASSERT(U_SUCCESS(status));
+	_converter = ucnv_open(qPrintable(encoding), &_status);
 
-	_iterator = ubrk_open(UBRK_SENTENCE, nullptr, nullptr, 0, &status);
-	Q_ASSERT(U_SUCCESS(status));
+	if (U_FAILURE(_status))
+	{
+		qWarning() << "ucnv_open failed";
+		return;
+	}
+
+	_iterator = ubrk_open(UBRK_SENTENCE, nullptr, nullptr, 0, &_status);
+
+	if (U_FAILURE(_status))
+	{
+		qWarning() << "ubrk_open failed";
+		return;
+	}
 
 	int32_t flags = options.searchMode() == Options::Plain ? UREGEX_LITERAL : 0;
 
@@ -21,8 +30,13 @@ MatchDetector::MatchDetector(const Options& options, const QString& encoding)
 	int32_t needleSize = static_cast<int32_t>(needle.size());
 
 	UParseError error;
-	_regex = uregex_open(needle.c_str(), needleSize, flags, &error, &status);
-	Q_ASSERT(U_SUCCESS(status));
+	_regex = uregex_open(needle.c_str(), needleSize, flags, &error, &_status);
+
+	if (U_FAILURE(_status))
+	{
+		qWarning() << "uregex_open failed";
+		return;
+	}
 }
 
 MatchDetector::~MatchDetector()
@@ -43,8 +57,13 @@ MatchDetector::~MatchDetector()
 	}
 }
 
-void MatchDetector::feed(const char* data, size_t size, bool flush)
+bool MatchDetector::feed(const char* data, size_t size, bool flush)
 {
+	if (U_FAILURE(_status))
+	{
+		return false;
+	}
+
 	std::u16string buffer(size, '\0');
 
 	UChar* target = buffer.data();
@@ -52,13 +71,12 @@ void MatchDetector::feed(const char* data, size_t size, bool flush)
 
 	const char* sourceDataLimit = data + size;
 
-	UErrorCode status = U_ZERO_ERROR;
-	ucnv_toUnicode(_converter, &target, targetLimit, &data, sourceDataLimit, nullptr, flush, &status);
+	ucnv_toUnicode(_converter, &target, targetLimit, &data, sourceDataLimit, nullptr, flush, &_status);
 
-	if (U_FAILURE(status))
+	if (U_FAILURE(_status))
 	{
-		qWarning() << "Conversion failure";
-		return;
+		qWarning() << "ucnv_toUnicode failed";
+		return false;
 	}
 
 	size_t lastNull = buffer.find_last_not_of(u'\0') + 1;
@@ -72,17 +90,21 @@ void MatchDetector::feed(const char* data, size_t size, bool flush)
 		_haystack += buffer;
 	}
 
-	detectMatch();
+	return detectMatch();
 }
 
-void MatchDetector::detectMatch()
+bool MatchDetector::detectMatch()
 {
 	UChar* haystack = _haystack.data();
 	int32_t haystackSize = static_cast<int32_t>(_haystack.size());
 
-	UErrorCode status = U_ZERO_ERROR;
-	ubrk_setText(_iterator, haystack, haystackSize, &status);
-	Q_ASSERT(U_SUCCESS(status));
+	ubrk_setText(_iterator, haystack, haystackSize, &_status);
+
+	if (U_FAILURE(_status))
+	{
+		qWarning() << "ubrk_setText failed";
+		return false;
+	}
 
 	int32_t prev = ubrk_first(_iterator);
 	int32_t next = ubrk_next(_iterator);
@@ -91,11 +113,21 @@ void MatchDetector::detectMatch()
 	{
 		++_line;
 		
-		uregex_setText(_regex, haystack + prev, next - prev, &status);
-		Q_ASSERT(status == U_ZERO_ERROR);
+		uregex_setText(_regex, haystack + prev, next - prev, &_status);
 
-		bool found = uregex_find(_regex, 0, &status);
-		Q_ASSERT(status == U_ZERO_ERROR);
+		if (U_FAILURE(_status))
+		{
+			qWarning() << "uregex_setText failed";
+			return false;
+		}
+
+		bool found = uregex_find(_regex, 0, &_status);
+
+		if (U_FAILURE(_status))
+		{
+			qWarning() << "uregex_find failed";
+			return false;
+		}
 
 		if (found)
 		{
@@ -116,4 +148,7 @@ void MatchDetector::detectMatch()
 			_haystack.erase(0, prev);
 		}
 	}
+
+	// The sample had lines
+	return _line > 0;
 }

@@ -9,7 +9,7 @@ public:
 
 	~MatchDetector();
 
-	void feed(const char* data, size_t size, bool flush);
+	bool feed(const char* data, size_t size, bool flush);
 
 	inline auto begin() const
 	{
@@ -22,7 +22,10 @@ public:
 	}
 
 private:
-	void detectMatch();
+	// Returns false if the sample contained no lines
+	bool detectMatch();
+
+	UErrorCode _status = U_ZERO_ERROR;
 
 	UConverter* _converter = nullptr;
 	UBreakIterator* _iterator = nullptr;

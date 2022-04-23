@@ -22,9 +22,6 @@
 #include <QThread>
 
 #include <array>
-#include <filesystem>
-#include <functional>
-#include <fstream>
 #include <iostream>
 
 #include <icu.h>
