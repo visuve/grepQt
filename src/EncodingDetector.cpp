@@ -14,27 +14,22 @@ EncodingDetector::~EncodingDetector()
 	}
 }
 
-QTextCodec* EncodingDetector::codec() const
+QPair<int, QString> EncodingDetector::encoding() const
 {
-	if (_charset.isEmpty())
-	{
-		return nullptr;
-	}
-
-	return QTextCodec::codecForName(_charset);
+	return { U_SUCCESS(_status) ? _confidence : 0, _charset };
 }
 
 EncodingDetector::EncodingDetector() :
 	_detector(ucsdet_open(&_status))
 {
-	Q_ASSERT(_status == U_ZERO_ERROR);
+	Q_ASSERT(U_SUCCESS(_status));
 }
 
-bool EncodingDetector::sample(QFile& file)
+void EncodingDetector::sample(QFile& file)
 {
-	if (_status != U_ZERO_ERROR)
+	if (U_FAILURE(_status))
 	{
-		return false;
+		return;
 	}
 
 	QByteArray data = file.read(0x400);
@@ -42,34 +37,39 @@ bool EncodingDetector::sample(QFile& file)
 
 	if (data.isEmpty())
 	{
-		return false;
+		return;
 	}
 
 	return sample(data);
 }
 
-bool EncodingDetector::sample(QByteArrayView sample)
+void EncodingDetector::sample(QByteArrayView sample)
 {
-	if (_status != U_ZERO_ERROR)
+	if (U_FAILURE(_status))
 	{
-		return false;
+		return;
 	}
 
 	ucsdet_setText(_detector, sample.data(), sample.size(), &_status);
 
-	if (_status != U_ZERO_ERROR)
+	if (U_FAILURE(_status))
 	{
-		return false;
+		return;
 	}
 
 	const UCharsetMatch* match = ucsdet_detect(_detector, &_status);
 
-	if (_status != U_ZERO_ERROR)
+	if (U_FAILURE(_status))
 	{
-		return false;
+		return;
+	}
+
+	_confidence = ucsdet_getConfidence(match, &_status);
+
+	if (U_FAILURE(_status))
+	{
+		return;
 	}
 
 	_charset = ucsdet_getName(match, &_status);
-
-	return _status == U_ZERO_ERROR;
 }

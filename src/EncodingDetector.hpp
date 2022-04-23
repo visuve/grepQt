@@ -6,14 +6,15 @@ public:
 	EncodingDetector(QFile& file);
 	~EncodingDetector();
 
-	QTextCodec* codec() const;
+	QPair<int, QString> encoding() const;
 
 private:
 	EncodingDetector();
-	bool sample(QFile& file);
-	bool sample(QByteArrayView sample);
+	void sample(QFile& file);
+	void sample(QByteArrayView sample);
 
 	UErrorCode _status = U_ZERO_ERROR;
 	UCharsetDetector* _detector;
-	QByteArray _charset;
+	QString _charset;
+	int _confidence = 0;
 };
