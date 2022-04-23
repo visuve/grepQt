@@ -13,7 +13,7 @@ public:
 signals:
 	void processing(const QString& filePath, int filesProcessed);
 	void matchFound(const QString& filePath, int lineNumber, const QString& lineContent);
-	void searchCompleted(const QString& directory, int hits, int filesProcessed);
+	void completed(const QString& directory, int filesProcessed);
 
 private:
 	void run() override;

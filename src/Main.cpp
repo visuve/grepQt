@@ -78,8 +78,6 @@ int main(int argc, char *argv[])
 {
 	qInstallMessageHandler(messageHandler);
 
-	qDebug() << QTextCodec::availableCodecs();
-
 	QApplication application(argc, argv);
 	loadIcon(application);
 	MainWindow window;

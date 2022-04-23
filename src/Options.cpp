@@ -353,38 +353,6 @@ std::function<bool (const QFileInfo&)> Options::createFilterFunction() const
 	};
 }
 
-std::function<bool(QStringView)> Options::createMatchFunction() const
-{
-	switch (_searchMode)
-	{
-		case Options::SearchMode::Plain:
-		{
-			const Qt::CaseSensitivity caseSensitivity = _isCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
-
-			return [&](QStringView haystack)->bool
-			{
-				return haystack.contains(_searchExpression, caseSensitivity);
-			};
-		}
-		case Options::SearchMode::Regex:
-		{
-			const QRegularExpression::PatternOptions options = !_isCaseSensitive ?
-				QRegularExpression::DontCaptureOption | QRegularExpression::CaseInsensitiveOption :
-				QRegularExpression::DontCaptureOption;
-
-			const QRegularExpression regex(_searchExpression, options);
-			regex.optimize();
-
-			return [&](QStringView haystack)->bool
-			{
-				return haystack.contains(regex);
-			};
-		}
-	}
-
-	return nullptr;
-}
-
 std::function<bool(QString&)> Options::createReplaceFunction() const
 {
 	switch (_searchMode)

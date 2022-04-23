@@ -61,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(_ui->tableViewResults, &QTableView::customContextMenuRequested, this, &MainWindow::createContextMenu);
 	connect(_searcher, &FileSearcher::processing, this, &MainWindow::onProcessing);
-	connect(_searcher, &FileSearcher::searchCompleted, this, &MainWindow::onSearchCompleted);
+	connect(_searcher, &FileSearcher::completed, this, &MainWindow::onSearchCompleted);
 	connect(_searcher, &FileSearcher::matchFound, _model, &ResultModel::addResult);
 
 	connect(_replacer, &FileReplacer::processing, this, &MainWindow::onProcessing);
@@ -337,14 +337,13 @@ void MainWindow::onProcessing(const QString& filePath, int filesProcessed)
 	_ui->statusbar->showMessage(message);
 }
 
-void MainWindow::onSearchCompleted(const QString& directoryPath, int hits, int filesProcessed)
+void MainWindow::onSearchCompleted(const QString& directoryPath, int filesProcessed)
 {
 	_ui->statusbar->clearMessage();
 
-	const QString message = QString("%1 Finished searching: %2. Hits: %3. Files processed: %4.")
+	const QString message = QString("%1 Finished searching: %2. Files processed: %3.")
 		.arg(QTime::currentTime().toString())
 		.arg(directoryPath)
-		.arg(hits)
 		.arg(filesProcessed);
 
 	_ui->statusbar->showMessage(message);

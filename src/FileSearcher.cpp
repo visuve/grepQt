@@ -1,8 +1,7 @@
 #include "FileSearcher.hpp"
 #include "Options.hpp"
 #include "EncodingDetector.hpp"
-
-const QRegularExpression lineSplit(QString::fromUtf16(u"\x2029|\\r\\n|\\r|\\n"));
+#include "MatchDetector.hpp"
 
 FileSearcher::FileSearcher(const Options& options, QObject* parent) :
 	QThread(parent),
@@ -23,14 +22,13 @@ void FileSearcher::run()
 	qDebug() << "Started";
 
 	auto filterFunction = _options.createFilterFunction();
-	auto matchFunction = _options.createMatchFunction();
 
 	QDirIterator iter(_options.path(), _options.wildcards(), QDir::Files, QDirIterator::Subdirectories);
 
 	int filesProcessed = 0;
-	QByteArray raw;
+	std::array<char, 0x2000> raw;
+
 	QString decoded;
-	int hits = 0;
 
 	while (!QThread::currentThread()->isInterruptionRequested() && iter.hasNext())
 	{
@@ -53,48 +51,35 @@ void FileSearcher::run()
 		emit processing(path, ++filesProcessed);
 
 		EncodingDetector detector(file);
-		QTextCodec* codec = detector.codec();
 
-		if (!codec)
+		const QPair<int, QString> encoding = detector.encoding();
+
+		// Buggy ICU...
+		if (encoding.first < 10 || (encoding.first <= 30 && encoding.second == "UTF-16BE"))
 		{
 			qInfo() << "Cannot detect encoding for" << file.fileName();
 			continue;
 		}
 
-		QTextDecoder* decoder = codec->makeDecoder(QStringConverter::Flag::ConvertInvalidToNull);
+		qDebug() << file.fileName() << "appears" << encoding;
+
+		MatchDetector matcher(_options, encoding.second);
 
 		while (!QThread::currentThread()->isInterruptionRequested() && !file.atEnd())
 		{
-			raw = file.read(0x400);
-			decoded = decoder->toUnicode(raw);
-
-			auto lines = decoded.split(lineSplit);
-			int lineNumber = 0;
-
-			// TODO: what if the last line does not produce a hit,
-			// when in fact it's just truncated... :-(
-
-			for (qsizetype i = 0; i < lines.size(); ++i)
-			{
-				++lineNumber;
-
-				if (!matchFunction(lines[i]))
-				{
-					continue;
-				}
-
-				++hits;
-
-				emit matchFound(path, lineNumber, lines[i]);
-			}
+			const qint64 bytesRead = file.read(raw.data(), raw.size());
+			matcher.feed(raw.data(), static_cast<size_t>(bytesRead), file.atEnd());
 		}
 
-		delete decoder;
+		for (const auto& [line, content] : matcher)
+		{
+			emit matchFound(path, line, QString::fromStdU16String(content));
+		}
 	}
 
 	if (!QThread::currentThread()->isInterruptionRequested())
 	{
-		emit searchCompleted(_options.path(), hits, filesProcessed);
+		emit completed(_options.path(), filesProcessed);
 		qDebug() << "Finished";
 	}
 }
