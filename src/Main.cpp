@@ -41,24 +41,30 @@ void messageHandler(QtMsgType type, const QMessageLogContext& context, const QSt
 {
 	const QString time = QTime::currentTime().toString(Qt::DateFormat::ISODateWithMs);
 
-	if (context.function && !message.isEmpty())
+	QString place;
+
+	if (context.function)
 	{
-		qtMessageTypeToStreamType(type)
-			<< time.toStdWString() << L" ["
-			<< qtMesssageTypeToChar(type) << L"] "
-			<< context.function << L':'
-			<< context.line << L": "
-			<< message.toStdWString() << std::endl;
+		place = context.function;
+		place.remove("__cdecl ");
+	}
+	else
+	{
+		place = QFileInfo(context.file).fileName();
 	}
 
-	if (context.function && message.isEmpty())
+	qtMessageTypeToStreamType(type)
+		<< time.toStdWString() << L" ["
+		<< qtMesssageTypeToChar(type) << L"] "
+		<< place.toStdWString() << L':'
+		<< context.line << L": ";
+
+	if (!message.isEmpty())
 	{
-		qtMessageTypeToStreamType(type)
-			<< time.toStdWString() << L" ["
-			<< qtMesssageTypeToChar(type) << L"] "
-			<< context.function << L':'
-			<< context.line << std::endl;
+		qtMessageTypeToStreamType(type) << message.toStdWString();
 	}
+
+	qtMessageTypeToStreamType(type) << std::endl;
 }
 
 void loadIcon(QApplication& application)
