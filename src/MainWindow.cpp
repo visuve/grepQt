@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	_ui->setupUi(this);
 
 	_ui->actionOpen->setIcon(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon));
-	connect(_ui->actionOpen, &QAction::triggered, this, &MainWindow::onOpenDirectoryDialog);
+	//connect(_ui->actionOpen, &QAction::triggered, this, &MainWindow::onOpenDirectoryDialog);
 
 	_ui->actionExit->setIcon(QApplication::style()->standardIcon(QStyle::SP_DialogCloseButton));
 	connect(_ui->actionExit, &QAction::triggered, qApp, &QApplication::quit);
@@ -31,25 +31,6 @@ MainWindow::MainWindow(QWidget *parent) :
 		QMessageBox::aboutQt(this, "grepQt");
 	});
 
-	connect(_ui->lineEditDirectory, &QLineEdit::textChanged, this, &MainWindow::onDirectoryChanged);
-	connect(_ui->lineEditWildcards, &QLineEdit::textChanged, this, &MainWindow::onWildcardsChanged);
-	connect(_ui->lineEditExcludes, &QLineEdit::textChanged, this, &MainWindow::onExcludesChanged);
-
-	connect(_ui->lineEditSearch, &QLineEdit::textChanged, this, &MainWindow::onSearchExpressionChanged);
-	connect(_ui->lineEditReplace, &QLineEdit::textChanged, this, &MainWindow::onReplacementChanged);
-	connect(_ui->radioButtonPlain, &QRadioButton::clicked, this, std::bind(&MainWindow::onSearchModeChanged, this, Options::SearchMode::Plain));
-	connect(_ui->radioButtonRegex, &QRadioButton::clicked, this, std::bind(&MainWindow::onSearchModeChanged, this, Options::SearchMode::Regex));
-	connect(_ui->checkBoxCaseSensitive, &QCheckBox::toggled, this, &MainWindow::onCaseSensitivityChanged);
-
-	connect(_ui->comboBoxFileSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileSizeOptionChanged);
-	connect(_ui->spinBoxSizeFrom, &QSpinBox::valueChanged, this, &MainWindow::onFileSizeFromChanged);
-	connect(_ui->spinBoxSizeTo, &QSpinBox::valueChanged, this, &MainWindow::onFileSizeToChanged);
-
-	connect(_ui->comboBoxLastModified, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileTimeOptionChanged);
-	connect(_ui->dateTimeEditFrom, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::onFileTimeFromChanged);
-	connect(_ui->dateTimeEditTo, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::onFileTimeToChanged);
-
-	connect(_ui->toolButtonBrowse, &QToolButton::clicked, this, &MainWindow::onOpenDirectoryDialog);
 	connect(_ui->pushButtonSearch, &QPushButton::clicked, this, &MainWindow::onSearch);
 	connect(_ui->pushButtonReplace, &QPushButton::clicked, this, &MainWindow::onReplace);
 
@@ -66,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(_replacer, &FileReplacer::replaceCompleted, this, &MainWindow::onReplaceCompleted);
 	connect(_replacer, &FileReplacer::lineReplaced, _model, &ResultModel::addResult);
 
-	loadSettings();
+	loadOptions();
 }
 
 MainWindow::~MainWindow()
@@ -74,169 +55,10 @@ MainWindow::~MainWindow()
 	delete _ui;
 }
 
-void MainWindow::onDirectoryChanged(const QString& value)
-{
-	qDebug() << value;
-
-	QPalette palette;
-
-	const bool exists = QFileInfo(value).isDir();
-
-	if (!exists)
-	{
-		palette.setColor(value.isEmpty() ? QPalette::Window : QPalette::Text, Qt::red);
-		_ui->pushButtonSearch->setEnabled(false);
-		_ui->pushButtonReplace->setEnabled(false);
-	}
-	else
-	{
-		_ui->pushButtonSearch->setEnabled(true);
-		_ui->pushButtonReplace->setEnabled(true);
-	}
-
-	_ui->lineEditDirectory->setPalette(palette);
-	_options.setPath(value);
-}
-
-void MainWindow::onSearchExpressionChanged(const QString& value)
-{
-	qDebug() << value;
-	_options.setSearchExpression(value);
-
-	QPalette palette;
-
-	if (value.isEmpty())
-	{
-		palette.setColor(QPalette::Window, Qt::red);
-		_ui->pushButtonSearch->setEnabled(false);
-		_ui->pushButtonReplace->setEnabled(false);
-	}
-	else
-	{
-		_ui->pushButtonSearch->setEnabled(true);
-		_ui->pushButtonReplace->setEnabled(true);
-	}
-}
-
-void MainWindow::onReplacementChanged(const QString& value)
-{
-	qDebug() << value;
-	_options.setReplacementText(value);
-	_ui->pushButtonReplace->setEnabled(!value.isEmpty());
-}
-
-void MainWindow::onWildcardsChanged(const QString& value)
-{
-	qDebug() << value;
-	_options.setWildcards(value.split('|'));
-}
-
-void MainWindow::onExcludesChanged(const QString& value)
-{
-	qDebug() << value;
-	_options.setExcludes(value.split('|'));
-}
-
-void MainWindow::onSearchModeChanged(Options::SearchMode value)
-{
-	qDebug() << value;
-	_options.setSearchMode(value);
-}
-
-void MainWindow::onCaseSensitivityChanged(bool value)
-{
-	qDebug() << value;
-	_options.setCaseSensitive(value);
-}
-
-void MainWindow::onFileSizeOptionChanged(int index)
-{
-	qDebug() << index;
-
-	switch (static_cast<Options::ComparisonOption>(index))
-	{
-		case Options::ComparisonOption::Irrelevant:
-			_ui->spinBoxSizeFrom->setEnabled(false);
-			_ui->spinBoxSizeTo->setEnabled(false);
-			_options.setSizeFilterOption(Options::ComparisonOption::Irrelevant);
-			break;
-		case Options::ComparisonOption::Lesser:
-			_ui->spinBoxSizeFrom->setEnabled(true);
-			_ui->spinBoxSizeTo->setEnabled(false);
-			_options.setSizeFilterOption(Options::ComparisonOption::Lesser);
-			break;
-		case Options::ComparisonOption::Greater:
-			_ui->spinBoxSizeFrom->setEnabled(true);
-			_ui->spinBoxSizeTo->setEnabled(false);
-			_options.setSizeFilterOption(Options::ComparisonOption::Greater);
-			break;
-		case Options::ComparisonOption::Between:
-			_ui->spinBoxSizeFrom->setEnabled(true);
-			_ui->spinBoxSizeTo->setEnabled(true);
-			_options.setSizeFilterOption(Options::ComparisonOption::Between);
-			break;
-	}
-}
-void MainWindow::onFileSizeFromChanged(int value)
-{
-	qDebug() << value;
-	_options.setSizeFilterFrom(value * 1024);
-}
-
-
-void MainWindow::onFileSizeToChanged(int value)
-{
-	qDebug() << value;
-	_options.setSizeFilterTo(value * 1024);
-}
-
-void MainWindow::onFileTimeOptionChanged(int index)
-{
-	qDebug() << index;
-
-	switch (static_cast<Options::ComparisonOption>(index))
-	{
-		case Options::ComparisonOption::Irrelevant:
-			_ui->dateTimeEditFrom->setEnabled(false);
-			_ui->dateTimeEditTo->setEnabled(false);
-			_options.setTimeFilterOption(Options::ComparisonOption::Irrelevant);
-			break;
-		case Options::ComparisonOption::Lesser:
-			_ui->dateTimeEditFrom->setEnabled(true);
-			_ui->dateTimeEditTo->setEnabled(false);
-			_options.setTimeFilterOption(Options::ComparisonOption::Lesser);
-			break;
-		case Options::ComparisonOption::Greater:
-			_ui->dateTimeEditFrom->setEnabled(true);
-			_ui->dateTimeEditTo->setEnabled(false);
-			_options.setTimeFilterOption(Options::ComparisonOption::Greater);
-			break;
-		case Options::ComparisonOption::Between:
-			_ui->dateTimeEditFrom->setEnabled(true);
-			_ui->dateTimeEditTo->setEnabled(true);
-			_options.setTimeFilterOption(Options::ComparisonOption::Between);
-			break;
-	}
-}
-
-void MainWindow::onFileTimeFromChanged(const QDateTime& value)
-{
-	qDebug() << value;
-	_options.setTimeFilterFrom(value);
-}
-
-void MainWindow::onFileTimeToChanged(const QDateTime& value)
-{
-	qDebug() << value;
-	_options.setTimeFilterTo(value);
-}
-
 void MainWindow::onAbout()
 {
 	QStringList text;
 	text << "grepQt - File Content Finder & Replacer version 0.1.";
-	text << "";
-	text << "grepQt is yet another grep like file content searched GUI.";
 	text << "";
 	text << "grepQt is open source (GPLv2) and written in Qt (C++) see Licenses for more details.";
 	text << "";
@@ -244,18 +66,6 @@ void MainWindow::onAbout()
 	QMessageBox::about(this, "grepQt", text.join('\n'));
 }
 
-void MainWindow::onOpenDirectoryDialog()
-{
-	QFileDialog dialog(this);
-	dialog.setFileMode(QFileDialog::Directory);
-	dialog.setOption(QFileDialog::ShowDirsOnly, true);
-
-	if (dialog.exec() == QFileDialog::Accepted)
-	{
-		const QString directory = dialog.selectedFiles().first();
-		_ui->lineEditDirectory->setText(QDir::toNativeSeparators(directory));
-	}
-}
 
 void MainWindow::onSearch()
 {
@@ -374,7 +184,7 @@ void MainWindow::openParentDirectory(const QString& filePath)
 		QMessageBox::warning(this, "Failed to open", "Failed to open directory:\n\n" + filePath + "\n");
 	}
 }
-void MainWindow::loadSettings()
+void MainWindow::loadOptions()
 {
 	const QStringList args = QCoreApplication::arguments();
 
@@ -382,24 +192,7 @@ void MainWindow::loadSettings()
 	{
 		_options.setPath(args[1]);
 	}
-
-	_ui->lineEditDirectory->setText(_options.path());
-	_ui->lineEditWildcards->setText(_options.wildcards().join('|'));
-	_ui->lineEditExcludes->setText(_options.excludes().join('|'));
-
-	_ui->lineEditSearch->setText(_options.searchExpression());
-	_ui->lineEditReplace->setText(_options.replacementText());
-	_ui->radioButtonPlain->setChecked(_options.searchMode() == Options::SearchMode::Plain);
-	_ui->radioButtonRegex->setChecked(_options.searchMode() == Options::SearchMode::Regex);
-	_ui->checkBoxCaseSensitive->setChecked(_options.isCaseSensitive());
-
-	int x = static_cast<int>(_options.sizeFilterOption());
-	_ui->comboBoxFileSize->setCurrentIndex(x);
-	_ui->spinBoxSizeFrom->setValue(_options.sizeFilterFrom() / 1024);
-	_ui->spinBoxSizeTo->setValue(_options.sizeFilterTo() / 1024);
-
-	int y = static_cast<int>(_options.timeFilterOption());
-	_ui->comboBoxLastModified->setCurrentIndex(y);
-	_ui->dateTimeEditFrom ->setDateTime(_options.timeFilterFrom());
-	_ui->dateTimeEditTo->setDateTime(_options.timeFilterTo());
+	_ui->groupBoxTarget->load(&_options);
+	_ui->groupBoxExpression->load(&_options);
+	_ui->groupBoxLimit->load(&_options);
 }

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LimitSelect</class>
+ <widget class="QGroupBox" name="LimitSelect">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>200</height>
+   </rect>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QLabel" name="labelFileSize">
+     <property name="text">
+      <string>File size</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QComboBox" name="comboBoxFileSize">
+     <item>
+      <property name="text">
+       <string>Irrelevant</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Less than</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>More than</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Between</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QSpinBox" name="spinBoxSizeFrom">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="suffix">
+      <string> KiB</string>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>1024</number>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QSpinBox" name="spinBoxSizeTo">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="suffix">
+      <string> KiB</string>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>1024</number>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="labelLastModified">
+     <property name="text">
+      <string>File last modified</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QComboBox" name="comboBoxLastModified">
+     <item>
+      <property name="text">
+       <string>Irrelevant</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Before</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>After</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Between</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QDateTimeEdit" name="dateTimeEditFrom">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="displayFormat">
+      <string>M/d/yy h:mm AP</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QDateTimeEdit" name="dateTimeEditTo">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

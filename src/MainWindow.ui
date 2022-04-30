@@ -65,123 +65,10 @@
      </widget>
     </item>
     <item row="2" column="0" colspan="3">
-     <widget class="QGroupBox" name="groupBoxLimits">
+     <widget class="LimitSelect" name="groupBoxLimit">
       <property name="title">
        <string>Limit</string>
       </property>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0">
-        <widget class="QLabel" name="labelFileSize">
-         <property name="text">
-          <string>File size</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="2">
-        <widget class="QDateTimeEdit" name="dateTimeEditTo">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QSpinBox" name="spinBoxSizeTo">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="suffix">
-          <string> KiB</string>
-         </property>
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>1024</number>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="labelLastModified">
-         <property name="text">
-          <string>File last modified</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QSpinBox" name="spinBoxSizeFrom">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="suffix">
-          <string> KiB</string>
-         </property>
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>1024</number>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QComboBox" name="comboBoxLastModified">
-         <item>
-          <property name="text">
-           <string>Irrelevant</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Before</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>After</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Between</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="4" column="2">
-        <widget class="QDateTimeEdit" name="dateTimeEditFrom">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="displayFormat">
-          <string>M/d/yy h:mm AP</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QComboBox" name="comboBoxFileSize">
-         <item>
-          <property name="text">
-           <string>Irrelevant</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Less than</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>More than</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Between</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-      </layout>
      </widget>
     </item>
     <item row="4" column="0">
@@ -198,53 +85,10 @@
      </spacer>
     </item>
     <item row="0" column="0" colspan="3">
-     <widget class="QGroupBox" name="groupBox">
+     <widget class="TargetSelect" name="groupBoxTarget">
       <property name="title">
        <string>Target</string>
       </property>
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Search path</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="labelWildcards">
-         <property name="text">
-          <string>File name wildcards (pipe separated)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="lineEditDirectory"/>
-       </item>
-       <item row="3" column="1" colspan="2">
-        <widget class="QLineEdit" name="lineEditWildcards">
-         <property name="text">
-          <string>*.*</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QToolButton" name="toolButtonBrowse">
-         <property name="text">
-          <string>...</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="labelExcludes">
-         <property name="text">
-          <string>Include only (pipe separated)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1" colspan="2">
-        <widget class="QLineEdit" name="lineEditExcludes"/>
-       </item>
-      </layout>
      </widget>
     </item>
     <item row="4" column="1">
@@ -258,56 +102,10 @@
      </widget>
     </item>
     <item row="1" column="0" colspan="3">
-     <widget class="QGroupBox" name="groupBoxExpressions">
+     <widget class="ExpressionSelect" name="groupBoxExpression">
       <property name="title">
        <string>Expression</string>
       </property>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="1" column="0">
-        <widget class="QLabel" name="labelSearch">
-         <property name="text">
-          <string>Search for:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1" colspan="3">
-        <widget class="QLineEdit" name="lineEditReplace"/>
-       </item>
-       <item row="1" column="1" colspan="3">
-        <widget class="QLineEdit" name="lineEditSearch"/>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="labelReplace">
-         <property name="text">
-          <string>Replace with:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2">
-        <widget class="QRadioButton" name="radioButtonPlain">
-         <property name="text">
-          <string>Plain</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QRadioButton" name="radioButtonRegex">
-         <property name="text">
-          <string>Regex</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="3">
-        <widget class="QCheckBox" name="checkBoxCaseSensitive">
-         <property name="text">
-          <string>Case Sensitive</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
      </widget>
     </item>
     <item row="4" column="2">
@@ -370,18 +168,27 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LimitSelect</class>
+   <extends>QGroupBox</extends>
+   <header>LimitSelect.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ExpressionSelect</class>
+   <extends>QGroupBox</extends>
+   <header>ExpressionSelect.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TargetSelect</class>
+   <extends>QGroupBox</extends>
+   <header>TargetSelect.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
-  <tabstop>lineEditDirectory</tabstop>
-  <tabstop>toolButtonBrowse</tabstop>
-  <tabstop>lineEditSearch</tabstop>
-  <tabstop>lineEditReplace</tabstop>
-  <tabstop>radioButtonRegex</tabstop>
-  <tabstop>radioButtonPlain</tabstop>
-  <tabstop>checkBoxCaseSensitive</tabstop>
-  <tabstop>comboBoxFileSize</tabstop>
-  <tabstop>spinBoxSizeFrom</tabstop>
-  <tabstop>comboBoxLastModified</tabstop>
-  <tabstop>dateTimeEditFrom</tabstop>
   <tabstop>pushButtonReplace</tabstop>
   <tabstop>treeViewResults</tabstop>
  </tabstops>

@@ -20,22 +20,7 @@ public:
 	~MainWindow();
 
 private:
-	void onDirectoryChanged(const QString&);
-	void onSearchExpressionChanged(const QString&);
-	void onReplacementChanged(const QString&);
-	void onWildcardsChanged(const QString&);
-	void onExcludesChanged(const QString&);
-	void onSearchModeChanged(Options::SearchMode);
-	void onCaseSensitivityChanged(bool);
-	void onFileSizeOptionChanged(int);
-	void onFileSizeFromChanged(int);
-	void onFileSizeToChanged(int);
-	void onFileTimeOptionChanged(int);
-	void onFileTimeFromChanged(const QDateTime&);
-	void onFileTimeToChanged(const QDateTime&);
-
 	void onAbout();
-	void onOpenDirectoryDialog();
 	void onSearch();
 	void onReplace();
 	void onProcessing(const QString& filePath, int filesProcessed);
@@ -44,7 +29,8 @@ private:
 	void createContextMenu(const QPoint& point);
 	void openFileWithDefaultAssociation(const QString& filePath);
 	void openParentDirectory(const QString& filePath);
-	void loadSettings();
+
+	void loadOptions();
 
 	Ui::MainWindow* _ui;
 	Options _options;
