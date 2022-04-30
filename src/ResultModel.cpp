@@ -1,36 +1,161 @@
 #include "ResultModel.hpp"
 
-ResultModel::ResultModel(QObject *parent) :
-	QAbstractTableModel(parent)
+inline Node* indexToNode(const QModelIndex& index)
 {
+	return static_cast<Node*>(index.internalPointer());
 }
 
-QVariant ResultModel::headerData(int section, Qt::Orientation orientation, int role) const
+class Node
 {
-	if (role != Qt::DisplayRole)
+public:
+	Node(Node* parent, const QMap<Qt::ItemDataRole, QVariantList>& data) :
+		_parent(parent),
+		_data(data)
 	{
-		return QVariant();
 	}
 
-	if (orientation == Qt::Orientation::Horizontal)
+	~Node()
 	{
-		switch (section)
+		qDeleteAll(_children);
+		qDebug() << _data[Qt::DisplayRole];
+	}
+
+	Node* parent() const
+	{
+		return _parent;
+	}
+
+	Node* childAt(int index) const
+	{
+		return _children.at(index);
+	}
+
+	Node* takeChild(int index)
+	{
+		return _children.takeAt(index);
+	}
+
+	QVector<Node*> takeChildren(const std::function<bool(Node*)>& lambda)
+	{
+		QVector<Node*> result;
+
+		for (int i = 0; i < childCount(); ++i)
 		{
-			case 0:
-				return "File Path";
-			case 1:
-				return "Line Number";
-			case 2:
-				return "Line Content";
+			if (lambda(childAt(i)))
+			{
+				result.append(takeChild(i));
+			}
 		}
+
+		return result;
 	}
 
-	return QVariant();
+	Node* appendChild(const QMap<Qt::ItemDataRole, QVariantList>& data)
+	{
+		Node* child = new Node(this, data);
+		_children.append(child);
+		return child;
+	}
+
+	QVector<Node*> findChildren(const std::function<bool(Node*)>& lambda) const
+	{
+		QVector<Node*> results;
+		QQueue<Node*> queue;
+		queue.enqueue(const_cast<Node*>(this));
+
+		while (!queue.empty())
+		{
+			Node* node = queue.dequeue();
+
+			for (Node* child : node->_children)
+			{
+				queue.enqueue(child);
+			}
+
+			if (lambda(node))
+			{
+				results.push_back(node);
+			}
+		}
+
+		return results;
+	}
+
+	Node* findChild(const std::function<bool(Node*)>& lambda) const
+	{
+		auto children = findChildren(lambda);
+		return children.isEmpty() ? nullptr : children.first();
+	}
+
+	int parentRow() const
+	{
+		return _parent ? _parent->_children.indexOf(const_cast<Node*>(this)) : 0;
+	}
+
+	int childCount() const
+	{
+		return _children.size();
+	}
+
+	bool hasChildren() const
+	{
+		return !_children.isEmpty();
+	}
+
+	const QVariant& data(Qt::ItemDataRole role, int column) const
+	{
+		return _data[role].at(column);
+	}
+
+private:
+	Node* _parent;
+	QVector<Node*> _children;
+	QMap<Qt::ItemDataRole, QVariantList> _data;
+};
+
+
+ResultModel::ResultModel(QObject *parent) :
+	QAbstractItemModel(parent),
+	_root(new Node(nullptr, { { Qt::DisplayRole, { "root" } } }))
+{
 }
 
-int ResultModel::rowCount(const QModelIndex&) const
+ResultModel::~ResultModel()
 {
-	return _results.size();
+	delete _root;
+}
+
+QModelIndex ResultModel::index(int row, int column, const QModelIndex& parentIndex) const
+{
+	if (!hasIndex(row, column, parentIndex))
+	{
+		return QModelIndex();
+	}
+
+	Node* parent= parentIndex.isValid() ? indexToNode(parentIndex) : _root;
+	Node* child = parent ->childAt(row);
+	return child ? createIndex(row, column, child) : QModelIndex();
+}
+
+QModelIndex ResultModel::parent(const QModelIndex& childIndex) const
+{
+	if (!childIndex.isValid())
+	{
+		return QModelIndex();
+	}
+
+	Node* parentNode = indexToNode(childIndex)->parent();
+
+	return parentNode != _root ?
+		createIndex(parentNode->parentRow(), 0, parentNode) :
+		QModelIndex();
+}
+
+int ResultModel::rowCount(const QModelIndex& parentIndex) const
+{
+	return parentIndex.isValid() ?
+		indexToNode(parentIndex)->childCount() :
+		_root->childCount();
 }
 
 int ResultModel::columnCount(const QModelIndex&) const
@@ -45,44 +170,69 @@ QVariant ResultModel::data(const QModelIndex& index, int role) const
 		return QVariant();
 	}
 
-	const int row = index.row();
+	Node* item = indexToNode(index);
+	bool topLevel = item->parent() == _root;
+	int column = index.column();
+	bool isParent = column == 0 && topLevel;
+	bool isChild = column >= 1 && !topLevel;
 
 	if (role == Qt::DisplayRole)
 	{
-		const int col = index.column();
-
-		switch (col)
+		if (isParent)
 		{
-			case 0:
-				return _results[row].filePath;
-			case 1:
-				return _results[row].lineNumber;
-			case 2:
-				return _results[row].lineContent;
+			return item->data(Qt::DisplayRole, column);
 		}
-	}
 
-	if (role == Qt::WhatsThisRole)
-	{
-		return _results[row].filePath;
+		if (isChild)
+		{
+			return item->data(Qt::DisplayRole, column - 1);
+		}
 	}
 
 	return QVariant();
 }
 
-void ResultModel::addResult(const QString& filePath, int lineNumber, const QString& lineContent)
+QVariant ResultModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-	const Result result(filePath, lineNumber, lineContent);
-	qDebug() << result.toString();
+	if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
+	{
+		return QVariant();
+	}
 
-	beginInsertRows(QModelIndex(), 0, 0);
-	_results.emplaceBack(result);
+	switch (section)
+	{
+		case 0:
+			return "Path";
+		case 1:
+			return "Line";
+		case 2:
+			return "Content";
+	}
+
+	return QVariant();
+}
+
+void ResultModel::addResult(const QString& filePath, int line, const QString& content)
+{
+	Node* pathNode = _root->findChild([&](Node* node)
+	{
+		return node->data(Qt::DisplayRole, 0).toString() == filePath;
+	});
+
+	if (!pathNode)
+	{
+		pathNode = _root->appendChild({ { Qt::DisplayRole, { filePath } } });
+	}
+
+	beginInsertRows(QModelIndex(), 0, 1);
+	pathNode->appendChild({ { Qt::DisplayRole, { line, content }} });
 	endInsertRows();
 }
 
 void ResultModel::clear()
 {
 	beginResetModel();
-	_results.clear();
+	delete _root;
+	_root = new Node(nullptr, { { Qt::DisplayRole, { "root" } } });
 	endResetModel();
 }

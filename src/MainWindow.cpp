@@ -48,18 +48,16 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(_ui->comboBoxLastModified, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onFileTimeOptionChanged);
 	connect(_ui->dateTimeEditFrom, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::onFileTimeFromChanged);
 	connect(_ui->dateTimeEditTo, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::onFileTimeToChanged);
-	connect(_ui->radioButtonFiles, &QRadioButton::clicked, std::bind(&MainWindow::onResultModeChanged, this, Options::ResultMode::ShowFiles));
-	connect(_ui->radioButtonContent, &QRadioButton::clicked, std::bind(&MainWindow::onResultModeChanged, this, Options::ResultMode::ShowContent));
 
 	connect(_ui->toolButtonBrowse, &QToolButton::clicked, this, &MainWindow::onOpenDirectoryDialog);
 	connect(_ui->pushButtonSearch, &QPushButton::clicked, this, &MainWindow::onSearch);
 	connect(_ui->pushButtonReplace, &QPushButton::clicked, this, &MainWindow::onReplace);
 
-	auto proxyModel = new QSortFilterProxyModel(this);
-	proxyModel->setSourceModel(_model);
-	_ui->tableViewResults->setModel(proxyModel);
+	// auto proxyModel = new QSortFilterProxyModel(this);
+	// proxyModel->setSourceModel(_model);
+	_ui->treeViewResults->setModel(_model);
 
-	connect(_ui->tableViewResults, &QTableView::customContextMenuRequested, this, &MainWindow::createContextMenu);
+	connect(_ui->treeViewResults, &QTreeView::customContextMenuRequested, this, &MainWindow::createContextMenu);
 	connect(_searcher, &FileSearcher::processing, this, &MainWindow::onProcessing);
 	connect(_searcher, &FileSearcher::completed, this, &MainWindow::onSearchCompleted);
 	connect(_searcher, &FileSearcher::matchFound, _model, &ResultModel::addResult);
@@ -233,12 +231,6 @@ void MainWindow::onFileTimeToChanged(const QDateTime& value)
 	_options.setTimeFilterTo(value);
 }
 
-void MainWindow::onResultModeChanged(Options::ResultMode value)
-{
-	qDebug() << value;
-	_options.setResultMode(value);
-}
-
 void MainWindow::onAbout()
 {
 	QStringList text;
@@ -292,7 +284,7 @@ void MainWindow::onReplace()
 
 void MainWindow::createContextMenu(const QPoint& pos)
 {
-	const QModelIndex selection = _ui->tableViewResults->indexAt(pos);
+	const QModelIndex selection = _ui->treeViewResults->indexAt(pos);
 
 	if (!selection.isValid())
 	{
@@ -324,7 +316,7 @@ void MainWindow::createContextMenu(const QPoint& pos)
 
 	QMenu menu(this);
 	menu.addActions({ openFileAction, openParentDirAction });
-	menu.exec(_ui->tableViewResults->mapToGlobal(pos));
+	menu.exec(_ui->treeViewResults->mapToGlobal(pos));
 }
 
 void MainWindow::onProcessing(const QString& filePath, int filesProcessed)

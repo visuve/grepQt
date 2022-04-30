@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QAbstractTableModel>
+#include <QAbstractItemModel>
 #include <QApplication>
 #include <QDebug>
 #include <QDesktopServices>
@@ -13,6 +13,7 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QObject>
+#include <QQueue>
 #include <QRegularExpression>
 #include <QSaveFile>
 #include <QSettings>

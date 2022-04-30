@@ -18,12 +18,6 @@ public:
 		Between = 3
 	};
 
-	enum ResultMode : int
-	{
-		ShowContent = 0,
-		ShowFiles = 1
-	};
-
 	explicit Options(QObject *parent = nullptr);
 	~Options();
 
@@ -66,9 +60,6 @@ public:
 	const QDateTime& timeFilterTo() const;
 	void setTimeFilterTo(const QDateTime&);
 
-	ResultMode resultMode() const;
-	void setResultMode(ResultMode);
-
 	std::function<bool(const QFileInfo&)> createFilterFunction() const;
 	std::function<bool(QString&)> createReplaceFunction() const;
 
@@ -89,6 +80,4 @@ private:
 	ComparisonOption _timeFilterOption;
 	QDateTime _timeFilterFrom;
 	QDateTime _timeFilterTo;
-
-	ResultMode _resultMode;
 };

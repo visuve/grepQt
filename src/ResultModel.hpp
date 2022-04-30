@@ -1,41 +1,27 @@
 #pragma once
 
-class ResultModel : public QAbstractTableModel
+class Node;
+
+class ResultModel : public QAbstractItemModel
 {
 	Q_OBJECT
 
 public:
-	struct Result
-	{
-		QString filePath;
-		int lineNumber;
-		QString lineContent;
-
-		inline Result(const QString& path, int line, const QString& content) :
-			filePath(QDir::toNativeSeparators(path)),
-			lineNumber(line),
-			lineContent(content)
-		{
-
-		}
-
-		inline QString toString() const
-		{
-			return QString("%1:%2:%3").arg(filePath).arg(lineNumber).arg(lineContent);
-		}
-	};
-
 	explicit ResultModel(QObject *parent = nullptr);
+	~ResultModel();
 
-	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+	QModelIndex index(int row, int column, const QModelIndex& parentIndex = QModelIndex()) const override;
+	QModelIndex parent(const QModelIndex& childIndex) const override;
+
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 	void addResult(const QString& filePath, int lineNumber, const QString& lineContent);
 	void clear();
 
 private:
-	QList<Result> _results;
+	Node* _root;
 };
-

@@ -33,7 +33,6 @@ private:
 	void onFileTimeOptionChanged(int);
 	void onFileTimeFromChanged(const QDateTime&);
 	void onFileTimeToChanged(const QDateTime&);
-	void onResultModeChanged(Options::ResultMode);
 
 	void onAbout();
 	void onOpenDirectoryDialog();

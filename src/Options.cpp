@@ -42,8 +42,6 @@ Options::Options(QObject* parent) :
 	_timeFilterOption = static_cast<ComparisonOption>(value(Keys::TimeOption, 0).value<int>());
 	_timeFilterFrom = QDateTime::fromSecsSinceEpoch(value(Keys::TimeFrom, 1623342562).value<qint64>());
 	_timeFilterTo = QDateTime::fromSecsSinceEpoch(value(Keys::TimeTo, 1623397338).value<qint64>());
-
-	_resultMode = value(Keys::ResultMode, ResultMode::ShowContent).value<ResultMode>();
 }
 
 Options::~Options()
@@ -67,8 +65,6 @@ Options::~Options()
 	setValue(Keys::TimeOption, static_cast<int>(_timeFilterOption));
 	setValue(Keys::TimeFrom, _timeFilterFrom.toSecsSinceEpoch());
 	setValue(Keys::TimeTo, _timeFilterTo.toSecsSinceEpoch());
-
-	setValue(Keys::ResultMode, static_cast<int>(_resultMode));
 
 	sync(); // TODO: probably not needed
 
@@ -280,22 +276,6 @@ void Options::setTimeFilterTo(const QDateTime& value)
 		qDebug() << _timeFilterTo << "->" << value;
 		_timeFilterTo = value;
 		setValue(Keys::TimeTo, value.toSecsSinceEpoch());
-	}
-}
-
-Options::ResultMode Options::resultMode() const
-{
-	qDebug() << _resultMode;
-	return _resultMode;
-}
-
-void Options::setResultMode(ResultMode value)
-{
-	if (_resultMode != value)
-	{
-		qDebug() << _resultMode << "->" << value;
-		_resultMode = value;
-		setValue(Keys::ResultMode, value);
 	}
 }
 
