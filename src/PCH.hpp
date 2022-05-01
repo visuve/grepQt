@@ -21,18 +21,14 @@
 #include <QStringView>
 #include <QTimer>
 #include <QThread>
+#include <QValidator>
 
 #include <array>
 #include <iostream>
 
 #include <icu.h>
 
-enum UiState : int
-{
-	Empty = -1,
-	Invalid = 0,
-	Ready = 1
-};
+constexpr QColor errorHighlight(0, 0, 0, 128);
 
 constexpr QColor activeGreen(0, 128, 0);
 constexpr QColor inactiveGreen(0, 64, 0);

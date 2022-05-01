@@ -13,15 +13,16 @@ ExpressionSelect::ExpressionSelect(QWidget* parent) :
 
 		switch (_state)
 		{
-			case UiState::Empty:
-				palette.setColor(QPalette::Highlight, Qt::black);
+			case QValidator::State::Invalid:
+			case QValidator::State::Intermediate:
+				palette.setColor(QPalette::Highlight, errorHighlight);
 				palette.setColor(QPalette::Base, isEnabled() ? activeRed : inactiveRed);
 				_ui->lineEditReplace->setEnabled(false);
 				_ui->radioButtonRegex->setEnabled(false);
 				_ui->radioButtonPlain->setEnabled(false);
 				_ui->checkBoxCaseSensitive->setEnabled(false);
 				break;
-			case UiState::Ready:
+			case QValidator::State::Acceptable:
 				palette.setColor(QPalette::Text, isEnabled() ? activeGreen : inactiveGreen);
 				_ui->lineEditReplace->setEnabled(true);
 				_ui->radioButtonRegex->setEnabled(true);
@@ -40,7 +41,7 @@ ExpressionSelect::ExpressionSelect(QWidget* parent) :
 	connect(_ui->radioButtonRegex, &QRadioButton::clicked, this, std::bind(&ExpressionSelect::onSearchModeChanged, this, Options::SearchMode::Regex));
 	connect(_ui->checkBoxCaseSensitive, &QCheckBox::toggled, this, &ExpressionSelect::onCaseSensitivityChanged);
 
-	emit stateChanged(UiState::Empty);
+	emit stateChanged(QValidator::State::Invalid);
 }
 
 ExpressionSelect::~ExpressionSelect()
@@ -70,11 +71,11 @@ void ExpressionSelect::onSearchExpressionChanged(const QString& value)
 
 	if (value.isEmpty())
 	{
-		_state = UiState::Empty;
+		_state = QValidator::State::Invalid;
 	}
 	else
 	{
-		_state = UiState::Ready;
+		_state = QValidator::State::Acceptable;
 	}
 
 	if (previous != _state)
@@ -104,10 +105,11 @@ void ExpressionSelect::setEnabled(bool enabled)
 
 	switch (_state)
 	{
-		case UiState::Empty:
+		case QValidator::State::Invalid:
+		case QValidator::State::Intermediate:
 			palette.setColor(QPalette::Base, enabled ? activeRed : inactiveRed);
 			break;
-		case UiState::Ready:
+		case QValidator::State::Acceptable:
 			palette.setColor(QPalette::Text, enabled ? activeGreen : inactiveGreen);
 			break;
 	}

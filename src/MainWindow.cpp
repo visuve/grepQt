@@ -46,18 +46,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(_replacer, &FileReplacer::replaceCompleted, this, &MainWindow::onReplaceCompleted);
 	connect(_replacer, &FileReplacer::lineReplaced, _model, &ResultModel::addResult);
 
-	connect(_ui->groupBoxTarget, &TargetSelect::stateChanged, [this](int state)
+	connect(_ui->groupBoxTarget, &TargetSelect::stateChanged, [this](QValidator::State state)
 	{
 		auto previous = _state;
 
-		if (state == UiState::Ready)
-		{
-			_state.set(1, true);
-		}
-		else
-		{
-			_state.set(1, false);
-		}
+		_state.set(1, state == QValidator::State::Acceptable);
 
 		if (previous != _state)
 		{
@@ -65,18 +58,11 @@ MainWindow::MainWindow(QWidget *parent) :
 		}
 	});
 
-	connect(_ui->groupBoxExpression, &ExpressionSelect::stateChanged, [this](int state)
+	connect(_ui->groupBoxExpression, &ExpressionSelect::stateChanged, [this](QValidator::State state)
 	{
 		auto previous = _state;
 
-		if (state == UiState::Ready)
-		{
-			_state.set(2, true);
-		}
-		else
-		{
-			_state.set(2, false);
-		}
+		_state.set(2, state == QValidator::State::Acceptable);
 
 		if (previous != _state)
 		{

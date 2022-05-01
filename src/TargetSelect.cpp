@@ -13,20 +13,20 @@ TargetSelect::TargetSelect(QWidget *parent) :
 
 		switch (_state)
 		{
-			case UiState::Empty:
-				palette.setColor(QPalette::Highlight, Qt::black);
+			case QValidator::State::Invalid:
+				palette.setColor(QPalette::Highlight, errorHighlight);
 				palette.setColor(QPalette::Base, isEnabled() ? activeRed : inactiveRed);
 
 				_ui->lineEditWildcards->setEnabled(false);
 				_ui->lineEditExcludes->setEnabled(false);
 				break;
-			case UiState::Invalid:
+			case QValidator::State::Intermediate:
 				palette.setColor(QPalette::Highlight, isEnabled() ? activeRed : inactiveRed);
 				palette.setColor(QPalette::Text, isEnabled() ? activeRed : inactiveRed);
 				_ui->lineEditWildcards->setEnabled(false);
 				_ui->lineEditExcludes->setEnabled(false);
 				break;
-			case UiState::Ready:
+			case QValidator::State::Acceptable:
 				palette.setColor(QPalette::Text, isEnabled() ? activeGreen : inactiveGreen);
 				_ui->lineEditWildcards->setEnabled(true);
 				_ui->lineEditExcludes->setEnabled(true);
@@ -41,7 +41,7 @@ TargetSelect::TargetSelect(QWidget *parent) :
 	connect(_ui->lineEditWildcards, &QLineEdit::textChanged, this, &TargetSelect::onWildcardsChanged);
 	connect(_ui->lineEditExcludes, &QLineEdit::textChanged, this, &TargetSelect::onExcludesChanged);
 
-	emit stateChanged(UiState::Empty);
+	emit stateChanged(QValidator::State::Invalid);
 }
 
 TargetSelect::~TargetSelect()
@@ -79,19 +79,19 @@ void TargetSelect::onDirectoryChanged(const QString& value)
 {
 	_options->setPath(value);
 
-	int previous = _state;;
+	QValidator::State previous = _state;;
 
 	if (value.isEmpty())
 	{
-		_state = UiState::Empty;
+		_state = QValidator::Invalid;
 	}
 	else if (!QDir(value).exists())
 	{
-		_state = UiState::Invalid;
+		_state = QValidator::Intermediate;
 	}
 	else
 	{
-		_state = UiState::Ready;
+		_state = QValidator::Acceptable;
 	}
 
 	if (previous != _state)
@@ -116,10 +116,11 @@ void TargetSelect::setEnabled(bool enabled)
 
 	switch (_state)
 	{
-		case UiState::Empty:
+		case QValidator::State::Invalid:
+		case QValidator::State::Intermediate:
 			palette.setColor(QPalette::Base, enabled ? activeRed : inactiveRed);
 			break;
-		case UiState::Ready:
+		case QValidator::State::Acceptable:
 			palette.setColor(QPalette::Text, enabled ? activeGreen : inactiveGreen);
 			break;
 	}

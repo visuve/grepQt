@@ -27,10 +27,10 @@ public:
 	void setEnabled(bool);
 
 signals:
-	void stateChanged(int);
+	void stateChanged(QValidator::State);
 
 private:
 	Options* _options = nullptr;
 	Ui::TargetSelect* _ui;
-	int _state = 0;
+	QValidator::State _state = QValidator::State::Invalid;
 };
