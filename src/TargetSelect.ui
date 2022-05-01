@@ -19,7 +19,7 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QLineEdit" name="lineEditDirectory"/>
+    <widget class="CustomLineEdit" name="lineEditDirectory"/>
    </item>
    <item row="0" column="2">
     <widget class="QToolButton" name="toolButtonBrowse">
@@ -36,7 +36,7 @@
     </widget>
    </item>
    <item row="1" column="1" colspan="2">
-    <widget class="QLineEdit" name="lineEditWildcards">
+    <widget class="CustomLineEdit" name="lineEditWildcards">
      <property name="text">
       <string>*.*</string>
      </property>
@@ -50,10 +50,17 @@
     </widget>
    </item>
    <item row="2" column="1" colspan="2">
-    <widget class="QLineEdit" name="lineEditExcludes"/>
+    <widget class="CustomLineEdit" name="lineEditExcludes"/>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CustomLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>CustomLineEdit.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

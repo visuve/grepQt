@@ -24,7 +24,7 @@ public:
 	void onWildcardsChanged(const QString&);
 	void onExcludesChanged(const QString&);
 
-	void setEnabled(bool);
+	void onPathLineEditStateChanged(QValidator::State);
 
 signals:
 	void stateChanged(QValidator::State);
@@ -32,5 +32,4 @@ signals:
 private:
 	Options* _options = nullptr;
 	Ui::TargetSelect* _ui;
-	QValidator::State _state = QValidator::State::Invalid;
 };

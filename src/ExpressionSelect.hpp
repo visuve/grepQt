@@ -25,7 +25,7 @@ public:
 	void onSearchModeChanged(Options::SearchMode);
 	void onCaseSensitivityChanged(bool);
 
-	void setEnabled(bool);
+	void onLineEditSearchStateChanged(QValidator::State);
 
 signals:
 	void stateChanged(QValidator::State);
@@ -33,5 +33,4 @@ signals:
 private:
 	Options* _options = nullptr;
 	Ui::ExpressionSelect* _ui;
-	QValidator::State _state = QValidator::State::Invalid;
 };

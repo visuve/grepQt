@@ -7,41 +7,81 @@ TargetSelect::TargetSelect(QWidget *parent) :
 {
 	_ui->setupUi(this);
 
-	connect(this, &TargetSelect::stateChanged, [this]()
-	{
-		QPalette palette =this->palette();
-
-		switch (_state)
-		{
-			case QValidator::State::Invalid:
-				palette.setColor(QPalette::Highlight, errorHighlight);
-				palette.setColor(QPalette::Base, isEnabled() ? activeRed : inactiveRed);
-
-				_ui->lineEditWildcards->setEnabled(false);
-				_ui->lineEditExcludes->setEnabled(false);
-				break;
-			case QValidator::State::Intermediate:
-				palette.setColor(QPalette::Highlight, isEnabled() ? activeRed : inactiveRed);
-				palette.setColor(QPalette::Text, isEnabled() ? activeRed : inactiveRed);
-				_ui->lineEditWildcards->setEnabled(false);
-				_ui->lineEditExcludes->setEnabled(false);
-				break;
-			case QValidator::State::Acceptable:
-				palette.setColor(QPalette::Text, isEnabled() ? activeGreen : inactiveGreen);
-				_ui->lineEditWildcards->setEnabled(true);
-				_ui->lineEditExcludes->setEnabled(true);
-				break;
-		}
-
-		_ui->lineEditDirectory->setPalette(palette);
-	});
-
 	connect(_ui->toolButtonBrowse, &QToolButton::clicked, this, &TargetSelect::onOpenDirectoryDialog);
 	connect(_ui->lineEditDirectory, &QLineEdit::textChanged, this, &TargetSelect::onDirectoryChanged);
 	connect(_ui->lineEditWildcards, &QLineEdit::textChanged, this, &TargetSelect::onWildcardsChanged);
 	connect(_ui->lineEditExcludes, &QLineEdit::textChanged, this, &TargetSelect::onExcludesChanged);
 
-	emit stateChanged(QValidator::State::Invalid);
+	_ui->lineEditDirectory->setLambda([](const QString& raw)
+	{
+		if (raw.isEmpty())
+		{
+			return QValidator::Invalid;
+		}
+
+		if (QDir(raw).exists())
+		{
+			return QValidator::Acceptable;
+		}
+
+		return QValidator::Intermediate;
+	});
+
+	_ui->lineEditWildcards->setLambda([](const QString& raw)
+	{
+		if (raw.isEmpty())
+		{
+			return QValidator::Acceptable;
+		}
+
+		const QStringList values = raw.split('|');
+
+		for (const QString& value : values)
+		{
+			if (value.isEmpty() || values.count(value) > 1)
+			{
+				qWarning() << "Duplicate or empty";
+				return QValidator::Invalid;
+			}
+
+			if (!value.contains('*') && !value.contains('?'))
+			{
+				qWarning() << "Not a proper wildcard";
+				return QValidator::Intermediate;
+			}
+		}
+
+		return QValidator::Acceptable;
+	});
+
+	_ui->lineEditExcludes->setLambda([](const QString& raw)
+	{
+		if (raw.isEmpty())
+		{
+			return QValidator::Acceptable;
+		}
+
+		const QStringList values = raw.split('|');
+
+		for (const QString& value : values)
+		{
+			if (value.isEmpty() || values.count(value) > 1)
+			{
+				qWarning() << "Duplicate or empty";
+				return QValidator::Invalid;
+			}
+
+			if (value.contains('*') || value.contains('?'))
+			{
+				qWarning() << "Wildcards not accepted here";
+				return QValidator::Intermediate;
+			}
+		}
+
+		return QValidator::Acceptable;
+	});
+
+	connect(_ui->lineEditDirectory, &CustomLineEdit::stateChanged, this, &TargetSelect::onPathLineEditStateChanged);
 }
 
 TargetSelect::~TargetSelect()
@@ -78,26 +118,6 @@ void TargetSelect::onOpenDirectoryDialog()
 void TargetSelect::onDirectoryChanged(const QString& value)
 {
 	_options->setPath(value);
-
-	QValidator::State previous = _state;;
-
-	if (value.isEmpty())
-	{
-		_state = QValidator::Invalid;
-	}
-	else if (!QDir(value).exists())
-	{
-		_state = QValidator::Intermediate;
-	}
-	else
-	{
-		_state = QValidator::Acceptable;
-	}
-
-	if (previous != _state)
-	{
-		emit stateChanged(_state);
-	}
 }
 
 void TargetSelect::onWildcardsChanged(const QString& value)
@@ -110,22 +130,20 @@ void TargetSelect::onExcludesChanged(const QString& value)
 	_options->setExcludes(value.split('|'));
 }
 
-void TargetSelect::setEnabled(bool enabled)
+void TargetSelect::onPathLineEditStateChanged(QValidator::State state)
 {
-	QPalette palette = _ui->lineEditDirectory->palette();
-
-	switch (_state)
+	switch (state)
 	{
 		case QValidator::State::Invalid:
 		case QValidator::State::Intermediate:
-			palette.setColor(QPalette::Base, enabled ? activeRed : inactiveRed);
+			_ui->lineEditWildcards->setEnabled(false);
+			_ui->lineEditExcludes->setEnabled(false);
 			break;
 		case QValidator::State::Acceptable:
-			palette.setColor(QPalette::Text, enabled ? activeGreen : inactiveGreen);
+			_ui->lineEditWildcards->setEnabled(true);
+			_ui->lineEditExcludes->setEnabled(true);
 			break;
 	}
 
-	_ui->lineEditDirectory->setPalette(palette);
-
-	return QGroupBox::setEnabled(enabled);
+	emit stateChanged(state);
 }
