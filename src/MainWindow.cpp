@@ -9,7 +9,6 @@
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	_ui(new Ui::MainWindow()),
-	_options(new Options(this)),
 	_model(new ResultModel(this)),
 	_searcher(new FileSearcher(_options, this)),
 	_replacer(new FileReplacer(_options, this))
@@ -17,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	_ui->setupUi(this);
 
 	_ui->actionOpen->setIcon(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon));
-	//connect(_ui->actionOpen, &QAction::triggered, this, &MainWindow::onOpenDirectoryDialog);
+	connect(_ui->actionOpen, &QAction::triggered, _ui->groupBoxTarget, &TargetSelect::onOpenDirectoryDialog);
 
 	_ui->actionExit->setIcon(QApplication::style()->standardIcon(QStyle::SP_DialogCloseButton));
 	connect(_ui->actionExit, &QAction::triggered, qApp, &QApplication::quit);
@@ -47,12 +46,57 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(_replacer, &FileReplacer::replaceCompleted, this, &MainWindow::onReplaceCompleted);
 	connect(_replacer, &FileReplacer::lineReplaced, _model, &ResultModel::addResult);
 
+	connect(_ui->groupBoxTarget, &TargetSelect::stateChanged, [this](int state)
+	{
+		auto previous = _state;
+
+		if (state == UiState::Ready)
+		{
+			_state.set(1, true);
+		}
+		else
+		{
+			_state.set(1, false);
+		}
+
+		if (previous != _state)
+		{
+			update();
+		}
+	});
+
+	connect(_ui->groupBoxExpression, &ExpressionSelect::stateChanged, [this](int state)
+	{
+		auto previous = _state;
+
+		if (state == UiState::Ready)
+		{
+			_state.set(2, true);
+		}
+		else
+		{
+			_state.set(2, false);
+		}
+
+		if (previous != _state)
+		{
+			update();
+		}
+	});
+
+	update();
+
+#ifdef _DEBUG
+	QTimer::singleShot(1500, this, &MainWindow::loadOptions);
+#elif
 	loadOptions();
+#endif
 }
 
 MainWindow::~MainWindow()
 {
 	delete _ui;
+	qDebug() << "Destroyed";
 }
 
 void MainWindow::onAbout()
@@ -195,4 +239,49 @@ void MainWindow::loadOptions()
 	_ui->groupBoxTarget->load(&_options);
 	_ui->groupBoxExpression->load(&_options);
 	_ui->groupBoxLimit->load(&_options);
+}
+
+void MainWindow::update()
+{
+	qDebug() << "State" << _state.to_ulong();
+
+	enum InternalState : unsigned long
+	{
+		Snafu = 0,
+		NoSearch = 2,
+		NoPath = 4,
+		Ready = 6
+	};
+
+	switch(_state.to_ulong())
+	{
+		case InternalState::Snafu:
+			_ui->groupBoxExpression->setEnabled(false);
+			_ui->groupBoxLimit->setEnabled(false);
+
+			_ui->pushButtonSearch->setEnabled(false);
+			_ui->pushButtonReplace->setEnabled(false);
+			break;
+		case InternalState::NoSearch:
+			_ui->groupBoxExpression->setEnabled(true);
+			_ui->groupBoxLimit->setEnabled(false);
+
+			_ui->pushButtonSearch->setEnabled(false);
+			_ui->pushButtonReplace->setEnabled(false);
+			break;
+		case InternalState::NoPath:
+			_ui->groupBoxExpression->setEnabled(false);
+			_ui->groupBoxLimit->setEnabled(false);
+
+			_ui->pushButtonSearch->setEnabled(false);
+			_ui->pushButtonReplace->setEnabled(false);
+			break;
+		case InternalState::Ready:
+			_ui->groupBoxExpression->setEnabled(true);
+			_ui->groupBoxLimit->setEnabled(true);
+
+			_ui->pushButtonSearch->setEnabled(true);
+			_ui->pushButtonReplace->setEnabled(true);
+			break;
+	}
 }

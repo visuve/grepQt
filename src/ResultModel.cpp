@@ -123,6 +123,7 @@ ResultModel::ResultModel(QObject *parent) :
 ResultModel::~ResultModel()
 {
 	delete _root;
+	qDebug() << "Destroyed";
 }
 
 QModelIndex ResultModel::index(int row, int column, const QModelIndex& parentIndex) const
@@ -171,13 +172,22 @@ QVariant ResultModel::data(const QModelIndex& index, int role) const
 	}
 
 	Node* item = indexToNode(index);
-	bool topLevel = item->parent() == _root;
+	Node* parent = item->parent();
+
+	bool topLevel = parent == _root;
 	int column = index.column();
 	bool isParent = column == 0 && topLevel;
 	bool isChild = column >= 1 && !topLevel;
+	bool isPath = column == 0 && !topLevel;
 
 	if (role == Qt::DisplayRole)
 	{
+		if (isPath)
+		{
+			// TODO: this is very ugly
+			return QFileInfo(parent->data(Qt::DisplayRole, 0).toString()).fileName();
+		}
+
 		if (isParent)
 		{
 			return item->data(Qt::DisplayRole, column);

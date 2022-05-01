@@ -31,7 +31,7 @@ void FileReplacer::run()
 	{
 		const QString path = iter.next();
 
-		if (!filterFunction(QFileInfo(path)))
+		if (!filterFunction(iter.fileInfo()))
 		{
 			qDebug() << "Filtered:" << path;
 			continue;

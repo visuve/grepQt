@@ -14,7 +14,7 @@
    <item row="0" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Search path</string>
+      <string>Search path:</string>
      </property>
     </widget>
    </item>
@@ -31,7 +31,7 @@
    <item row="1" column="0">
     <widget class="QLabel" name="labelWildcards">
      <property name="text">
-      <string>File name wildcards (pipe separated)</string>
+      <string>File name wildcards (pipe separated):</string>
      </property>
     </widget>
    </item>
@@ -45,7 +45,7 @@
    <item row="2" column="0">
     <widget class="QLabel" name="labelExcludes">
      <property name="text">
-      <string>Include only (pipe separated)</string>
+      <string>Exclude directories (pipe separated):</string>
      </property>
     </widget>
    </item>

@@ -18,6 +18,7 @@ LimitSelect::LimitSelect(QWidget *parent) :
 
 LimitSelect::~LimitSelect()
 {
+	qDebug() << "Destroyed";
 	delete _ui;
 }
 
@@ -48,8 +49,8 @@ void LimitSelect::onFileSizeOptionChanged(int index)
 			_options->setSizeFilterOption(Options::ComparisonOption::Irrelevant);
 			break;
 		case Options::ComparisonOption::Lesser:
-			_ui->spinBoxSizeFrom->setEnabled(true);
-			_ui->spinBoxSizeTo->setEnabled(false);
+			_ui->spinBoxSizeFrom->setEnabled(false);
+			_ui->spinBoxSizeTo->setEnabled(true);
 			_options->setSizeFilterOption(Options::ComparisonOption::Lesser);
 			break;
 		case Options::ComparisonOption::Greater:
@@ -66,21 +67,16 @@ void LimitSelect::onFileSizeOptionChanged(int index)
 }
 void LimitSelect::onFileSizeFromChanged(int value)
 {
-	qDebug() << value;
 	_options->setSizeFilterFrom(value * 1024);
 }
 
-
 void LimitSelect::onFileSizeToChanged(int value)
 {
-	qDebug() << value;
 	_options->setSizeFilterTo(value * 1024);
 }
 
 void LimitSelect::onFileTimeOptionChanged(int index)
 {
-	qDebug() << index;
-
 	switch (static_cast<Options::ComparisonOption>(index))
 	{
 		case Options::ComparisonOption::Irrelevant:
@@ -89,8 +85,8 @@ void LimitSelect::onFileTimeOptionChanged(int index)
 			_options->setTimeFilterOption(Options::ComparisonOption::Irrelevant);
 			break;
 		case Options::ComparisonOption::Lesser:
-			_ui->dateTimeEditFrom->setEnabled(true);
-			_ui->dateTimeEditTo->setEnabled(false);
+			_ui->dateTimeEditFrom->setEnabled(false);
+			_ui->dateTimeEditTo->setEnabled(true);
 			_options->setTimeFilterOption(Options::ComparisonOption::Lesser);
 			break;
 		case Options::ComparisonOption::Greater:
@@ -108,12 +104,10 @@ void LimitSelect::onFileTimeOptionChanged(int index)
 
 void LimitSelect::onFileTimeFromChanged(const QDateTime& value)
 {
-	qDebug() << value;
 	_options->setTimeFilterFrom(value);
 }
 
 void LimitSelect::onFileTimeToChanged(const QDateTime& value)
 {
-	qDebug() << value;
 	_options->setTimeFilterTo(value);
 }

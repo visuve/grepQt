@@ -2,6 +2,8 @@
 
 #include "Options.hpp"
 
+#include <bitset>
+
 namespace Ui
 {
 	class MainWindow;
@@ -31,10 +33,15 @@ private:
 	void openParentDirectory(const QString& filePath);
 
 	void loadOptions();
+	void update();
 
 	Ui::MainWindow* _ui;
 	Options _options;
 	ResultModel* _model;
 	FileSearcher* _searcher;
 	FileReplacer* _replacer;
+	std::bitset<4> _state;
+
+signals:
+	void stateChanged();
 };

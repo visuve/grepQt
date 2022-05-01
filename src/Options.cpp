@@ -68,12 +68,11 @@ Options::~Options()
 
 	sync(); // TODO: probably not needed
 
-	qDebug() << "Destroyed.";
+	qDebug() << "Destroyed";
 }
 
 const QString& Options::path() const
 {
-	qDebug() << _path;
 	return _path;
 }
 
@@ -105,7 +104,6 @@ void Options::setWildcards(const QStringList& value)
 
 const QStringList& Options::excludes() const
 {
-	qDebug() << _excludes;
 	return _excludes;
 }
 
@@ -121,7 +119,6 @@ void Options::setExcludes(const QStringList& value)
 
 const QString& Options::searchExpression() const
 {
-	qDebug() << _searchExpression;
 	return _searchExpression;
 }
 
@@ -137,7 +134,6 @@ void Options::setSearchExpression(const QString& value)
 
 const QString& Options::replacementText() const
 {
-	qDebug() << _replacementText;
 	return _replacementText;
 }
 
@@ -153,7 +149,6 @@ void Options::setReplacementText(const QString& value)
 
 Options::SearchMode Options::searchMode() const
 {
-	qDebug() << _searchMode;
 	return _searchMode;
 }
 
@@ -169,7 +164,6 @@ void Options::setSearchMode(SearchMode value)
 
 bool Options::isCaseSensitive() const
 {
-	qDebug() << _isCaseSensitive;
 	return _isCaseSensitive;
 }
 
@@ -185,7 +179,6 @@ void Options::setCaseSensitive(bool value)
 
 Options::ComparisonOption Options::sizeFilterOption() const
 {
-	qDebug() << _sizeFilterOption;
 	return _sizeFilterOption;
 }
 
@@ -201,7 +194,6 @@ void Options::setSizeFilterOption(ComparisonOption value)
 
 qint64 Options::sizeFilterFrom() const
 {
-	qDebug() << _sizeFilterFrom;
 	return _sizeFilterFrom;
 }
 
@@ -217,7 +209,6 @@ void Options::setSizeFilterFrom(qint64 value)
 
 qint64 Options::sizeFilterTo() const
 {
-	qDebug() << _sizeFilterTo;
 	return _sizeFilterTo;
 }
 
@@ -233,7 +224,6 @@ void Options::setSizeFilterTo(qint64 value)
 
 Options::ComparisonOption Options::timeFilterOption() const
 {
-	qDebug() << _timeFilterOption;
 	return _timeFilterOption;
 }
 
@@ -249,7 +239,6 @@ void Options::setTimeFilterOption(ComparisonOption value)
 
 const QDateTime& Options::timeFilterFrom() const
 {
-	qDebug() << _timeFilterFrom;
 	return _timeFilterFrom;
 }
 
@@ -265,7 +254,6 @@ void Options::setTimeFilterFrom(const QDateTime& value)
 
 const QDateTime& Options::timeFilterTo() const
 {
-	qDebug() << _timeFilterTo;
 	return _timeFilterTo;
 }
 
@@ -301,7 +289,7 @@ std::function<bool (const QFileInfo&)> Options::createFilterFunction() const
 				sizeMatches = true;
 				break;
 			case Options::ComparisonOption::Lesser:
-				sizeMatches = fileInfo.size() < _sizeFilterFrom;
+				sizeMatches = fileInfo.size() < _sizeFilterTo;
 				break;
 			case Options::ComparisonOption::Greater:
 				sizeMatches = fileInfo.size() > _sizeFilterFrom;
@@ -319,13 +307,14 @@ std::function<bool (const QFileInfo&)> Options::createFilterFunction() const
 				lastModifiedMatches = true;
 				break;
 			case Options::ComparisonOption::Lesser:
-				sizeMatches = fileInfo.lastModified() < _timeFilterFrom;
+				lastModifiedMatches = fileInfo.lastModified() < _timeFilterTo;
 				break;
 			case Options::ComparisonOption::Greater:
-				sizeMatches = fileInfo.lastModified() > _timeFilterFrom;
+				lastModifiedMatches = fileInfo.lastModified() > _timeFilterFrom;
 				break;
+
 			case Options::ComparisonOption::Between:
-				sizeMatches = fileInfo.lastModified() > _timeFilterFrom && fileInfo.lastModified() < _timeFilterTo;
+				lastModifiedMatches = fileInfo.lastModified() > _timeFilterFrom && fileInfo.lastModified() < _timeFilterTo;
 				break;
 		}
 

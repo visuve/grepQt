@@ -14,7 +14,7 @@
    <item row="0" column="0">
     <widget class="QLabel" name="labelFileSize">
      <property name="text">
-      <string>File size</string>
+      <string>File size:</string>
      </property>
     </widget>
    </item>
@@ -44,9 +44,6 @@
    </item>
    <item row="0" column="2">
     <widget class="QSpinBox" name="spinBoxSizeFrom">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
      <property name="suffix">
       <string> KiB</string>
      </property>
@@ -60,9 +57,6 @@
    </item>
    <item row="1" column="2">
     <widget class="QSpinBox" name="spinBoxSizeTo">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
      <property name="suffix">
       <string> KiB</string>
      </property>
@@ -77,7 +71,7 @@
    <item row="2" column="0">
     <widget class="QLabel" name="labelLastModified">
      <property name="text">
-      <string>File last modified</string>
+      <string>Last modified:</string>
      </property>
     </widget>
    </item>
@@ -106,21 +100,10 @@
     </widget>
    </item>
    <item row="2" column="2">
-    <widget class="QDateTimeEdit" name="dateTimeEditFrom">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="displayFormat">
-      <string>M/d/yy h:mm AP</string>
-     </property>
-    </widget>
+    <widget class="QDateTimeEdit" name="dateTimeEditFrom"/>
    </item>
    <item row="3" column="2">
-    <widget class="QDateTimeEdit" name="dateTimeEditTo">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-    </widget>
+    <widget class="QDateTimeEdit" name="dateTimeEditTo"/>
    </item>
   </layout>
  </widget>

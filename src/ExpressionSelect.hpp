@@ -25,10 +25,13 @@ public:
 	void onSearchModeChanged(Options::SearchMode);
 	void onCaseSensitivityChanged(bool);
 
+	void setEnabled(bool);
+
 signals:
-	void isReady(bool);
+	void stateChanged(int);
 
 private:
 	Options* _options = nullptr;
 	Ui::ExpressionSelect* _ui;
+	int _state = 0;
 };

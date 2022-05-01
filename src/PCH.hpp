@@ -26,3 +26,16 @@
 #include <iostream>
 
 #include <icu.h>
+
+enum UiState : int
+{
+	Empty = -1,
+	Invalid = 0,
+	Ready = 1
+};
+
+constexpr QColor activeGreen(0, 128, 0);
+constexpr QColor inactiveGreen(0, 64, 0);
+
+constexpr QColor activeRed(192, 0, 0);
+constexpr QColor inactiveRed(96, 0, 0);

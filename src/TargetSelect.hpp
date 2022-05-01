@@ -24,10 +24,13 @@ public:
 	void onWildcardsChanged(const QString&);
 	void onExcludesChanged(const QString&);
 
+	void setEnabled(bool);
+
 signals:
-	void isReady(bool);
+	void stateChanged(int);
 
 private:
 	Options* _options = nullptr;
 	Ui::TargetSelect* _ui;
+	int _state = 0;
 };
