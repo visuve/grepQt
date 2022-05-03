@@ -14,6 +14,79 @@ LimitSelect::LimitSelect(QWidget *parent) :
 	connect(_ui->comboBoxLastModified, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LimitSelect::onFileTimeOptionChanged);
 	connect(_ui->dateTimeEditFrom, &QDateTimeEdit::dateTimeChanged, this, &LimitSelect::onFileTimeFromChanged);
 	connect(_ui->dateTimeEditTo, &QDateTimeEdit::dateTimeChanged, this, &LimitSelect::onFileTimeToChanged);
+
+	_ui->spinBoxSizeFrom->setLambda([&](const QVariant& v)
+	{
+		const int from = v.toInt();
+		const int to = _ui->spinBoxSizeTo->value();
+
+		if (from > to)
+		{
+			qDebug() << from << to;
+			return QValidator::State::Invalid;
+		}
+
+		if (from == to)
+		{
+			return QValidator::State::Intermediate;
+		}
+
+		return QValidator::State::Acceptable;
+	});
+
+	_ui->spinBoxSizeTo->setLambda([&](const QVariant& v)
+	{
+		const int from = _ui->spinBoxSizeFrom->value();
+		const int to = v.toInt();
+
+		if (from > to)
+		{
+			return QValidator::State::Invalid;
+		}
+
+		if (from == to)
+		{
+			return QValidator::State::Intermediate;
+		}
+
+		return QValidator::State::Acceptable;
+	});
+
+	_ui->dateTimeEditFrom->setLambda([&](const QVariant& v)
+	{
+		const QDateTime from = v.toDateTime();
+		const QDateTime to = _ui->dateTimeEditTo->dateTime();
+
+		if (from > to)
+		{
+			return QValidator::State::Invalid;
+		}
+
+		if (from == to)
+		{
+			return QValidator::State::Intermediate;
+		}
+
+		return QValidator::State::Acceptable;
+	});
+
+	_ui->dateTimeEditTo->setLambda([&](const QVariant& v)
+	{
+		const QDateTime from = _ui->dateTimeEditFrom->dateTime();
+		const QDateTime to = v.toDateTime();
+
+		if (from > to)
+		{
+			return QValidator::State::Invalid;
+		}
+
+		if (from == to)
+		{
+			return QValidator::State::Intermediate;
+		}
+
+		return QValidator::State::Acceptable;
+	});
 }
 
 LimitSelect::~LimitSelect()
@@ -68,11 +141,13 @@ void LimitSelect::onFileSizeOptionChanged(int index)
 void LimitSelect::onFileSizeFromChanged(int value)
 {
 	_options->setSizeFilterFrom(value * 1024);
+	_ui->spinBoxSizeTo->check();
 }
 
 void LimitSelect::onFileSizeToChanged(int value)
 {
 	_options->setSizeFilterTo(value * 1024);
+	_ui->spinBoxSizeFrom->check();
 }
 
 void LimitSelect::onFileTimeOptionChanged(int index)
@@ -105,9 +180,11 @@ void LimitSelect::onFileTimeOptionChanged(int index)
 void LimitSelect::onFileTimeFromChanged(const QDateTime& value)
 {
 	_options->setTimeFilterFrom(value);
+	_ui->dateTimeEditTo->check();
 }
 
 void LimitSelect::onFileTimeToChanged(const QDateTime& value)
 {
 	_options->setTimeFilterTo(value);
+	_ui->dateTimeEditFrom->check();
 }

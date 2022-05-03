@@ -19,8 +19,9 @@ ExpressionSelect::ExpressionSelect(QWidget* parent) :
 	connect(_ui->radioButtonRegex, &QRadioButton::clicked, this, std::bind(&ExpressionSelect::onSearchModeChanged, this, Options::SearchMode::Regex));
 	connect(_ui->checkBoxCaseSensitive, &QCheckBox::toggled, this, &ExpressionSelect::onCaseSensitivityChanged);
 
-	_ui->lineEditSearch->setLambda([](const QString& raw)
+	_ui->lineEditSearch->setLambda([](const QVariant& v)
 	{
+		const QString raw = v.toString();
 		return raw.isEmpty()? QValidator::Invalid : QValidator::Acceptable;
 	});
 

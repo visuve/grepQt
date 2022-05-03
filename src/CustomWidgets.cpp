@@ -1,30 +1,15 @@
-#include "CustomLineEdit.hpp"
+#include "CustomWidgets.hpp"
 
-CustomLineEdit::CustomLineEdit(QWidget *parent) :
-	QLineEdit(parent)
+template<typename WidgetType>
+void LambdaWidget<WidgetType>::check(const QVariant& v)
 {
-}
+	if (!_lambda)
+	{
+		return;
+	}
 
-void CustomLineEdit::setLambda(std::function<QValidator::State(const QString&)> lambda)
-{
-	Q_ASSERT(_lambda == nullptr);
-
-	_lambda = lambda;
-
-	validate(text());
-
-	connect(this, &QLineEdit::textChanged, this, &CustomLineEdit::validate);
-}
-
-QValidator::State CustomLineEdit::state()
-{
-	return _state;
-}
-
-void CustomLineEdit::validate(const QString& text)
-{
-	auto previous = _state;
-	_state = _lambda(text);
+	const QValidator::State previous = _state;
+	_state = _lambda(v);
 
 	if (previous == _state)
 	{
@@ -52,6 +37,27 @@ void CustomLineEdit::validate(const QString& text)
 			break;
 	}
 
-	setPalette(palette);
-	emit stateChanged(_state);
+	WidgetType::setPalette(palette);
+	stateChanged(_state);
+}
+
+
+CustomLineEdit::CustomLineEdit(QWidget* parent) :
+	LambdaWidget<QLineEdit>(parent)
+{
+	QObject::connect(this, &QLineEdit::textChanged, this, &CustomLineEdit::check);
+}
+
+
+CustomSpinBox::CustomSpinBox(QWidget* parent) :
+	LambdaWidget<QSpinBox>(parent)
+{
+	QObject::connect(this, &QSpinBox::valueChanged, this, &CustomSpinBox::check);
+}
+
+
+CustomDateTimeEdit::CustomDateTimeEdit(QWidget* parent) :
+	LambdaWidget<QDateTimeEdit>(parent)
+{
+	QObject::connect(this, &QDateTimeEdit::dateTimeChanged, this, &CustomDateTimeEdit::check);
 }

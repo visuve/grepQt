@@ -58,7 +58,7 @@
   <customwidget>
    <class>CustomLineEdit</class>
    <extends>QLineEdit</extends>
-   <header>CustomLineEdit.hpp</header>
+   <header>CustomWidgets.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

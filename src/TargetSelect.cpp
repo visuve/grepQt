@@ -12,8 +12,10 @@ TargetSelect::TargetSelect(QWidget *parent) :
 	connect(_ui->lineEditWildcards, &QLineEdit::textChanged, this, &TargetSelect::onWildcardsChanged);
 	connect(_ui->lineEditExcludes, &QLineEdit::textChanged, this, &TargetSelect::onExcludesChanged);
 
-	_ui->lineEditDirectory->setLambda([](const QString& raw)
+	_ui->lineEditDirectory->setLambda([](const QVariant& v)
 	{
+		const QString raw = v.toString();
+
 		if (raw.isEmpty())
 		{
 			return QValidator::Invalid;
@@ -27,8 +29,10 @@ TargetSelect::TargetSelect(QWidget *parent) :
 		return QValidator::Intermediate;
 	});
 
-	_ui->lineEditWildcards->setLambda([](const QString& raw)
+	_ui->lineEditWildcards->setLambda([](const QVariant& v)
 	{
+		const QString raw = v.toString();
+
 		if (raw.isEmpty())
 		{
 			return QValidator::Acceptable;
@@ -54,8 +58,10 @@ TargetSelect::TargetSelect(QWidget *parent) :
 		return QValidator::Acceptable;
 	});
 
-	_ui->lineEditExcludes->setLambda([](const QString& raw)
+	_ui->lineEditExcludes->setLambda([](const QVariant& v)
 	{
+		const QString raw = v.toString();
+
 		if (raw.isEmpty())
 		{
 			return QValidator::Acceptable;

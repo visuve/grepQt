@@ -43,7 +43,7 @@
     </widget>
    </item>
    <item row="0" column="2">
-    <widget class="QSpinBox" name="spinBoxSizeFrom">
+    <widget class="CustomSpinBox" name="spinBoxSizeFrom">
      <property name="suffix">
       <string> KiB</string>
      </property>
@@ -56,7 +56,7 @@
     </widget>
    </item>
    <item row="1" column="2">
-    <widget class="QSpinBox" name="spinBoxSizeTo">
+    <widget class="CustomSpinBox" name="spinBoxSizeTo">
      <property name="suffix">
       <string> KiB</string>
      </property>
@@ -100,13 +100,25 @@
     </widget>
    </item>
    <item row="2" column="2">
-    <widget class="QDateTimeEdit" name="dateTimeEditFrom"/>
+    <widget class="CustomDateTimeEdit" name="dateTimeEditFrom"/>
    </item>
    <item row="3" column="2">
-    <widget class="QDateTimeEdit" name="dateTimeEditTo"/>
+    <widget class="CustomDateTimeEdit" name="dateTimeEditTo"/>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CustomDateTimeEdit</class>
+   <extends>QDateTimeEdit</extends>
+   <header>CustomWidgets.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>CustomSpinBox</class>
+   <extends>QSpinBox</extends>
+   <header>CustomWidgets.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
