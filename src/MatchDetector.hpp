@@ -9,7 +9,7 @@ public:
 
 	~MatchDetector();
 
-	bool feed(const char* data, size_t size, bool flush);
+	bool feed(QByteArrayView content, bool flush);
 
 	inline auto begin() const
 	{
@@ -26,7 +26,6 @@ private:
 	bool detectMatch();
 
 	UErrorCode _status = U_ZERO_ERROR;
-
 	UConverter* _converter = nullptr;
 	UBreakIterator* _iterator = nullptr;
 	URegularExpression* _regex = nullptr;

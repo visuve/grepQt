@@ -57,21 +57,22 @@ MatchDetector::~MatchDetector()
 	}
 }
 
-bool MatchDetector::feed(const char* data, size_t size, bool flush)
+bool MatchDetector::feed(QByteArrayView content, bool flush)
 {
 	if (U_FAILURE(_status))
 	{
 		return false;
 	}
 
-	std::u16string buffer(size, '\0');
+	std::u16string buffer(content.size(), '\0');
 
 	UChar* target = buffer.data();
-	UChar* targetLimit = target + buffer.size();
+	UChar* targetLimit = buffer.data() + buffer.size();
 
-	const char* sourceDataLimit = data + size;
+	const char* sourceData = content.data();
+	const char* sourceDataLimit = content.data() + content.size();
 
-	ucnv_toUnicode(_converter, &target, targetLimit, &data, sourceDataLimit, nullptr, flush, &_status);
+	ucnv_toUnicode(_converter, &target, targetLimit, &sourceData, sourceDataLimit, nullptr, flush, &_status);
 
 	if (U_FAILURE(_status))
 	{

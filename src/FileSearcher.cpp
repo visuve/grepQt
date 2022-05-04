@@ -73,7 +73,7 @@ void FileSearcher::run()
 		{
 			const qint64 bytesRead = file.read(raw.data(), raw.size());
 
-			if (!matcher.feed(raw.data(), static_cast<size_t>(bytesRead), file.atEnd()))
+			if (!matcher.feed({ raw.data(), bytesRead }, file.atEnd()))
 			{
 				qInfo() << "Cannot process" << path;
 				break;
