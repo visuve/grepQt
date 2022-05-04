@@ -128,12 +128,12 @@ void TargetSelect::onDirectoryChanged(const QString& value)
 
 void TargetSelect::onWildcardsChanged(const QString& value)
 {
-	_options->setWildcards(value.split('|'));
+	_options->setWildcards(value);
 }
 
 void TargetSelect::onExcludesChanged(const QString& value)
 {
-	_options->setExcludes(value.split('|'));
+	_options->setExcludes(value);
 }
 
 void TargetSelect::onPathLineEditStateChanged(QValidator::State state)

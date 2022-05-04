@@ -23,18 +23,22 @@ void FileSearcher::run()
 
 	auto filterFunction = _options.createFilterFunction();
 
-	QDirIterator iter(_options.path(), _options.wildcards(), QDir::Files, QDirIterator::Subdirectories);
+	const QStringList& wildcards = _options.wildcards();
+
+	std::unique_ptr<QDirIterator> iter = wildcards.isEmpty() ?
+		std::make_unique<QDirIterator>(_options.path(), QDir::Files, QDirIterator::Subdirectories):
+		std::make_unique<QDirIterator>(_options.path(), _options.wildcards(), QDir::Files, QDirIterator::Subdirectories);
 
 	int filesProcessed = 0;
 	std::array<char, 0x2000> raw;
 
 	QString decoded;
 
-	while (!QThread::currentThread()->isInterruptionRequested() && iter.hasNext())
+	while (!QThread::currentThread()->isInterruptionRequested() && iter->hasNext())
 	{
-		const QString path = iter.next();
+		const QString path = iter->next();
 
-		if (!filterFunction(QFileInfo(path)))
+		if (!filterFunction(iter->fileInfo()))
 		{
 			qDebug() << "Filtered:" << path;
 			continue;

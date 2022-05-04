@@ -28,7 +28,7 @@ Options::Options(QObject* parent) :
 {
 	_path = value(Keys::Path).value<QString>();
 	_wildcards = value(Keys::Wildcards, "*.*").value<QString>().split('|');
-	_excludes = value(Keys::Excludes, ".git").value<QString>().split('|');
+	_excludes = value(Keys::Excludes, ".bzr|.git|.hg|.svn").value<QString>().split('|');
 
 	_searchExpression = value(Keys::SearchExpression).value<QString>();
 	_replacementText = value(Keys::ReplacementText).value<QString>();
@@ -92,6 +92,18 @@ const QStringList& Options::wildcards() const
 	return _wildcards;
 }
 
+void Options::setWildcards(const QString& wildcards)
+{
+	if (wildcards.isEmpty())
+	{
+		_wildcards.clear();
+	}
+	else
+	{
+		setWildcards(wildcards.split('|'));
+	}
+}
+
 void Options::setWildcards(const QStringList& value)
 {
 	if (_wildcards != value)
@@ -105,6 +117,18 @@ void Options::setWildcards(const QStringList& value)
 const QStringList& Options::excludes() const
 {
 	return _excludes;
+}
+
+void Options::setExcludes(const QString& excludes)
+{
+	if (excludes.isEmpty())
+	{
+		_excludes.clear();
+	}
+	else
+	{
+		setExcludes(excludes.split('|'));
+	}
 }
 
 void Options::setExcludes(const QStringList& value)

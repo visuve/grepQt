@@ -25,10 +25,10 @@ public:
 	void setPath(const QString&);
 
 	const QStringList& wildcards() const;
-	void setWildcards(const QStringList&);
+	void setWildcards(const QString&);
 
 	const QStringList& excludes() const;
-	void setExcludes(const QStringList&);
+	void setExcludes(const QString&);
 
 	const QString& searchExpression() const;
 	void setSearchExpression(const QString&);
@@ -64,6 +64,9 @@ public:
 	std::function<bool(QString&)> createReplaceFunction() const;
 
 private:
+	void setWildcards(const QStringList&);
+	void setExcludes(const QStringList&);
+
 	QString _path;
 	QStringList _wildcards;
 	QStringList _excludes;
