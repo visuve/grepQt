@@ -21,19 +21,19 @@ void LambdaWidget<WidgetType>::check(const QVariant& v)
 	switch(_state)
 	{
 		case QValidator::Invalid:
-			palette.setColor(QPalette::Highlight, errorHighlight);
-			palette.setColor(QPalette::Active, QPalette::Base, activeRed);
-			palette.setColor(QPalette::Disabled, QPalette::Base, inactiveRed);
+			palette.setColor(QPalette::Highlight, grepQt::errorHighlight);
+			palette.setColor(QPalette::Active, QPalette::Base, grepQt::activeRed);
+			palette.setColor(QPalette::Disabled, QPalette::Base, grepQt::inactiveRed);
 			break;
 		case QValidator::Intermediate:
-			palette.setColor(QPalette::Active, QPalette::Highlight, activeRed);
-			palette.setColor(QPalette::Disabled, QPalette::Highlight, inactiveRed);
-			palette.setColor(QPalette::Active, QPalette::Text, activeRed);
-			palette.setColor(QPalette::Disabled, QPalette::Text, inactiveRed);
+			palette.setColor(QPalette::Active, QPalette::Highlight, grepQt::activeRed);
+			palette.setColor(QPalette::Disabled, QPalette::Highlight, grepQt::inactiveRed);
+			palette.setColor(QPalette::Active, QPalette::Text, grepQt::activeRed);
+			palette.setColor(QPalette::Disabled, QPalette::Text, grepQt::inactiveRed);
 			break;
 		case QValidator::Acceptable:
-			palette.setColor(QPalette::Active, QPalette::Text, activeGreen);
-			palette.setColor(QPalette::Disabled, QPalette::Text, inactiveGreen);
+			palette.setColor(QPalette::Active, QPalette::Text, grepQt::activeGreen);
+			palette.setColor(QPalette::Disabled, QPalette::Text, grepQt::inactiveGreen);
 			break;
 	}
 

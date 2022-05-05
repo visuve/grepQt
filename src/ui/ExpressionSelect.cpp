@@ -8,8 +8,8 @@ ExpressionSelect::ExpressionSelect(QWidget* parent) :
 	_ui->setupUi(this);
 
 	QPalette palette =_ui->lineEditReplace->palette();
-	palette.setColor(QPalette::Active, QPalette::Text, activeGreen);
-	palette.setColor(QPalette::Disabled, QPalette::Text, inactiveGreen);
+	palette.setColor(QPalette::Active, QPalette::Text, grepQt::activeGreen);
+	palette.setColor(QPalette::Disabled, QPalette::Text, grepQt::inactiveGreen);
 	_ui->lineEditReplace->setPalette(palette);
 
 	connect(_ui->lineEditSearch, &QLineEdit::textChanged, this, &ExpressionSelect::onSearchExpressionChanged);
