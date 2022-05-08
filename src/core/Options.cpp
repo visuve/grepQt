@@ -2,29 +2,26 @@
 
 namespace Keys
 {
-	const QString Path = "target/path";
-	const QString Wildcards = "target/wildcards";
-	const QString Excludes = "target/excludes";
+	constexpr char Path[] = "target/path";
+	constexpr char Wildcards[] = "target/wildcards";
+	constexpr char Excludes[] = "target/excludes";
 
-	const QString SearchExpression = "search/expression";
-	const QString ReplacementText = "search/replacement";
-	const QString CaseSensitive = "search/case_sensitive";
-	const QString SearchMode = "search/mode";
+	constexpr char SearchExpression[] = "search/expression";
+	constexpr char ReplacementText[] = "search/replacement";
+	constexpr char CaseSensitive[] = "search/case_sensitive";
+	constexpr char SearchMode[] = "search/mode";
 
-	const QString SizeOption = "filter/size_option";
-	const QString SizeFrom = "filter/size_from";
-	const QString SizeTo = "filter/size_to";
-	const QString SkipBinary = "filter/skip_binary";
+	constexpr char SizeOption[] = "filter/size_option";
+	constexpr char SizeFrom[] = "filter/size_from";
+	constexpr char SizeTo[] = "filter/size_to";
 
-	const QString TimeOption = "filter/time_option";
-	const QString TimeFrom = "filter/time_from";
-	const QString TimeTo = "filter/time_to";
-
-	const QString ResultMode = "result/mode";
+	constexpr char TimeOption[] = "filter/time_option";
+	constexpr char TimeFrom[] = "filter/time_from";
+	constexpr char TimeTo[] = "filter/time_to";
 }
 
-Options::Options(QObject* parent) :
-	QSettings(QSettings::IniFormat, QSettings::UserScope, "visuve", "grepQt", parent)
+Options::Options(const QString& application, QObject* parent) :
+	QSettings(QSettings::IniFormat, QSettings::UserScope, "visuve", application, parent)
 {
 	_path = value(Keys::Path).value<QString>();
 	_wildcards = value(Keys::Wildcards, "*.*").value<QString>().split('|');
@@ -42,6 +39,11 @@ Options::Options(QObject* parent) :
 	_timeFilterOption = static_cast<ComparisonOption>(value(Keys::TimeOption, 0).value<int>());
 	_timeFilterFrom = QDateTime::fromSecsSinceEpoch(value(Keys::TimeFrom, 1623342562).value<qint64>());
 	_timeFilterTo = QDateTime::fromSecsSinceEpoch(value(Keys::TimeTo, 1623397338).value<qint64>());
+}
+
+Options::Options(QObject* parent) :
+	Options("grepQt", parent)
+{
 }
 
 Options::~Options()

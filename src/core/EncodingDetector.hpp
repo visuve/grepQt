@@ -4,6 +4,7 @@ class EncodingDetector
 {
 public:
 	EncodingDetector(QFile& file);
+	EncodingDetector(QByteArrayView data);
 	~EncodingDetector();
 
 	QPair<int, QString> encoding() const;

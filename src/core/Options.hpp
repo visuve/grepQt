@@ -18,7 +18,8 @@ public:
 		Between = 3
 	};
 
-	explicit Options(QObject *parent = nullptr);
+	explicit Options(const QString& application, QObject* parent = nullptr);
+	explicit Options(QObject* parent = nullptr);
 	~Options();
 
 	const QString& path() const;

@@ -1,4 +1,5 @@
 #include "FileReplacer.hpp"
+#include "EncodingDetector.hpp"
 #include "Options.hpp"
 
 FileReplacer::FileReplacer(const Options& options, QObject* parent) :
@@ -44,6 +45,19 @@ void FileReplacer::run()
 			qWarning() << "Could not open:" << path;
 			continue;
 		}
+
+		EncodingDetector detector(inputFile);
+
+		const QPair<int, QString> encoding = detector.encoding();
+
+		// Buggy ICU...
+		if (encoding.first <= 10 || (encoding.first <= 30 && encoding.second == "UTF-16BE"))
+		{
+			qInfo() << "Cannot detect encoding for" << inputFile.fileName();
+			continue;
+		}
+
+		qDebug() << inputFile.fileName() << "appears" << encoding;
 
 		QSaveFile outputFile(path);
 

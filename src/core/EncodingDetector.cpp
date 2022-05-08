@@ -6,6 +6,12 @@ EncodingDetector::EncodingDetector(QFile& file) :
 	sample(file);
 }
 
+EncodingDetector::EncodingDetector(QByteArrayView data) :
+	EncodingDetector()
+{
+	sample(data);
+}
+
 EncodingDetector::~EncodingDetector()
 {
 	if (_detector)
@@ -27,11 +33,6 @@ EncodingDetector::EncodingDetector() :
 
 void EncodingDetector::sample(QFile& file)
 {
-	if (U_FAILURE(_status))
-	{
-		return;
-	}
-
 	QByteArray data = file.read(0x400);
 	file.reset();
 
@@ -45,11 +46,6 @@ void EncodingDetector::sample(QFile& file)
 
 void EncodingDetector::sample(QByteArrayView sample)
 {
-	if (U_FAILURE(_status))
-	{
-		return;
-	}
-
 	ucsdet_setText(_detector, sample.data(), sample.size(), &_status);
 
 	if (U_FAILURE(_status))
