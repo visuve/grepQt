@@ -1,0 +1,11 @@
+<RCC>
+	<qresource prefix="/">
+		<file>data/ANSI.txt</file>
+		<file>data/UTF-8.txt</file>
+		<file>data/UTF-8-BOM.txt</file>
+		<file>data/UTF-16BE.txt</file>
+		<file>data/UTF-16BE-BOM.txt</file>
+		<file>data/UTF-16LE.txt</file>
+		<file>data/UTF-16LE-BOM.txt</file>
+	</qresource>
+</RCC>

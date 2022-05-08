@@ -11,6 +11,11 @@ public:
 
 	bool feed(QByteArrayView content, bool flush);
 
+	inline std::map<int, std::u16string> matches() const
+	{
+		return _matches;
+	}
+
 	inline auto begin() const
 	{
 		return _matches.cbegin();

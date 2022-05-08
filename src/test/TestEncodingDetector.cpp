@@ -2,7 +2,7 @@
 
 #include <icu.h>
 
-#include "../core/EncodingDetector.hpp"
+#include "EncodingDetector.hpp"
 
 void TestEncodingDetector::ansi()
 {
@@ -52,5 +52,4 @@ void TestEncodingDetector::utf16be()
 	QVERIFY(result.second == "UTF-16BE");
 }
 
-QTEST_MAIN(TestEncodingDetector)
 #include "TestEncodingDetector.moc"
