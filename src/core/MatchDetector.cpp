@@ -82,14 +82,9 @@ bool MatchDetector::feed(QByteArrayView content, bool flush)
 	size_t nulls = targetLimit - target;
 	_haystack.append(buffer, 0, buffer.size() - nulls);
 
-	if (!find())
+	if (flush && find())
 	{
-		return false;
-	}
-
-	if (flush)
-	{
-		setLines();
+		return setLines();
 	}
 
 	return true;
@@ -111,12 +106,15 @@ bool MatchDetector::find()
 	while (uregex_findNext(_regex, &_status))
 	{
 		Match m;
-		m.start = uregex_start(_regex, 0, &_status);
-		m.end = uregex_end(_regex, 0, &_status);
+
+		m.pos = std::make_pair<int32_t, int32_t>(
+			uregex_start(_regex, 0, &_status),
+			uregex_end(_regex, 0, &_status));
+
 		_matches.push_back(m);
 	}
 
-	return true;
+	return !_matches.empty();
 }
 
 
@@ -133,29 +131,44 @@ bool MatchDetector::setLines()
 		return false;
 	}
 
-	int32_t line = 0;
-	int32_t prev = ubrk_first(_iterator);
-	int32_t next = ubrk_next(_iterator);
+	std::pair<int32_t, int32_t> pos;
+	pos.first = ubrk_first(_iterator);
+	pos.second = ubrk_next(_iterator);
 
-	auto isIn = [&](const Match& m)->bool
+	const auto startPositionMatches = [&](const Match& m)->bool
 	{
-		return prev >= m.start && next <= m.end;
+		return pos.first <= m.pos.first && pos.second >= m.pos.first;
 	};
 
-	while (prev >= 0 && next > 0)
+	const auto endPositionMatches = [&](const Match& m)->bool
 	{
-		auto iter = std::find_if(_matches.begin(), _matches.end(), isIn);
+		return pos.first <= m.pos.second && pos.second >= m.pos.second;
+	};
 
-		if (iter != _matches.end())
+	for (int32_t line = 1; pos.first != UBRK_DONE && pos.second != UBRK_DONE; ++line)
+	{
 		{
-			iter->line = line;
-			iter->content = _haystack.substr(prev, next);
+			auto match = std::find_if(_matches.begin(), _matches.end(), startPositionMatches);
+
+			if (match != _matches.end())
+			{
+				match->line.first = line;
+				match->ctx.first = haystack + pos.first;
+			}
+		}
+		{
+			auto match = std::find_if(_matches.begin(), _matches.end(), endPositionMatches);
+
+			if (match != _matches.end())
+			{
+				match->line.second = line;
+				match->ctx.second = haystack + pos.second;
+			}
 		}
 
-		++line;
-		prev = next;
-		next = ubrk_next(_iterator);
+		pos.first = ubrk_current(_iterator);
+		pos.second = ubrk_next(_iterator);
 	}
 
-	return false;
+	return true;
 }

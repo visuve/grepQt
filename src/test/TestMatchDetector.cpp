@@ -8,7 +8,7 @@ TestMatchDetector::TestMatchDetector() :
 	_options("TestFileSearcher")
 {
 	_options.setCaseSensitive(false);
-	_options.setSearchExpression("SUOLAA");
+	_options.setSearchExpression("IHANOITA\r\nSILAKOITA");
 	_options.setSearchMode(Options::SearchMode::Plain);
 }
 
@@ -40,7 +40,7 @@ void TestMatchDetector::find()
 
 	while (!file.atEnd())
 	{
-		QByteArray data = file.read(0x40);
+		QByteArray data = file.read(6);
 		QVERIFY(md.feed(data, file.atEnd()));
 	}
 

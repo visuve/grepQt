@@ -80,10 +80,11 @@ void FileSearcher::run()
 			}
 		}
 
-		/*for (const auto& [line, content] : matcher)
+		for (const Match& m: matcher)
 		{
-			emit matchFound(path, line, QString::fromStdU16String(content));
-		}*/
+			// TODO: just emit the whole match
+			emit matchFound(path, m.line.first, QString::fromUtf16(m.ctx.first, m.ctx.second - m.ctx.first));
+		}
 	}
 
 	if (!QThread::currentThread()->isInterruptionRequested())

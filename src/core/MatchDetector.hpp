@@ -4,26 +4,17 @@
 
 class Options;
 
+struct Match
+{
+	std::pair<int32_t, int32_t> pos = { 0, 0 };
+	std::pair<int32_t, int32_t> line = { 0, 0 };
+	std::pair<char16_t*, char16_t*> ctx = { nullptr, nullptr };
+};
+
 class MatchDetector
 {
 public:
-	struct Match
-	{
-		int32_t start = 0;
-		int32_t end = 0;
-		int32_t line = 0;
-
-		std::strong_ordering operator<=>(const Match& m) const
-		{
-			return std::tie(start, end, line) <=>
-				std::tie(m.start, m.end, m.line);
-		}
-
-		std::u16string content;
-	};
-
 	MatchDetector(const Options& options, const QString& encoding);
-
 	~MatchDetector();
 
 	bool feed(QByteArrayView content, bool flush);
