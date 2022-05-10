@@ -80,10 +80,10 @@ void FileSearcher::run()
 			}
 		}
 
-		for (const auto& [line, content] : matcher)
+		/*for (const auto& [line, content] : matcher)
 		{
 			emit matchFound(path, line, QString::fromStdU16String(content));
-		}
+		}*/
 	}
 
 	if (!QThread::currentThread()->isInterruptionRequested())

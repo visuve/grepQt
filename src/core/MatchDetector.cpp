@@ -65,9 +65,8 @@ bool MatchDetector::feed(QByteArrayView content, bool flush)
 	}
 
 	std::u16string buffer(content.size(), '\0');
-
-	UChar* target = buffer.data();
-	UChar* targetLimit = buffer.data() + buffer.size();
+	char16_t* target = buffer.data();
+	char16_t* targetLimit = buffer.data() + buffer.size();
 
 	const char* sourceData = content.data();
 	const char* sourceDataLimit = content.data() + content.size();
@@ -80,23 +79,50 @@ bool MatchDetector::feed(QByteArrayView content, bool flush)
 		return false;
 	}
 
-	size_t lastNull = buffer.find_last_not_of(u'\0') + 1;
+	size_t nulls = targetLimit - target;
+	_haystack.append(buffer, 0, buffer.size() - nulls);
 
-	if (lastNull < buffer.size())
+	if (!find())
 	{
-		_haystack += buffer.substr(0, lastNull);
-	}
-	else
-	{
-		_haystack += buffer;
+		return false;
 	}
 
-	return detectMatch();
+	if (flush)
+	{
+		setLines();
+	}
+
+	return true;
 }
 
-bool MatchDetector::detectMatch()
+bool MatchDetector::find()
 {
-	UChar* haystack = _haystack.data();
+	char16_t* target = _haystack.data();
+	int32_t haystackSize = static_cast<int32_t>(_haystack.size());
+
+	uregex_setText(_regex, target, haystackSize, &_status);
+
+	if (U_FAILURE(_status))
+	{
+		qWarning() << "uregex_setText failed";
+		return false;
+	}
+
+	while (uregex_findNext(_regex, &_status))
+	{
+		Match m;
+		m.start = uregex_start(_regex, 0, &_status);
+		m.end = uregex_end(_regex, 0, &_status);
+		_matches.push_back(m);
+	}
+
+	return true;
+}
+
+
+bool MatchDetector::setLines()
+{
+	char16_t* haystack = _haystack.data();
 	int32_t haystackSize = static_cast<int32_t>(_haystack.size());
 
 	ubrk_setText(_iterator, haystack, haystackSize, &_status);
@@ -107,49 +133,29 @@ bool MatchDetector::detectMatch()
 		return false;
 	}
 
+	int32_t line = 0;
 	int32_t prev = ubrk_first(_iterator);
 	int32_t next = ubrk_next(_iterator);
 
+	auto isIn = [&](const Match& m)->bool
+	{
+		return prev >= m.start && next <= m.end;
+	};
+
 	while (prev >= 0 && next > 0)
 	{
-		++_line;
-		
-		uregex_setText(_regex, haystack + prev, next - prev, &_status);
+		auto iter = std::find_if(_matches.begin(), _matches.end(), isIn);
 
-		if (U_FAILURE(_status))
+		if (iter != _matches.end())
 		{
-			qWarning() << "uregex_setText failed";
-			return false;
+			iter->line = line;
+			iter->content = _haystack.substr(prev, next);
 		}
 
-		bool found = uregex_find(_regex, 0, &_status);
-
-		if (U_FAILURE(_status))
-		{
-			qWarning() << "uregex_find failed";
-			return false;
-		}
-
-		if (found)
-		{
-			_matches[_line] = _haystack.substr(prev, next - prev);
-			qDebug() << "Found: " << _matches[_line];
-		}
-
+		++line;
 		prev = next;
 		next = ubrk_next(_iterator);
 	}
 
-	if (prev > 0)
-	{
-		prev = ubrk_previous(_iterator);
-
-		if (prev > 0)
-		{
-			_haystack.erase(0, prev);
-		}
-	}
-
-	// The sample had lines
-	return _line > 0;
+	return false;
 }

@@ -40,8 +40,7 @@ void TestMatchDetector::find()
 
 	while (!file.atEnd())
 	{
-		// TODO: by using a smaller buffer, the test fails
-		QByteArray data = file.read(0xFFE);
+		QByteArray data = file.read(0x40);
 		QVERIFY(md.feed(data, file.atEnd()));
 	}
 

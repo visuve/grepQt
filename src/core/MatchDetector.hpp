@@ -1,17 +1,34 @@
 #pragma once
 
+#include <vector>
+
 class Options;
 
 class MatchDetector
 {
 public:
+	struct Match
+	{
+		int32_t start = 0;
+		int32_t end = 0;
+		int32_t line = 0;
+
+		std::strong_ordering operator<=>(const Match& m) const
+		{
+			return std::tie(start, end, line) <=>
+				std::tie(m.start, m.end, m.line);
+		}
+
+		std::u16string content;
+	};
+
 	MatchDetector(const Options& options, const QString& encoding);
 
 	~MatchDetector();
 
 	bool feed(QByteArrayView content, bool flush);
 
-	inline std::map<int, std::u16string> matches() const
+	inline std::vector<Match> matches() const
 	{
 		return _matches;
 	}
@@ -27,8 +44,8 @@ public:
 	}
 
 private:
-	// Returns false if the sample contained no lines
-	bool detectMatch();
+	bool find();
+	bool setLines();
 
 	UErrorCode _status = U_ZERO_ERROR;
 	UConverter* _converter = nullptr;
@@ -38,5 +55,5 @@ private:
 	std::u16string _haystack;
 
 	int _line = 0;
-	std::map<int, std::u16string> _matches;
+	std::vector<Match> _matches;
 };
